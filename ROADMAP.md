@@ -1913,16 +1913,22 @@ Contracts are critical to multi-agent safety. Must be enforceable at all handoff
 - [ ] Contract loader service
 - [ ] Contract registry (in-memory with file loading)
 - [ ] Contract validation service
+- [ ] **Agent message envelope** (`agent_message_envelope.v1`) with provenance and handoff metadata
+- [ ] **Explicit handoff contract** definition (`handoff_contract.v1`) with preconditions, payload schema, retry/failure routes
 - [ ] Contract CRUD API endpoints
 - [ ] ContractsList and ContractDetail pages
 - [ ] Contract compliance dashboard
 - [ ] Validation middleware for API
-- [ ] Tests for contracts and validation
+- [ ] Tests for contracts, envelopes, and handoff contracts
 
 ### Implementation Tasks
 
 - [ ] Create `backend/src/services/contract-loader.ts`
 - [ ] Create `backend/src/services/contract-validator.ts`
+- [ ] **Define `agent_message_envelope.v1` schema** with run_id, stage_id, agent_id, schema_id, trace_id, parent_message_id, handoff_id, status, confidence, payload
+- [ ] **Define `handoff_contract.v1` schema** with from_agent, to_agent, trigger, preconditions, payload_schema, state_patch_schema, artifact_refs_required, failure_route
+- [ ] Implement envelope wrapper for all agent outputs
+- [ ] Implement handoff contract validation before dispatch
 - [ ] Create POST /api/contracts endpoint
 - [ ] Create GET /api/contracts endpoint
 - [ ] Create GET /api/contracts/:id endpoint
@@ -1932,7 +1938,7 @@ Contracts are critical to multi-agent safety. Must be enforceable at all handoff
 - [ ] Create `frontend/src/pages/ContractDetail.tsx`
 - [ ] Create `frontend/src/components/SchemaViewer.tsx`
 - [ ] Create `frontend/src/components/ContractComplianceDashboard.tsx`
-- [ ] Write tests
+- [ ] Write tests for envelope, handoff contracts, and validation
 
 ### Files Expected to Be Created or Modified
 
@@ -2294,14 +2300,15 @@ Audit and cost tracking are foundational. Early implementation ensures they're b
 
 - [ ] AuditEvent model and persistence
 - [ ] CostTracking model (basic)
-- [ ] Audit logging service
+- [ ] **Trace span types** (agent.start, agent.complete, handoff.start, handoff.complete, tool.call, tool.result, gate.verdict, repair.start)
+- [ ] Audit logging service with trace spans
 - [ ] Cost accumulation in Run records
-- [ ] Approval events logged
-- [ ] Task execution events logged
-- [ ] Failure and repair events logged
+- [ ] Approval events logged as spans
+- [ ] Task execution events logged as spans
+- [ ] Failure and repair events logged as spans
 - [ ] Basic audit log display in execution console
 - [ ] Cost summary in run detail
-- [ ] Tests for audit and cost tracking
+- [ ] Tests for audit, cost tracking, and trace spans
 
 ### Implementation Tasks
 
@@ -2394,11 +2401,11 @@ feat(phase-15): basic audit and cost tracking
 
 ### Goal
 
-Implement the run state machine that tracks phase and task execution states. Defines valid state transitions (pending → executing → complete, or executing → failed), prevents invalid transitions, and persists state changes.
+Implement the run state machine that tracks phase and task execution states. Defines valid state transitions (pending → executing → complete, or executing → failed), prevents invalid transitions, and persists state changes. Establish a **typed shared run state** model that all agents read/write through with merge rules for concurrent workers.
 
 ### Why This Phase Exists
 
-The orchestration engine is stateful. The state machine ensures correctness and prevents race conditions or invalid state transitions.
+The orchestration engine is stateful. The state machine ensures correctness and prevents race conditions or invalid state transitions. A typed shared state model enables safe concurrent worker coordination and provides agents a unified interface for state access.
 
 ### Inputs
 
@@ -2486,11 +2493,11 @@ feat(phase-16): run state machine
 
 ### Goal
 
-Implement task queue that orders task execution, respects dependencies, and sequences them correctly. Tasks within a phase can execute in parallel if no dependencies; tasks across phases must respect phase order.
+Implement task queue that orders task execution, respects dependencies, and sequences them correctly. Tasks within a phase can execute in parallel if no dependencies; tasks across phases must respect phase order. Define and enforce **software task ownership contracts** that specify task ownership, scope, acceptance criteria, and merge strategies.
 
 ### Why This Phase Exists
 
-Task queuing and dependency resolution are non-trivial. Separating this from the orchestration engine keeps the engine focused and the queue testable.
+Task queuing and dependency resolution are non-trivial. Separating this from the orchestration engine keeps the engine focused and the queue testable. Software task contracts are the unit of parallel worktree execution and ensure each task has clear ownership, scope, and validation requirements.
 
 ### Inputs
 
@@ -2498,11 +2505,13 @@ Task queuing and dependency resolution are non-trivial. Separating this from the
 
 ### Deliverables
 
+- [ ] **Software task ownership contract** (`software_task_contract.v1`) with task_id, owner_agent, goal, target_files, read_context_files, write_scope, conflict_group, dependencies, expected_exports, acceptance_criteria, validation_commands, merge_strategy, rollback_strategy, risk_level
 - [ ] TaskQueue class
 - [ ] Dependency resolution logic
 - [ ] Parallel vs. sequential execution decision
 - [ ] Queue progression logic
-- [ ] Tests for queue and dependency logic
+- [ ] Task contract enforcement (owner verification, scope validation)
+- [ ] Tests for queue, dependency logic, and task contracts
 
 ### Implementation Tasks
 
@@ -2673,11 +2682,11 @@ feat(phase-18): agent executor adapter
 
 ### Goal
 
-Implement contract validation at agent-to-agent handoff points. Before one agent's output goes to the next agent, validate it matches the next agent's input contract. Prevent invalid data from propagating.
+Implement contract validation at agent-to-agent handoff points using the explicit handoff contracts defined in Phase 12. Before one agent's output (wrapped in agent message envelope) goes to the next agent, validate it matches the handoff contract preconditions and the next agent's input contract. Prevent invalid data from propagating. Implement handoff routing logic for failures.
 
 ### Why This Phase Exists
 
-Handoff contracts are the core safety mechanism. This phase makes them enforceable.
+Handoff contracts are the core safety mechanism. This phase makes them enforceable and implements the failure recovery routes defined in the contracts, ensuring agent-to-agent communication is auditable and deterministic.
 
 ### Inputs
 
@@ -3092,11 +3101,11 @@ feat(phase-22): execution console and live monitoring
 
 ### Goal
 
-Classify failures with a taxonomy (schema invalid, tool denied, test failed, etc.). Implement repair strategies (retry, escalate, switch agent). Track repair attempts. Failed tasks become recoverable.
+Classify failures with a comprehensive taxonomy (requirements_missing, schema_invalid, tool_denied, command_failed, env_missing, dependency_unavailable, test_failed, merge_conflict, scope_violation, low_confidence, human_approval_required). Implement recovery protocols with recovery routing, retry policies, escalation paths, and repair suggestions. Track repair attempts and outcomes. Failed tasks become recoverable with clear next steps.
 
 ### Why This Phase Exists
 
-Failures are inevitable. Handling them gracefully and transparently is critical.
+Failures are inevitable. Handling them gracefully, transparently, and with clear recovery pathways is critical. A shared failure taxonomy enables the system to route failures intelligently and provide agents/humans actionable recovery suggestions.
 
 ### Inputs
 
@@ -3105,12 +3114,14 @@ Failures are inevitable. Handling them gracefully and transparently is critical.
 
 ### Deliverables
 
-- [ ] Failure taxonomy and classification
+- [ ] **Failure taxonomy** with 11 standard failure types (requirements_missing, schema_invalid, tool_denied, command_failed, env_missing, dependency_unavailable, test_failed, merge_conflict, scope_violation, low_confidence, human_approval_required)
+- [ ] Failure classification logic
+- [ ] **Recovery protocol** with recovery routing, retry policies, escalation paths, and repair suggestions
 - [ ] Repair strategy selection logic
-- [ ] Repair attempt tracking
-- [ ] Escalation to human
+- [ ] Repair attempt tracking and limits
+- [ ] Escalation to human with evidence
 - [ ] FailureDetail and RepairOptions UI
-- [ ] Tests for failure handling
+- [ ] Tests for failure classification, recovery routing, and repair handling
 
 ### Implementation Tasks
 

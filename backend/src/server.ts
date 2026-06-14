@@ -2,6 +2,7 @@ import express, { Express, Request, Response } from 'express';
 
 const PORT: number = parseInt(process.env.BACKEND_PORT ?? '3000', 10);
 const HOST: string = process.env.BACKEND_HOST ?? 'localhost';
+const CORS_ORIGIN: string = process.env.BACKEND_CORS_ORIGIN ?? 'http://localhost:5173';
 
 const app: Express = express();
 
@@ -20,7 +21,7 @@ if (process.env.NODE_ENV === 'development') {
 
 // CORS middleware
 app.use((_req: Request, res: Response, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:5173');
+  res.header('Access-Control-Allow-Origin', CORS_ORIGIN);
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   next();
