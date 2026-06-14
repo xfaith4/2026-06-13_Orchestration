@@ -336,11 +336,15 @@ OUTPUT FORMAT (CRITICAL — NO DEVIATIONS):
         $jsonEnd = $raw.LastIndexOf('}')
 
         if ($jsonStart -lt 0 -or $jsonEnd -lt 0 -or $jsonEnd -le $jsonStart) {
-            Write-Log "Gate output contains no valid JSON for phase $($Phase.id). Raw: $($raw.Substring(0, [Math]::Min(100, $raw.Length)))" 'ERROR'
+            Write-Log "Gate: no JSON found. Raw start: $($raw.Substring(0, [Math]::Min(50, $raw.Length)))" 'ERROR'
             return $false
         }
 
         $cleaned = $raw.Substring($jsonStart, $jsonEnd - $jsonStart + 1)
+
+        # Debug: log what we extracted
+        $preview = $cleaned.Substring(0, [Math]::Min(60, $cleaned.Length))
+        Write-Log "Gate: JSON extracted (pos $jsonStart-$jsonEnd, len $($cleaned.Length)). Preview: $preview" 'INFO'
 
         # Parse the output - it may be nested (Claude JSON wrapper) or direct JSON
         $parsed = $cleaned | ConvertFrom-Json -ErrorAction Stop
