@@ -2,45 +2,21 @@
   "root": true,
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "ecmaVersion": "latest",
+    "ecmaVersion": 2020,
     "sourceType": "module",
     "ecmaFeatures": {
       "jsx": true
     }
   },
-  "env": {
-    "browser": true,
-    "es2022": true,
-    "node": true
-  },
   "extends": [
     "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/recommended-requiring-type-checking",
-    "plugin:react/recommended",
-    "plugin:react-hooks/recommended",
-    "prettier"
+    "plugin:@typescript-eslint/recommended"
   ],
   "plugins": [
-    "@typescript-eslint",
-    "react",
-    "react-hooks"
+    "@typescript-eslint"
   ],
-  "settings": {
-    "react": {
-      "version": "18"
-    }
-  },
   "rules": {
-    "no-console": ["warn", { "allow": ["warn", "error"] }],
-    "no-debugger": "warn",
-    "@typescript-eslint/no-explicit-any": "error",
-    "@typescript-eslint/no-non-null-assertion": "error",
-    "@typescript-eslint/explicit-module-boundary-types": "warn",
-    "@typescript-eslint/explicit-function-return-types": ["warn", { "allowExpressions": true }],
-    "react/react-in-jsx-scope": "off",
-    "react/prop-types": "off",
-    "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "warn"
-  }
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }]
+  },
+  "ignorePatterns": ["dist", "node_modules"]
 }

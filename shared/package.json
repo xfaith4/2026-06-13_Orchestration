@@ -1,16 +1,16 @@
 {
   "name": "@unifiedaitoolbox/shared",
   "version": "0.1.0",
+  "description": "Shared types and utilities",
   "type": "module",
-  "description": "UnifiedAIToolbox Shared Types and Schemas",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist node_modules .turbo"
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "typescript": "^5.5.0"
+    "@types/node": "^20.4.5",
+    "typescript": "^5.1.6"
   }
 }

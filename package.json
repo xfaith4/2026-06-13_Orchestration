@@ -1,36 +1,22 @@
 {
   "name": "unifiedaitoolbox",
   "version": "0.1.0",
+  "description": "Web-based Multi-Agent Orchestration Platform",
   "private": true,
   "type": "module",
-  "description": "UnifiedAIToolbox - Orchestrated multi-agent AI platform",
   "workspaces": [
-    "frontend",
     "backend",
+    "frontend",
     "shared"
   ],
-  "engines": {
-    "node": "24.13.1",
-    "npm": "10.8.2"
-  },
   "scripts": {
-    "install": "npm ci --workspaces",
-    "build": "npm run build --workspaces --if-present",
-    "dev": "npm run dev --workspaces --if-present",
-    "lint": "eslint . --ext .ts,.tsx",
-    "lint:fix": "eslint . --ext .ts,.tsx --fix",
-    "typecheck": "tsc --noEmit",
-    "test": "npm run test --workspaces --if-present",
-    "clean": "npm run clean --workspaces --if-present && rm -rf node_modules"
+    "dev": "concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "build": "npm run build -w backend && npm run build -w frontend",
+    "test": "npm test -w backend && npm test -w frontend",
+    "lint": "npm run lint -w backend && npm run lint -w frontend",
+    "typecheck": "npm run typecheck -w backend && npm run typecheck -w frontend"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
-    "eslint": "^9.0.0",
-    "eslint-config-prettier": "^9.0.0",
-    "eslint-plugin-react": "^7.33.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "prettier": "^3.0.0",
-    "typescript": "^5.5.0"
+    "concurrently": "^8.2.0"
   }
 }
