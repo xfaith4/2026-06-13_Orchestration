@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Application",
+  "description": "Application intake request",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "description": "Application name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description"
+    },
+    "goal": {
+      "type": "string",
+      "description": "Primary goal of the application"
+    },
+    "requirements": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Functional requirements"
+    },
+    "targetAudience": {
+      "type": "string",
+      "description": "Target users/audience"
+    },
+    "constraints": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Technical or business constraints"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "submitted", "approved", "rejected"],
+      "description": "Current status"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Creation timestamp"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last update timestamp"
+    }
+  },
+  "required": ["id", "name", "description", "goal", "requirements", "status", "createdAt", "updatedAt"],
+  "additionalProperties": false
+}
