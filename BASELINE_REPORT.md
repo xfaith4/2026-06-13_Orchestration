@@ -150,7 +150,7 @@ The UnifiedAIToolbox repository is a production-grade orchestration system for m
 - ✅ All library modules readable and importable
 - ✅ PowerShell orchestrator framework initialized
 - ✅ CLAUDE.md contract defined
-- ✅ ROADMAP.md active and scoped (Releases 0.4–2.4, 28 phases)
+- ✅ ROADMAP.md active and scoped to Phases 0.0–2.4 (15 phases, Release 1: ~15 weeks estimated)
 - ✅ Directory structure organized and documented
 - ✅ No critical dependencies missing
 
@@ -472,6 +472,34 @@ The UnifiedAIToolbox repository is a production-grade orchestration system for m
 | MONITORING_GUIDE.md | Guide to monitoring orchestration runs |
 | GITIGNORE_GUIDE.md | .gitignore strategy and patterns |
 | Archive roadmaps | Previous roadmap versions (v1.0, v2.0) for reference |
+
+## Phase Enumeration (Phases 0.0–2.4)
+
+| Phase ID | Phase Name | Job Type | Acceptance Criteria Count |
+|----------|-----------|----------|-------------------------|
+| 0.0 | Repository Baseline and Verification | build_new_app | 3 |
+| 0.1 | Project Foundation | maintain_existing_app | 4 |
+| 0.2 | Core Data Models and Persistence Layer | maintain_existing_app | 4 |
+| 0.3 | Backend API Foundation | maintain_existing_app | 4 |
+| 0.4 | Frontend Shell and Professional UI System | maintain_existing_app | 5 |
+| 1.0 | Application Intake Workflow | maintain_existing_app | 5 |
+| 1.1 | Design Plan Generation Service | maintain_existing_app | 5 |
+| 1.2 | Design Plan Approval Gate | maintain_existing_app | 5 |
+| 1.3 | Roadmap Generation Service | maintain_existing_app | 5 |
+| 1.4 | Roadmap Approval Gate | maintain_existing_app | 4 |
+| 2.0 | Agent Registry and Manager | maintain_existing_app | 4 |
+| 2.1 | Prompt Refinement Workspace | maintain_existing_app | 4 |
+| 2.2 | A2A Contract Manager | maintain_existing_app | 4 |
+| 2.3 | Thin Vertical Orchestration Spike | maintain_existing_app | 5 |
+| 2.4 | Agent Execution Abstraction | maintain_existing_app | 5 |
+
+**Phase Enumeration Summary:**
+- **Total Phases in Scope:** 15 (Phases 0.0–2.4)
+- **Build New App Phases:** 1 (Phase 0.0)
+- **Maintain Existing App Phases:** 14 (Phases 0.1–2.4)
+- **Total Acceptance Criteria:** 66 across all phases
+- **Estimated Timeline:** Release 1 spans ~15 weeks (Phase 0.0–2.4)
+- **Dependency Chain:** Linear; each phase depends on previous phase(s)
 
 ---
 
