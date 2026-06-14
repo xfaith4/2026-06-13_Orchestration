@@ -1,0 +1,40 @@
+[
+  {
+    "attemptId": "a1",
+    "attemptNumber": 1,
+    "endedAt": "2026-04-05T21:15:54.204Z",
+    "status": "failed",
+    "triggerReason": "initial"
+  },
+  {
+    "attemptId": "a2",
+    "attemptNumber": 2,
+    "startedAt": "2026-04-05T21:15:54.204Z",
+    "status": "failed",
+    "triggerReason": "requeue",
+    "endedAt": "2026-04-05T21:32:20.371Z"
+  },
+  {
+    "attemptId": "a3",
+    "attemptNumber": 3,
+    "startedAt": "2026-04-05T21:32:20.371Z",
+    "status": "failed",
+    "triggerReason": "requeue",
+    "endedAt": "2026-04-05T21:33:10.693Z"
+  },
+  {
+    "attemptId": "a4",
+    "attemptNumber": 4,
+    "startedAt": "2026-04-05T21:33:10.693Z",
+    "status": "failed",
+    "triggerReason": "requeue",
+    "endedAt": "2026-04-05T21:33:15.262Z"
+  },
+  {
+    "attemptId": "a5",
+    "attemptNumber": 5,
+    "startedAt": "2026-04-05T21:33:15.262Z",
+    "status": "queued",
+    "triggerReason": "requeue"
+  }
+]

@@ -1,0 +1,218 @@
+[
+  {
+    "id": "0.0",
+    "title": "Repository Baseline and Verification",
+    "depends_on": [],
+    "job_type": "build_new_app",
+    "roadmap_md_reference": "ROADMAP.md line 476 (Phase 0)",
+    "objective": "Understand the current state of the repository, inventory existing assets, classify file types, and establish a baseline for all subsequent work.",
+    "acceptance": [
+      "Repository baseline report generated and committed",
+      "Asset migration status document created",
+      "Asset classification and migration strategy documented"
+    ]
+  },
+  {
+    "id": "0.1",
+    "title": "Project Foundation",
+    "depends_on": ["0.0"],
+    "job_type": "maintain_existing_app",
+    "roadmap_md_reference": "ROADMAP.md line 604 (Phase 1)",
+    "objective": "Create monorepo structure, install dependencies, set up build and test infrastructure.",
+    "acceptance": [
+      "Monorepo structure initialized with frontend and backend directories",
+      "Package managers configured (npm/yarn)",
+      "Build toolchain configured (Vite for frontend, express for backend)",
+      "Development server runs without errors"
+    ]
+  },
+  {
+    "id": "0.2",
+    "title": "Core Data Models and Persistence Layer",
+    "depends_on": ["0.1"],
+    "job_type": "maintain_existing_app",
+    "roadmap_md_reference": "ROADMAP.md line 715 (Phase 2)",
+    "objective": "Define and implement core data models for Application, DesignPlan, Roadmap, and AgentRun. Set up persistence layer.",
+    "acceptance": [
+      "TypeScript interfaces defined for all core models",
+      "Persistence layer abstractions implemented (File/DB adapter)",
+      "Migrations framework in place",
+      "Unit tests pass for all models"
+    ]
+  },
+  {
+    "id": "0.3",
+    "title": "Backend API Foundation",
+    "depends_on": ["0.2"],
+    "job_type": "maintain_existing_app",
+    "roadmap_md_reference": "ROADMAP.md line 828 (Phase 3)",
+    "objective": "Implement Express.js API with request/response validation middleware, error handling, and CRUD endpoints for core models.",
+    "acceptance": [
+      "Express server starts and handles requests",
+      "Validation middleware enforces contract schemas",
+      "CRUD endpoints functional for Application, DesignPlan, Roadmap models",
+      "Error handling middleware returns proper HTTP status codes"
+    ]
+  },
+  {
+    "id": "0.4",
+    "title": "Frontend Shell and Professional UI System",
+    "depends_on": ["0.3"],
+    "job_type": "maintain_existing_app",
+    "roadmap_md_reference": "ROADMAP.md line 948 (Phase 4)",
+    "objective": "Create React SPA with Vite, establish component library, professional design system, and responsive layouts.",
+    "acceptance": [
+      "React application initializes with Vite",
+      "Component library established (Button, Form, Modal, Card)",
+      "Design tokens and Tailwind configuration complete",
+      "Responsive layout works on mobile, tablet, desktop",
+      "UI library documented with Storybook"
+    ]
+  },
+  {
+    "id": "1.0",
+    "title": "Application Intake Workflow",
+    "depends_on": ["0.4"],
+    "job_type": "maintain_existing_app",
+    "roadmap_md_reference": "ROADMAP.md line 1081 (Phase 5)",
+    "objective": "Implement first complete feature: user describes application idea, system accepts and stores it.",
+    "acceptance": [
+      "Application intake form renders and submits successfully",
+      "Form validation prevents submission of incomplete data",
+      "Application record created in persistence layer",
+      "User receives confirmation with application ID",
+      "Integration test covers happy path"
+    ]
+  },
+  {
+    "id": "1.1",
+    "title": "Design Plan Generation Service",
+    "depends_on": ["1.0"],
+    "job_type": "maintain_existing_app",
+    "roadmap_md_reference": "ROADMAP.md line 1206 (Phase 6)",
+    "objective": "Implement service that calls Claude to generate design plan from application description.",
+    "acceptance": [
+      "Design generation endpoint accepts application ID",
+      "Claude API called with appropriate prompt",
+      "Design plan structured response parsed correctly",
+      "Design plan persisted to storage",
+      "Cost tracking recorded"
+    ]
+  },
+  {
+    "id": "1.2",
+    "title": "Design Plan Approval Gate",
+    "depends_on": ["1.1"],
+    "job_type": "maintain_existing_app",
+    "roadmap_md_reference": "ROADMAP.md line 1316 (Phase 7)",
+    "objective": "Implement UI and logic for user to review and approve generated design plan.",
+    "acceptance": [
+      "Design plan review page displays plan details clearly",
+      "User can approve, reject, or request changes",
+      "Approval state persisted to database",
+      "Rejected plans can be regenerated",
+      "Audit trail recorded"
+    ]
+  },
+  {
+    "id": "1.3",
+    "title": "Roadmap Generation Service",
+    "depends_on": ["1.2"],
+    "job_type": "maintain_existing_app",
+    "roadmap_md_reference": "ROADMAP.md line 1428 (Phase 8)",
+    "objective": "Implement service that generates implementation roadmap from approved design plan.",
+    "acceptance": [
+      "Roadmap generation endpoint accepts design plan ID",
+      "Claude called to generate roadmap",
+      "Roadmap structured with phases, dependencies, and acceptance criteria",
+      "Roadmap persisted to storage",
+      "Cost tracked"
+    ]
+  },
+  {
+    "id": "1.4",
+    "title": "Roadmap Approval Gate",
+    "depends_on": ["1.3"],
+    "job_type": "maintain_existing_app",
+    "roadmap_md_reference": "ROADMAP.md line 1541 (Phase 9)",
+    "objective": "Implement UI for reviewing and approving generated roadmap.",
+    "acceptance": [
+      "Roadmap review page displays phases with dependencies",
+      "User can approve, reject, or request changes",
+      "Approval state persisted",
+      "Integration test covers full intake→design→roadmap approval flow"
+    ]
+  },
+  {
+    "id": "2.0",
+    "title": "Agent Registry and Manager",
+    "depends_on": ["1.4"],
+    "job_type": "maintain_existing_app",
+    "roadmap_md_reference": "ROADMAP.md line 1648 (Phase 10)",
+    "objective": "Implement system to register, manage, and introspect agent definitions from agents/*.yaml.",
+    "acceptance": [
+      "Agent registry loads from agents/ directory",
+      "Agent definitions expose I/O contracts",
+      "Agent manager UI allows viewing agent capabilities",
+      "Agent lookup endpoint functional"
+    ]
+  },
+  {
+    "id": "2.1",
+    "title": "Prompt Refinement Workspace",
+    "depends_on": ["2.0"],
+    "job_type": "maintain_existing_app",
+    "roadmap_md_reference": "ROADMAP.md line 1770 (Phase 11)",
+    "objective": "Create workspace for reviewing, testing, and iterating on agent prompts.",
+    "acceptance": [
+      "Prompt editor loads from Prompts/ directory",
+      "Prompt can be tested against sample inputs",
+      "Test results displayed (tokens, latency, quality)",
+      "Refined prompts saved to version control"
+    ]
+  },
+  {
+    "id": "2.2",
+    "title": "A2A Contract Manager",
+    "depends_on": ["2.1"],
+    "job_type": "maintain_existing_app",
+    "roadmap_md_reference": "ROADMAP.md line 1890 (Phase 12)",
+    "objective": "Implement system to manage A2A contracts and validate handoffs between agents.",
+    "acceptance": [
+      "Contract schema loaded and validated",
+      "Contract validation middleware enforces I/O contracts",
+      "Contract violations surfaced with clear errors",
+      "Gap analysis updated based on current schema coverage"
+    ]
+  },
+  {
+    "id": "2.3",
+    "title": "Thin Vertical Orchestration Spike",
+    "depends_on": ["2.2"],
+    "job_type": "maintain_existing_app",
+    "roadmap_md_reference": "ROADMAP.md line 2012 (Phase 13)",
+    "objective": "Prove end-to-end orchestration: approved roadmap → execute one phase with one agent → record results.",
+    "acceptance": [
+      "Single phase can be executed via orchestration endpoint",
+      "Agent called, output captured, artifact created",
+      "Run state machine transitions correctly",
+      "Cost and audit trail recorded",
+      "End-to-end integration test passes"
+    ]
+  },
+  {
+    "id": "2.4",
+    "title": "Agent Execution Abstraction",
+    "depends_on": ["2.3"],
+    "job_type": "maintain_existing_app",
+    "roadmap_md_reference": "ROADMAP.md line 2144 (Phase 14)",
+    "objective": "Define and implement clean abstraction for agent execution that decouples orchestration from specific agent implementations.",
+    "acceptance": [
+      "AgentExecutor interface defined and documented",
+      "ClaudeExecutor implementation functional",
+      "Executor can be mocked for testing",
+      "Contract validation integrated into executor lifecycle",
+      "Unit tests cover executor contract enforcement"
+    ]
+  }
+]

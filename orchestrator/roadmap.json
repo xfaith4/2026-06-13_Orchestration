@@ -1,0 +1,5 @@
+[
+  { "id": "0.4", "title": "Bootstrap orchestration engine", "depends_on": [],        "job_type": "build_new_app" },
+  { "id": "0.5", "title": "State + handoff schema",          "depends_on": ["0.4"],   "job_type": "build_new_app" },
+  { "id": "0.6", "title": "ReviewGate integration",          "depends_on": ["0.5"],   "job_type": "maintain_existing_app" }
+]

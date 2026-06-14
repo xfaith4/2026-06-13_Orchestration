@@ -328,16 +328,19 @@ OUTPUT FORMAT (CRITICAL — NO DEVIATIONS):
             return $false
         }
 
-        # Clean up markdown code fences and backticks. Handle:
-        # - Triple backticks (```json ... ```)
-        # - Single backticks (` ... `)
-        # - Newlines and whitespace
-        $cleaned = $raw.Trim()
-        $cleaned = $cleaned -replace '^\s*```+(?:json)?\s*\n?', ''  # Remove opening fence
-        $cleaned = $cleaned -replace '\n?\s*```+\s*$', ''            # Remove closing fence
-        $cleaned = $cleaned -replace '^\s*`+\s*', ''                 # Remove leading backticks
-        $cleaned = $cleaned -replace '\s*`+\s*$', ''                 # Remove trailing backticks
-        $cleaned = $cleaned.Trim()
+        # Extract JSON by finding first { and last }. This is robust against:
+        # - Markdown code fences (```json ... ```)
+        # - Backticks (single or multiple)
+        # - Prose before/after JSON
+        $jsonStart = $raw.IndexOf('{')
+        $jsonEnd = $raw.LastIndexOf('}')
+
+        if ($jsonStart -lt 0 -or $jsonEnd -lt 0 -or $jsonEnd -le $jsonStart) {
+            Write-Log "Gate output contains no valid JSON for phase $($Phase.id). Raw: $($raw.Substring(0, [Math]::Min(100, $raw.Length)))" 'ERROR'
+            return $false
+        }
+
+        $cleaned = $raw.Substring($jsonStart, $jsonEnd - $jsonStart + 1)
 
         # Parse the output - it may be nested (Claude JSON wrapper) or direct JSON
         $parsed = $cleaned | ConvertFrom-Json -ErrorAction Stop

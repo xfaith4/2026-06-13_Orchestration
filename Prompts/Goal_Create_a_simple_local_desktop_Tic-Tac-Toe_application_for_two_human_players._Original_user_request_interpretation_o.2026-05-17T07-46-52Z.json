@@ -1,0 +1,16 @@
+[
+  {
+    "attemptId": "a1",
+    "attemptNumber": 1,
+    "endedAt": "2026-05-17T17:55:33.578Z",
+    "status": "failed",
+    "triggerReason": "initial"
+  },
+  {
+    "attemptId": "a2",
+    "attemptNumber": 2,
+    "startedAt": "2026-05-17T17:55:33.578Z",
+    "status": "queued",
+    "triggerReason": "requeue"
+  }
+]
