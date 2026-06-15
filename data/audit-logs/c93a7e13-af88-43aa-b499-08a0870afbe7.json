@@ -1,0 +1,22 @@
+{
+  "timestamp": "2026-06-15T06:07:12.219Z",
+  "userId": "anonymous",
+  "action": "UPDATE",
+  "resourceType": "undefined",
+  "resourceId": "unknown",
+  "changes": [
+    {
+      "field": "error",
+      "newValue": "Run not found"
+    },
+    {
+      "field": "timestamp",
+      "newValue": "2026-06-15T06:07:12.219Z"
+    }
+  ],
+  "ipAddress": "::ffff:127.0.0.1",
+  "status": "success",
+  "id": "c93a7e13-af88-43aa-b499-08a0870afbe7",
+  "createdAt": "2026-06-15T06:07:12.222Z",
+  "updatedAt": "2026-06-15T06:07:12.222Z"
+}

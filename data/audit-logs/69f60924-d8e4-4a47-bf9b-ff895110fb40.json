@@ -1,0 +1,37 @@
+{
+  "timestamp": "2026-06-15T06:08:56.183Z",
+  "userId": "anonymous",
+  "action": "CREATE",
+  "resourceType": "unknown",
+  "resourceId": "079f6d13-ca6a-45bb-93ce-b94276f9333a",
+  "resourceName": "Test Roadmap",
+  "changes": [
+    {
+      "field": "data",
+      "newValue": {
+        "applicationId": "app-1",
+        "designPlanId": "design-1",
+        "title": "Test Roadmap",
+        "description": "A test roadmap",
+        "phases": [],
+        "estimatedDuration": "2 weeks",
+        "status": "approved",
+        "id": "079f6d13-ca6a-45bb-93ce-b94276f9333a",
+        "createdAt": "2026-06-15T06:08:56.180Z",
+        "updatedAt": "2026-06-15T06:08:56.180Z"
+      }
+    },
+    {
+      "field": "error"
+    },
+    {
+      "field": "timestamp",
+      "newValue": "2026-06-15T06:08:56.182Z"
+    }
+  ],
+  "ipAddress": "::ffff:127.0.0.1",
+  "status": "success",
+  "id": "69f60924-d8e4-4a47-bf9b-ff895110fb40",
+  "createdAt": "2026-06-15T06:08:56.186Z",
+  "updatedAt": "2026-06-15T06:08:56.186Z"
+}

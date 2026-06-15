@@ -7,6 +7,7 @@ import { createResponse, ApiError } from '../types/responses.js';
 export const createErrorLogRoutes = (persistence: PersistenceService) => {
   const router = Router();
   const errorLogger = new ErrorLogger(persistence);
+  type SeverityLevel = 'low' | 'medium' | 'high' | 'critical';
 
   // Get all error logs with optional filtering
   router.get('/', async (req: Request, res: Response) => {
@@ -102,12 +103,12 @@ export const createErrorLogRoutes = (persistence: PersistenceService) => {
     try {
       const { level } = req.params;
 
-      const validSeverities = ['low', 'medium', 'high', 'critical'];
-      if (!validSeverities.includes(level)) {
+      const validSeverities: SeverityLevel[] = ['low', 'medium', 'high', 'critical'];
+      if (!validSeverities.includes(level as SeverityLevel)) {
         throw new ApiError(400, `Invalid severity level. Must be one of: ${validSeverities.join(', ')}`);
       }
 
-      const errors = await errorLogger.getErrorsBySeverity(level as any);
+      const errors = await errorLogger.getErrorsBySeverity(level as SeverityLevel);
       res.json(createResponse(errors));
     } catch (error) {
       if (error instanceof ApiError) {

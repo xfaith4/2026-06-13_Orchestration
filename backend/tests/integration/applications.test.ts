@@ -10,7 +10,7 @@ import { createApiRoutes } from '../../src/routes/index.js';
 import { errorHandler, notFoundHandler } from '../../src/middleware/error-handler.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const testDataDir = path.join(__dirname, '../../.test-data');
+const testDataDir = path.join(__dirname, '../../.test-data-applications');
 
 describe('Applications API', () => {
   let app: express.Application;
@@ -20,7 +20,7 @@ describe('Applications API', () => {
   beforeAll(async () => {
     schemasDir = path.join(__dirname, '../../../shared/src/schemas');
     persistence = new PersistenceService({ dataDir: testDataDir });
-    
+
     const validation = new ValidationService(schemasDir);
 
     app = express();

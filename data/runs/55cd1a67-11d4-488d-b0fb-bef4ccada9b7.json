@@ -1,0 +1,12 @@
+{
+  "roadmapId": "ccbda43f-2ff9-4e57-b449-11a1bdb5665d",
+  "applicationId": "app-1",
+  "title": "Run: Test Roadmap",
+  "description": "A test roadmap",
+  "phases": [],
+  "status": "paused",
+  "id": "55cd1a67-11d4-488d-b0fb-bef4ccada9b7",
+  "createdAt": "2026-06-15T06:17:35.357Z",
+  "updatedAt": "2026-06-15T06:17:35.386Z",
+  "startedAt": "2026-06-15T06:17:35.371Z"
+}

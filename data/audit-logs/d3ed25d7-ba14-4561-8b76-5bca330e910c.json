@@ -1,0 +1,34 @@
+{
+  "timestamp": "2026-06-15T06:17:35.427Z",
+  "userId": "anonymous",
+  "action": "UPDATE",
+  "resourceType": "pause",
+  "resourceId": "7eb2d0b4-378b-41e0-9d4b-45ec0b716f3a",
+  "resourceName": "Run: Test Roadmap",
+  "changes": [
+    {
+      "field": "data",
+      "newValue": {
+        "roadmapId": "5b899827-334f-4777-813f-635e802dd0db",
+        "applicationId": "app-1",
+        "title": "Run: Test Roadmap",
+        "description": "A test roadmap",
+        "phases": [],
+        "status": "paused",
+        "id": "7eb2d0b4-378b-41e0-9d4b-45ec0b716f3a",
+        "createdAt": "2026-06-15T06:17:35.408Z",
+        "updatedAt": "2026-06-15T06:17:35.426Z",
+        "startedAt": "2026-06-15T06:17:35.414Z"
+      }
+    },
+    {
+      "field": "timestamp",
+      "newValue": "2026-06-15T06:17:35.427Z"
+    }
+  ],
+  "ipAddress": "::ffff:127.0.0.1",
+  "status": "success",
+  "id": "d3ed25d7-ba14-4561-8b76-5bca330e910c",
+  "createdAt": "2026-06-15T06:17:35.431Z",
+  "updatedAt": "2026-06-15T06:17:35.431Z"
+}

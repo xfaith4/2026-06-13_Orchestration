@@ -1,0 +1,22 @@
+{
+  "timestamp": "2026-06-15T06:17:35.494Z",
+  "userId": "anonymous",
+  "action": "UPDATE",
+  "resourceType": "c",
+  "resourceId": "unknown",
+  "changes": [
+    {
+      "field": "error",
+      "newValue": "Can only resume paused runs, current status: running"
+    },
+    {
+      "field": "timestamp",
+      "newValue": "2026-06-15T06:17:35.494Z"
+    }
+  ],
+  "ipAddress": "::ffff:127.0.0.1",
+  "status": "success",
+  "id": "773452c6-22f3-4d9f-8759-9a97312563fb",
+  "createdAt": "2026-06-15T06:17:35.502Z",
+  "updatedAt": "2026-06-15T06:17:35.502Z"
+}

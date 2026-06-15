@@ -1,10 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { PersistenceService } from '../services/persistence.js';
-import { ValidationService } from '../services/validation.js';
+import type { ValidationService } from '../services/validation.js';
 import { PromptRegistry } from '../services/prompt-registry.js';
-import { PromptDefinition } from '@unifiedaitoolbox/shared';
 import { createResponse, ApiError } from '../types/responses.js';
-import { createGenericCrudRoutes } from './generic-crud.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -12,7 +10,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const createPromptRoutes = (
   persistence: PersistenceService,
-  validation: ValidationService
+  _validation: ValidationService
 ) => {
   const router = Router();
   const promptsDir = path.join(__dirname, '..', '..', '..', 'Prompts');

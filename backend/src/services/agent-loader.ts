@@ -16,6 +16,12 @@ export class AgentLoader {
     this.agentsDir = agentsDir;
   }
 
+  private asRecord(value: unknown): Record<string, unknown> {
+    return typeof value === 'object' && value !== null
+      ? (value as Record<string, unknown>)
+      : {};
+  }
+
   // Load all agents from the agents directory
   async loadAllAgents(): Promise<LoadedAgent[]> {
     try {
@@ -33,7 +39,8 @@ export class AgentLoader {
           // Handle both single agent and array of agents
           const agentList = Array.isArray(data) ? data : [data];
 
-          for (const agentData of agentList) {
+          for (const rawAgentData of agentList) {
+            const agentData = this.asRecord(rawAgentData);
             if (agentData.name && agentData.type) {
               const agent = this.normalizeAgent(agentData, file);
               agents.push(agent);
@@ -100,19 +107,32 @@ export class AgentLoader {
   }
 
   // Normalize agent data to AgentDefinition format
-  private normalizeAgent(data: any, sourceFile: string): LoadedAgent {
+  private normalizeAgent(data: Record<string, unknown>, sourceFile: string): LoadedAgent {
+    const capabilities = Array.isArray(data.capabilities)
+      ? (data.capabilities as string[])
+      : Array.isArray(data.tools)
+        ? (data.tools as string[])
+        : Array.isArray(data.skills)
+          ? (data.skills as string[])
+          : [];
+
+    const inputs = this.asRecord(data.inputs ?? data.parameters ?? {});
+    const outputs = this.asRecord(data.outputs ?? data.result ?? {});
+
     return {
-      id: data.id || `agent-${uuidv4()}`,
-      name: data.name || 'Unknown Agent',
-      type: data.type || 'generic',
-      description: data.description || data.prompt || '',
-      capabilities: Array.isArray(data.capabilities)
-        ? data.capabilities
-        : data.tools || data.skills || [],
-      inputs: data.inputs || data.parameters || {},
-      outputs: data.outputs || data.result || {},
-      createdAt: data.createdAt || new Date().toISOString(),
-      updatedAt: data.updatedAt || new Date().toISOString(),
+      id: typeof data.id === 'string' ? data.id : `agent-${uuidv4()}`,
+      name: typeof data.name === 'string' ? data.name : 'Unknown Agent',
+      type: typeof data.type === 'string' ? data.type : 'generic',
+      description: typeof data.description === 'string'
+        ? data.description
+        : typeof data.prompt === 'string'
+          ? data.prompt
+          : '',
+      capabilities,
+      inputs,
+      outputs,
+      createdAt: typeof data.createdAt === 'string' ? data.createdAt : new Date().toISOString(),
+      updatedAt: typeof data.updatedAt === 'string' ? data.updatedAt : new Date().toISOString(),
       sourceFile,
       loadedAt: new Date().toISOString(),
     };

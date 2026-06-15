@@ -1,0 +1,11 @@
+{
+  "applicationId": "app-1",
+  "designPlanId": "design-1",
+  "title": "Test Roadmap",
+  "description": "A test roadmap",
+  "phases": [],
+  "estimatedDuration": "2 weeks",
+  "id": "553e8b07-98b6-432b-9762-1c2cdca15cc5",
+  "createdAt": "2026-06-15T06:07:12.235Z",
+  "updatedAt": "2026-06-15T06:07:12.235Z"
+}

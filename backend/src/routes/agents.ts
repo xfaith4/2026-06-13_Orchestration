@@ -1,10 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { PersistenceService } from '../services/persistence.js';
-import { ValidationService } from '../services/validation.js';
+import type { ValidationService } from '../services/validation.js';
 import { AgentRegistry } from '../services/agent-registry.js';
-import { AgentDefinition } from '@unifiedaitoolbox/shared';
 import { createResponse, ApiError } from '../types/responses.js';
-import { createGenericCrudRoutes } from './generic-crud.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -12,7 +10,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const createAgentRoutes = (
   persistence: PersistenceService,
-  validation: ValidationService
+  _validation: ValidationService
 ) => {
   const router = Router();
   const agentsDir = path.join(__dirname, '..', '..', '..', 'agents');

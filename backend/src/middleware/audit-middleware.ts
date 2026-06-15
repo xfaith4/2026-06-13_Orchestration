@@ -10,6 +10,27 @@ export interface AuditRequest extends Request {
   originalParams?: Record<string, unknown>;
 }
 
+interface ApiEnvelope<T = unknown> {
+  data?: T;
+}
+
+interface IdentifiableRecord {
+  id?: string;
+  title?: string;
+  name?: string;
+  description?: string;
+  [key: string]: unknown;
+}
+
+function unwrapEnvelope(data: unknown): unknown {
+  if (typeof data !== 'object' || data === null) {
+    return data;
+  }
+
+  const envelope = data as ApiEnvelope;
+  return envelope.data ?? data;
+}
+
 export function createAuditMiddleware(persistence: PersistenceService) {
   const auditLogger = new AuditLogger();
 
@@ -31,8 +52,12 @@ export function createAuditMiddleware(persistence: PersistenceService) {
       if (method === 'POST' && !path.includes('/generate') && !path.includes('/from-roadmap')) {
         // Create operation
         const resourceType = getResourceTypeFromPath(path);
-        const resourceId = (data as any)?.id || 'unknown';
-        const resourceName = getResourceName(data);
+        const payload = unwrapEnvelope(data);
+        const record = (typeof payload === 'object' && payload !== null)
+          ? (payload as IdentifiableRecord)
+          : undefined;
+        const resourceId = record?.id || 'unknown';
+        const resourceName = getResourceName(payload);
 
         const auditEntry = auditLogger.logCreate(
           resourceType,
@@ -53,8 +78,12 @@ export function createAuditMiddleware(persistence: PersistenceService) {
       } else if (method === 'PUT' || method === 'PATCH') {
         // Update operation
         const resourceType = getResourceTypeFromPath(path);
-        const resourceId = (data as any)?.id || req.originalParams?.id || 'unknown';
-        const resourceName = getResourceName(data);
+        const payload = unwrapEnvelope(data);
+        const record = (typeof payload === 'object' && payload !== null)
+          ? (payload as IdentifiableRecord)
+          : undefined;
+        const resourceId = record?.id || req.originalParams?.id || 'unknown';
+        const resourceName = getResourceName(payload);
 
         const auditEntry = auditLogger.logUpdate(
           resourceType,
@@ -114,7 +143,7 @@ function getResourceName(data: unknown): string | undefined {
     return undefined;
   }
 
-  const obj = data as Record<string, unknown>;
+  const obj = data as IdentifiableRecord;
 
   // Try to find a descriptive name field
   if (obj.title) return obj.title as string;
