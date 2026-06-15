@@ -428,6 +428,72 @@ export interface CircuitBreakerState {
   successCount?: number;
 }
 
+// Failure Taxonomy
+export type FailureType =
+  | 'requirements_missing'
+  | 'schema_invalid'
+  | 'tool_denied'
+  | 'command_failed'
+  | 'env_missing'
+  | 'dependency_unavailable'
+  | 'test_failed'
+  | 'merge_conflict'
+  | 'scope_violation'
+  | 'low_confidence'
+  | 'human_approval_required';
+
+export type RepairStrategy = 'retry' | 'repair' | 'escalate' | 'skip' | 'manual';
+
+export interface FailureClassification {
+  failureType: FailureType;
+  severity: ErrorSeverity;
+  errorType: ErrorType;
+  confidence: number; // 0-1, how confident in classification
+  evidence: string[]; // evidence for classification
+}
+
+export interface RepairAttempt {
+  attemptNumber: number;
+  timestamp: string;
+  strategy: RepairStrategy;
+  result: 'success' | 'failed' | 'escalated';
+  notes?: string;
+}
+
+export interface FailureContext {
+  taskId: string;
+  phaseId: string;
+  runId: string;
+  errorMessage: string;
+  errorStack?: string;
+  context?: Record<string, unknown>;
+}
+
+export interface RepairOptions {
+  strategy: RepairStrategy;
+  priority: number; // 1-10, higher is better
+  description: string;
+  estimatedDuration?: number; // ms
+  riskLevel: 'low' | 'medium' | 'high';
+  prerequisites?: string[];
+  instructions?: string[];
+}
+
+export interface TaskFailure extends BaseEntity {
+  taskId: string;
+  taskName: string;
+  phaseId: string;
+  runId: string;
+  originalError: string;
+  classification: FailureClassification;
+  repairAttempts: RepairAttempt[];
+  suggestedRepairs: RepairOptions[];
+  maxRetries: number;
+  status: 'active' | 'resolved' | 'escalated' | 'skipped';
+  resolvedAt?: string;
+  resolutionDetails?: string;
+}
+
 // Audit Logging
 export interface AuditLogEntry extends BaseEntity {
   timestamp: string;
