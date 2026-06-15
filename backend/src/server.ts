@@ -95,7 +95,15 @@ app.listen(port, () => {
   console.log(`  GET  /api/agents/meta/types (list all agent types)`);
   console.log(`  GET  /api/agents/meta/stats (agent statistics)`);
   console.log(`  POST /api/agents, PUT /api/agents/:id, DELETE /api/agents/:id`);
-  console.log(`  GET  /api/prompts, POST, GET/:id, PUT/:id, DELETE/:id`);
+  console.log(`  GET  /api/prompts (with filters: category, search, tag)`);
+  console.log(`  GET  /api/prompts/:id`);
+  console.log(`  GET  /api/prompts/category/:category (prompts by category)`);
+  console.log(`  GET  /api/prompts/tag/:tag (prompts by tag)`);
+  console.log(`  GET  /api/prompts/meta/categories (list all categories)`);
+  console.log(`  GET  /api/prompts/meta/tags (list all tags)`);
+  console.log(`  GET  /api/prompts/meta/stats (prompt statistics)`);
+  console.log(`  POST /api/prompts, PUT /api/prompts/:id, DELETE /api/prompts/:id`);
+  console.log(`  PATCH /api/prompts/:id/use (record prompt usage)`);
   console.log(`  GET  /api/contracts, POST, GET/:id, PUT/:id, DELETE/:id`);
 });
 

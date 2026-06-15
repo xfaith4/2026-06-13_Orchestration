@@ -12,6 +12,7 @@ import { RunList } from '../pages/RunList';
 import { RunDetail } from '../pages/RunDetail';
 import { AuditLog } from '../pages/AuditLog';
 import { AgentList } from '../pages/AgentList';
+import { PromptList } from '../pages/PromptList';
 
 export function AppRoutes() {
   return (
@@ -109,10 +110,7 @@ export function AppRoutes() {
           path="/prompts"
           element={
             <MainLayout>
-              <div>
-                <h1 className="text-3xl font-bold">Prompts</h1>
-                <p className="text-gray-600 mt-2">Coming soon</p>
-              </div>
+              <PromptList />
             </MainLayout>
           }
         />

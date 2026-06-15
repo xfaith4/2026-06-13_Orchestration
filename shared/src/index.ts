@@ -154,6 +154,19 @@ export interface AgentDefinition extends BaseEntity {
   outputs: Record<string, unknown>;
 }
 
+export interface PromptDefinition extends BaseEntity {
+  name: string;
+  category?: string;
+  content: string;
+  description?: string;
+  tags?: string[];
+  variables?: string[];
+  version: number;
+  parentId?: string;
+  usageCount?: number;
+  lastUsedAt?: string;
+}
+
 export interface User extends BaseEntity {
   email: string;
   name: string;

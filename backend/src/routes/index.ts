@@ -6,6 +6,7 @@ import { createDesignPlanRoutes } from './design-plans.js';
 import { createRoadmapRoutes } from './roadmaps.js';
 import { createRunRoutes } from './runs.js';
 import { createAgentRoutes } from './agents.js';
+import { createPromptRoutes } from './prompts.js';
 import { createGenericCrudRoutes } from './generic-crud.js';
 
 export const createApiRoutes = (
@@ -19,7 +20,7 @@ export const createApiRoutes = (
   router.use('/roadmaps', createRoadmapRoutes(persistence, validation));
   router.use('/runs', createRunRoutes(persistence, validation));
   router.use('/agents', createAgentRoutes(persistence, validation));
-  router.use('/prompts', createGenericCrudRoutes(persistence, validation, 'prompts'));
+  router.use('/prompts', createPromptRoutes(persistence, validation));
   router.use('/contracts', createGenericCrudRoutes(persistence, validation, 'contracts'));
 
   return router;
