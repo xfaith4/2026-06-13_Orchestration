@@ -130,13 +130,28 @@ export interface RunCost extends CostMetrics {
   phaseCosts: PhaseCost[];
 }
 
+export type RunStatus = 'draft' | 'pending' | 'running' | 'completed' | 'failed' | 'paused';
+export type PhaseStatus = 'pending' | 'in-progress' | 'completed' | 'failed';
+export type TaskStatus = 'pending' | 'assigned' | 'in-progress' | 'completed' | 'failed' | 'blocked';
+
+export interface StateTransitionEvent {
+  id: string;
+  timestamp: string;
+  entityType: 'run' | 'phase' | 'task';
+  entityId: string;
+  fromState: string;
+  toState: string;
+  reason?: string;
+  performedBy?: string;
+}
+
 export interface Run extends BaseEntity {
   roadmapId: string;
   applicationId: string;
   title: string;
   description: string;
   phases: ExecutionPhase[];
-  status: 'draft' | 'pending' | 'running' | 'completed' | 'failed' | 'paused';
+  status: RunStatus;
   startedAt?: string;
   completedAt?: string;
   summary?: string;

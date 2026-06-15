@@ -8,6 +8,7 @@ import { AgentRegistry } from '../services/agent-registry.js';
 import { PromptRegistry } from '../services/prompt-registry.js';
 import { CostTracker } from '../services/cost-tracker.js';
 import { ErrorLogger } from '../services/error-logger.js';
+import { RunStateMachine } from '../services/run-state-machine.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -24,6 +25,7 @@ export const createExecutionRoutes = (persistence: PersistenceService) => {
   let promptRegistry: PromptRegistry;
   let costTracker: CostTracker;
   let errorLogger: ErrorLogger;
+  let stateMachine: RunStateMachine;
 
   const ensureInitialized = async () => {
     if (!servicesInitialized) {
@@ -34,6 +36,7 @@ export const createExecutionRoutes = (persistence: PersistenceService) => {
       promptRegistry = new PromptRegistry(persistence, promptsDir);
       costTracker = new CostTracker();
       errorLogger = new ErrorLogger(persistence);
+      stateMachine = new RunStateMachine();
 
       await agentRegistry.initialize();
       await promptRegistry.initialize();
@@ -82,18 +85,25 @@ export const createExecutionRoutes = (persistence: PersistenceService) => {
         variables: variables || {},
       });
 
-      // Update task status
+      // Update task status using state machine
+      const newTaskStatus = result.success ? ('completed' as const) : ('failed' as const);
+      if (stateMachine.canTransitionTask(task.status as any, newTaskStatus)) {
+        stateMachine.transitionTask(runId, phaseId, taskId, task.status as any, newTaskStatus, 'Task execution completed');
+      }
+
       const updatedTask = {
         ...task,
-        status: (result.success ? 'completed' : 'failed') as 'completed' | 'failed',
+        status: newTaskStatus,
         completedAt: new Date().toISOString(),
         output: result.output,
         error: result.error,
       };
 
+      // Update phase status
+      const newPhaseStatus = result.success ? ('completed' as const) : ('failed' as const);
       const updatedPhase = {
         ...phase,
-        status: (result.success ? 'completed' : 'failed') as 'completed' | 'failed',
+        status: newPhaseStatus,
         tasks: phase.tasks.map(t => t.id === taskId ? updatedTask : t),
         completedAt: new Date().toISOString(),
       };
@@ -153,10 +163,15 @@ export const createExecutionRoutes = (persistence: PersistenceService) => {
         variables: variables || {},
       });
 
-      // Update phase status
+      // Update phase status using state machine
+      const newPhaseStatus = result.success ? ('completed' as const) : ('failed' as const);
+      if (stateMachine.canTransitionPhase(phase.status, newPhaseStatus)) {
+        stateMachine.transitionPhase(runId, phaseId, phase.status, newPhaseStatus, 'Phase execution completed');
+      }
+
       const updatedPhase: ExecutionPhase = {
         ...phase,
-        status: (result.success ? 'completed' : 'failed') as 'completed' | 'failed',
+        status: newPhaseStatus,
         completedAt: new Date().toISOString(),
       };
 
