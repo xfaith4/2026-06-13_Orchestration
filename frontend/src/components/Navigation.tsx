@@ -19,9 +19,6 @@ export function Navigation() {
                 Welcome, <span className="font-medium">{user.name}</span>
               </div>
             )}
-            <button className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
-              Profile
-            </button>
           </div>
         </div>
       </div>

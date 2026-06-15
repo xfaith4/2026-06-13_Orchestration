@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { apiClient } from '../services/api';
 
 interface Agent {
@@ -20,36 +20,34 @@ export function AgentList() {
   const [agentTypes, setAgentTypes] = useState<string[]>([]);
   const [stats, setStats] = useState<any>(null);
 
-  useEffect(() => {
-    const fetchAgents = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const fetchAgents = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        // Fetch agents
-        let url = '/agents?limit=200';
-        if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
-        if (filterType) url += `&type=${encodeURIComponent(filterType)}`;
+      let url = '/agents?limit=200';
+      if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
+      if (filterType) url += `&type=${encodeURIComponent(filterType)}`;
 
-        const data = await apiClient.get<Agent[]>(url);
-        setAgents(data || []);
+      const [data, typesData, statsData] = await Promise.all([
+        apiClient.get<Agent[]>(url),
+        apiClient.get<{ types: string[] }>('/agents/meta/types'),
+        apiClient.get('/agents/meta/stats'),
+      ]);
 
-        // Fetch types
-        const typesData = await apiClient.get<{ types: string[] }>('/agents/meta/types');
-        setAgentTypes(typesData?.types || []);
-
-        // Fetch stats
-        const statsData = await apiClient.get('/agents/meta/stats');
-        setStats(statsData);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load agents');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAgents();
+      setAgents(data || []);
+      setAgentTypes(typesData?.types || []);
+      setStats(statsData);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load agents');
+    } finally {
+      setLoading(false);
+    }
   }, [searchQuery, filterType]);
+
+  useEffect(() => {
+    fetchAgents();
+  }, [fetchAgents]);
 
   const getTypeColor = (type: string) => {
     const colors: Record<string, string> = {
@@ -75,7 +73,7 @@ export function AgentList() {
       <div className="p-6">
         <div className="text-red-600 mb-4">{error}</div>
         <button
-          onClick={() => window.location.reload()}
+          onClick={fetchAgents}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
           Try Again

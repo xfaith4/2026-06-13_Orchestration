@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../services/api';
 
@@ -27,29 +27,30 @@ export function AuditLog() {
   const [filterUserId, setFilterUserId] = useState<string>('');
   const [filterStatus, setFilterStatus] = useState<string>('');
 
+  const fetchLogs = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const params = new URLSearchParams();
+      if (filterAction) params.append('action', filterAction);
+      if (filterResourceType) params.append('resourceType', filterResourceType);
+      if (filterUserId) params.append('userId', filterUserId);
+      if (filterStatus) params.append('status', filterStatus);
+      params.append('limit', '100');
+
+      const data = await apiClient.get<AuditLogEntry[]>(`/audit-logs?${params.toString()}`);
+      setLogs(data || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load audit logs');
+    } finally {
+      setLoading(false);
+    }
+  }, [filterAction, filterResourceType, filterUserId, filterStatus]);
+
   useEffect(() => {
-    const fetchLogs = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const params = new URLSearchParams();
-        if (filterAction) params.append('action', filterAction);
-        if (filterResourceType) params.append('resourceType', filterResourceType);
-        if (filterUserId) params.append('userId', filterUserId);
-        params.append('limit', '100');
-
-        const data = await apiClient.get<AuditLogEntry[]>(`/audit-logs?${params.toString()}`);
-        setLogs(data || []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load audit logs');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchLogs();
-  }, [filterAction, filterResourceType, filterUserId]);
+  }, [fetchLogs]);
 
   const getActionColor = (action: string) => {
     switch (action) {
@@ -75,11 +76,6 @@ export function AuditLog() {
     }
   };
 
-  const filteredLogs = logs.filter(log => {
-    if (filterStatus && log.status !== filterStatus) return false;
-    return true;
-  });
-
   if (loading) {
     return (
       <div className="p-6">
@@ -93,7 +89,7 @@ export function AuditLog() {
       <div className="p-6">
         <div className="text-red-600 mb-4">{error}</div>
         <button
-          onClick={() => window.location.reload()}
+          onClick={fetchLogs}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
           Try Again
@@ -175,7 +171,7 @@ export function AuditLog() {
 
       {/* Logs Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
-        {filteredLogs.length === 0 ? (
+        {logs.length === 0 ? (
           <div className="p-8 text-center text-gray-600">
             No audit log entries found matching your filters.
           </div>
@@ -193,7 +189,7 @@ export function AuditLog() {
                 </tr>
               </thead>
               <tbody>
-                {filteredLogs.map((log) => (
+                {logs.map((log) => (
                   <tr key={log.id} className="border-b border-gray-200 hover:bg-gray-50">
                     <td className="px-6 py-3 text-sm text-gray-600">
                       {new Date(log.timestamp).toLocaleString()}
@@ -246,7 +242,7 @@ export function AuditLog() {
       </div>
 
       <div className="mt-4 text-sm text-gray-600">
-        Showing {filteredLogs.length} of {logs.length} entries
+        Showing {logs.length} entries
       </div>
     </div>
   );

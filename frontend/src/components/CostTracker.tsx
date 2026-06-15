@@ -95,7 +95,7 @@ export function CostTracker({ run }: CostTrackerProps) {
           <h4 className="text-base font-semibold text-gray-900 mb-4">Cost by Phase</h4>
 
           <div className="space-y-4">
-            {phaseCosts.map((phaseCost: PhaseCost, index: number) => {
+            {phaseCosts.map((phaseCost: PhaseCost) => {
               const phasePercentage = totalCost > 0 ? (phaseCost.estimatedCost / totalCost) * 100 : 0;
 
               return (
@@ -103,7 +103,7 @@ export function CostTracker({ run }: CostTrackerProps) {
                   <div className="flex items-center justify-between mb-2">
                     <div>
                       <h5 className="text-sm font-medium text-gray-900">
-                        Phase {index + 1}: {phaseCost.phaseName}
+                        {phaseCost.phaseName}
                       </h5>
                       <p className="text-xs text-gray-600">
                         {phaseCost.tokenInputs} input · {phaseCost.tokenOutputs} output

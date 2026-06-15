@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { usePost } from '../hooks/useApi';
+import { Application } from '../types';
 
 interface ApplicationFormData {
   name: string;
@@ -11,7 +12,7 @@ interface ApplicationFormData {
 }
 
 interface ApplicationIntakeFormProps {
-  onSubmitSuccess?: () => void;
+  onSubmitSuccess?: (id: string) => void;
 }
 
 export function ApplicationIntakeForm({ onSubmitSuccess }: ApplicationIntakeFormProps) {
@@ -24,7 +25,7 @@ export function ApplicationIntakeForm({ onSubmitSuccess }: ApplicationIntakeForm
     constraints: '',
   });
 
-  const { loading, error, post } = usePost('/applications');
+  const { loading, error, post } = usePost<Application>('/applications');
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
@@ -87,7 +88,7 @@ export function ApplicationIntakeForm({ onSubmitSuccess }: ApplicationIntakeForm
         constraints: '',
       });
       setTimeout(() => {
-        onSubmitSuccess?.();
+        onSubmitSuccess?.(result.id);
       }, 1500);
     }
   };

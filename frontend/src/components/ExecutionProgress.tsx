@@ -84,7 +84,7 @@ export function ExecutionProgress({ run }: ExecutionProgressProps) {
         <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
           <div
             className="bg-green-500 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${(completedTasks / totalTasks) * 100}%` }}
+            style={{ width: `${totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0}%` }}
           />
         </div>
 

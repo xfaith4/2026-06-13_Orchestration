@@ -15,8 +15,8 @@ export function NewApplication() {
 
       <div className="bg-white rounded-lg shadow p-6">
         <ApplicationIntakeForm
-          onSubmitSuccess={() => {
-            navigate('/applications');
+          onSubmitSuccess={(id) => {
+            navigate(`/applications/${id}`);
           }}
         />
       </div>
