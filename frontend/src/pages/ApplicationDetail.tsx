@@ -1,19 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiClient } from '../services/api';
-
-interface Application {
-  id: string;
-  name: string;
-  description: string;
-  goal: string;
-  requirements: string[];
-  targetAudience?: string;
-  constraints?: string[];
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { Application, DesignPlan } from '../types';
 
 export function ApplicationDetail() {
   const { id } = useParams<{ id: string }>();
@@ -21,6 +9,8 @@ export function ApplicationDetail() {
   const [application, setApplication] = useState<Application | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [generateError, setGenerateError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -40,6 +30,24 @@ export function ApplicationDetail() {
 
     fetchApplication();
   }, [id]);
+
+  const handleGenerateDesignPlan = async () => {
+    if (!application) return;
+
+    try {
+      setGenerating(true);
+      setGenerateError(null);
+      const designPlan = await apiClient.post<DesignPlan>(
+        `/design-plans/generate/${application.id}`,
+        {}
+      );
+      navigate(`/design-plans/${designPlan.id}`);
+    } catch (err) {
+      setGenerateError(err instanceof Error ? err.message : 'Failed to generate design plan');
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   if (loading) {
     return <div className="text-center py-12">Loading...</div>;
@@ -132,8 +140,18 @@ export function ApplicationDetail() {
             </p>
           </div>
 
-          <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700">
-            Generate Design Plan
+          {generateError && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <p className="text-sm text-red-800">{generateError}</p>
+            </div>
+          )}
+
+          <button
+            onClick={handleGenerateDesignPlan}
+            disabled={generating}
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {generating ? 'Generating Design Plan...' : 'Generate Design Plan'}
           </button>
         </div>
       </div>

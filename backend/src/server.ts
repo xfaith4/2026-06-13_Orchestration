@@ -55,6 +55,7 @@ app.listen(port, () => {
   console.log(`✓ Available endpoints:`);
   console.log(`  GET  /api/health`);
   console.log(`  GET  /api/applications, POST, GET/:id, PUT/:id, DELETE/:id`);
+  console.log(`  POST /api/design-plans/generate/:applicationId`);
   console.log(`  GET  /api/design-plans, POST, GET/:id, PUT/:id, DELETE/:id`);
   console.log(`  GET  /api/roadmaps, POST, GET/:id, PUT/:id, DELETE/:id`);
   console.log(`  GET  /api/runs, POST, GET/:id, PUT/:id, DELETE/:id`);

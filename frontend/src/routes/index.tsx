@@ -4,6 +4,8 @@ import { Dashboard } from '../pages/Dashboard';
 import { ApplicationsList } from '../pages/ApplicationsList';
 import { NewApplication } from '../pages/NewApplication';
 import { ApplicationDetail } from '../pages/ApplicationDetail';
+import { DesignPlansList } from '../pages/DesignPlansList';
+import { DesignPlanDetail } from '../pages/DesignPlanDetail';
 
 export function AppRoutes() {
   return (
@@ -45,10 +47,15 @@ export function AppRoutes() {
           path="/design-plans"
           element={
             <MainLayout>
-              <div>
-                <h1 className="text-3xl font-bold">Design Plans</h1>
-                <p className="text-gray-600 mt-2">Coming soon</p>
-              </div>
+              <DesignPlansList />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/design-plans/:id"
+          element={
+            <MainLayout>
+              <DesignPlanDetail />
             </MainLayout>
           }
         />

@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { PersistenceService } from '../services/persistence.js';
 import { ValidationService } from '../services/validation.js';
 import { createApplicationRoutes } from './applications.js';
+import { createDesignPlanRoutes } from './design-plans.js';
 import { createGenericCrudRoutes } from './generic-crud.js';
 
 export const createApiRoutes = (
@@ -11,7 +12,7 @@ export const createApiRoutes = (
   const router = Router();
 
   router.use('/applications', createApplicationRoutes(persistence, validation));
-  router.use('/design-plans', createGenericCrudRoutes(persistence, validation, 'design-plans', 'design_plan'));
+  router.use('/design-plans', createDesignPlanRoutes(persistence, validation));
   router.use('/roadmaps', createGenericCrudRoutes(persistence, validation, 'roadmaps', 'roadmap'));
   router.use('/runs', createGenericCrudRoutes(persistence, validation, 'runs', 'run'));
   router.use('/agents', createGenericCrudRoutes(persistence, validation, 'agents'));
