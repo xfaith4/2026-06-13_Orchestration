@@ -16,6 +16,12 @@ export class PromptLoader {
     this.promptsDir = promptsDir;
   }
 
+  private asRecord(value: unknown): Record<string, unknown> {
+    return typeof value === 'object' && value !== null
+      ? (value as Record<string, unknown>)
+      : {};
+  }
+
   // Load all prompts from the Prompts directory
   async loadAllPrompts(): Promise<LoadedPrompt[]> {
     try {
@@ -33,7 +39,8 @@ export class PromptLoader {
           // Handle both single prompt and array of prompts
           const promptList = Array.isArray(data) ? data : [data];
 
-          for (const promptData of promptList) {
+          for (const rawPromptData of promptList) {
+            const promptData = this.asRecord(rawPromptData);
             if (promptData.content || promptData.prompt) {
               const prompt = this.normalizePrompt(promptData, file);
               prompts.push(prompt);
@@ -115,24 +122,50 @@ export class PromptLoader {
   }
 
   // Normalize prompt data to PromptDefinition format
-  private normalizePrompt(data: any, sourceFile: string): LoadedPrompt {
-    const content = data.content || data.prompt || data.text || '';
+  private normalizePrompt(data: Record<string, unknown>, sourceFile: string): LoadedPrompt {
+    const content = typeof data.content === 'string'
+      ? data.content
+      : typeof data.prompt === 'string'
+        ? data.prompt
+        : typeof data.text === 'string'
+          ? data.text
+          : '';
     const variables = this.extractVariables(content);
+    const normalizedVariables = Array.isArray(data.variables)
+      ? (data.variables as string[])
+      : variables;
+    const tags = Array.isArray(data.tags)
+      ? (data.tags as string[])
+      : Array.isArray(data.keywords)
+        ? (data.keywords as string[])
+        : [];
 
     return {
-      id: data.id || `prompt-${uuidv4()}`,
-      name: data.name || data.title || path.basename(sourceFile, '.json'),
-      category: data.category || data.type || 'general',
+      id: typeof data.id === 'string' ? data.id : `prompt-${uuidv4()}`,
+      name: typeof data.name === 'string'
+        ? data.name
+        : typeof data.title === 'string'
+          ? data.title
+          : path.basename(sourceFile, '.json'),
+      category: typeof data.category === 'string'
+        ? data.category
+        : typeof data.type === 'string'
+          ? data.type
+          : 'general',
       content,
-      description: data.description || data.summary || '',
-      tags: Array.isArray(data.tags) ? data.tags : (data.keywords || []),
-      variables: data.variables || variables,
-      version: data.version || 1,
-      parentId: data.parentId,
-      usageCount: data.usageCount || 0,
-      lastUsedAt: data.lastUsedAt,
-      createdAt: data.createdAt || new Date().toISOString(),
-      updatedAt: data.updatedAt || new Date().toISOString(),
+      description: typeof data.description === 'string'
+        ? data.description
+        : typeof data.summary === 'string'
+          ? data.summary
+          : '',
+      tags,
+      variables: normalizedVariables,
+      version: typeof data.version === 'number' ? data.version : 1,
+      parentId: typeof data.parentId === 'string' ? data.parentId : undefined,
+      usageCount: typeof data.usageCount === 'number' ? data.usageCount : 0,
+      lastUsedAt: typeof data.lastUsedAt === 'string' ? data.lastUsedAt : undefined,
+      createdAt: typeof data.createdAt === 'string' ? data.createdAt : new Date().toISOString(),
+      updatedAt: typeof data.updatedAt === 'string' ? data.updatedAt : new Date().toISOString(),
       sourceFile,
       loadedAt: new Date().toISOString(),
     };

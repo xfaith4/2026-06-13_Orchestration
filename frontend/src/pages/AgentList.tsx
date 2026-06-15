@@ -11,6 +11,12 @@ interface Agent {
   sourceFile?: string;
 }
 
+interface AgentStats {
+  totalAgents: number;
+  agentsByType?: Record<string, number>;
+  agentsByCapability?: Record<string, number>;
+}
+
 export function AgentList() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +24,7 @@ export function AgentList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('');
   const [agentTypes, setAgentTypes] = useState<string[]>([]);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<AgentStats | null>(null);
 
   const fetchAgents = useCallback(async () => {
     try {
@@ -32,7 +38,7 @@ export function AgentList() {
       const [data, typesData, statsData] = await Promise.all([
         apiClient.get<Agent[]>(url),
         apiClient.get<{ types: string[] }>('/agents/meta/types'),
-        apiClient.get('/agents/meta/stats'),
+        apiClient.get<AgentStats>('/agents/meta/stats'),
       ]);
 
       setAgents(data || []);

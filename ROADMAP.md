@@ -440,7 +440,7 @@ When complete, update to:
 
 | # | Phase | Goal | Status | Completed |
 |---|-------|------|--------|-----------|
-| 0 | Repository Baseline & Verification | Understand current state | Not Started | |
+| 0 | Repository Baseline & Verification | Understand current state | Complete | 2026-06-14 |
 | 1 | Project Foundation | Create monorepo, install deps | Not Started | |
 | 2 | Core Data Models & Schemas | Define all models | Not Started | |
 | 3 | Backend API Foundation | Implement CRUD endpoints | Not Started | |
@@ -456,15 +456,15 @@ When complete, update to:
 | 13 | Thin Vertical Orchestration Spike | Prove core abstractions end-to-end | Not Started | |
 | 14 | Agent Execution Abstraction | Define executor interface | Not Started | |
 | 15 | Basic Audit & Cost Tracking | Early audit and cost model | Not Started | |
-| 16 | Run State Machine | State transition logic | Not Started | |
-| 17 | Task Execution Queue | Queue and scheduling | Not Started | |
-| 18 | Agent Executor Adapter | Pluggable agent execution | Not Started | |
-| 19 | Contract-Gated Handoffs | Validate at handoff points | Not Started | |
-| 20 | Artifact Persistence & Run Outputs | Store and retrieve artifacts | Not Started | |
-| 21 | Execution Summary & Completion | Run summary and closure | Not Started | |
-| 22 | Execution Console & Live Monitoring | Real-time monitoring UI | Not Started | |
-| 23 | Failure Taxonomy & Repair Workflow | Classify and repair failures | Not Started | |
-| 24 | Advanced Cost Tracking & Analytics | Detailed cost dashboards | Not Started | |
+| 16 | Run State Machine | State transition logic | Complete | 2026-06-14 |
+| 17 | Task Execution Queue | Queue and scheduling | Complete | 2026-06-14 |
+| 18 | Agent Executor Adapter | Pluggable agent execution | Complete | 2026-06-14 |
+| 19 | Contract-Gated Handoffs | Validate at handoff points | Complete | 2026-06-14 |
+| 20 | Artifact Persistence & Run Outputs | Store and retrieve artifacts | Complete | 2026-06-14 |
+| 21 | Execution Summary & Completion | Run summary and closure | Complete | 2026-06-14 |
+| 22 | Execution Console & Live Monitoring | Real-time monitoring UI | Complete | 2026-06-14 |
+| 23 | Failure Taxonomy & Repair Workflow | Classify and repair failures | In Progress | 2026-06-15 (backend) |
+| 24 | Advanced Cost Tracking & Analytics | Detailed cost dashboards | Complete | 2026-06-15 |
 | 25 | GitHub Integration | OAuth, branches, PRs, CI | Not Started | |
 | 26 | Testing, Quality Hardening, CI | Test suite and pipeline | Not Started | |
 | 27 | Security, Accessibility, Production Ready | Auth, WCAG, hardening | Not Started | |
@@ -495,29 +495,29 @@ The roadmap assumes certain existing files, agent definitions, contracts, and li
 
 ### Deliverables
 
-- [ ] Inventory of all agent definitions with status
-- [ ] Inventory of all contract schemas with versions
-- [ ] Assessment of existing lib files
-- [ ] Confirmation of Node.js/npm availability
-- [ ] Decision: preserve or refactor each asset
-- [ ] **Asset Classification Table** (NEW: per Existing Asset Migration Policy)
-- [ ] Assessment report documenting baseline state
+- [x] Inventory of all agent definitions with status
+- [x] Inventory of all contract schemas with versions
+- [x] Assessment of existing lib files
+- [x] Confirmation of Node.js/npm availability
+- [x] Decision: preserve or refactor each asset
+- [x] **Asset Classification Table** (NEW: per Existing Asset Migration Policy)
+- [x] Assessment report documenting baseline state
 
 ### Implementation Tasks
 
-- [ ] List all files in `agents/` directory, note format and status
-- [ ] Read agent-library.active.json and agent-library.active2.json; compare
-- [ ] List all files in `contracts/` and validate JSON schemas
-- [ ] Read all contract files and document structure
-- [ ] Inspect `lib/*.js` files and assess code quality
-- [ ] Check for existing package.json in root or subdirectories
-- [ ] Verify Node.js version (target: 18+) and npm version
-- [ ] Look for existing test files or CI configuration
-- [ ] Check for existing README or documentation
-- [ ] Verify git repository status
-- [ ] **NEW: Create Asset Classification Table** with columns: Asset | Current Location | Intended Future Location | Action | Rationale | Migration Phase
-- [ ] **NEW: Classify all assets** per Existing Asset Migration Policy (Preserve, Normalize/Migrate, Refactor, Archive/Reference, Deprecate)
-- [ ] **NEW: Document migration schedule** showing which assets are used by which phases
+- [x] List all files in `agents/` directory, note format and status
+- [x] Read agent-library.active.json and agent-library.active2.json; compare
+- [x] List all files in `contracts/` and validate JSON schemas
+- [x] Read all contract files and document structure
+- [x] Inspect `lib/*.js` files and assess code quality
+- [x] Check for existing package.json in root or subdirectories
+- [x] Verify Node.js version (target: 18+) and npm version
+- [x] Look for existing test files or CI configuration
+- [x] Check for existing README or documentation
+- [x] Verify git repository status
+- [x] **NEW: Create Asset Classification Table** with columns: Asset | Current Location | Intended Future Location | Action | Rationale | Migration Phase
+- [x] **NEW: Classify all assets** per Existing Asset Migration Policy (Preserve, Normalize/Migrate, Refactor, Archive/Reference, Deprecate)
+- [x] **NEW: Document migration schedule** showing which assets are used by which phases
 
 ### Files Expected to Be Created or Modified
 
@@ -546,10 +546,10 @@ All existing agents, contracts, and models.
 
 ### Testing Requirements
 
-* [ ] Validate all JSON files in `contracts/` parse without errors
-* [ ] Validate all YAML files in `agents/` parse without errors
-* [ ] Confirm `lib/run-tracker.js` exports expected functions
-* [ ] Confirm `lib/api-server.js` can start without errors
+* [x] Validate all JSON files in `contracts/` parse without errors
+* [x] Validate all YAML files in `agents/` parse without errors
+* [x] Confirm `lib/run-tracker.js` exports expected functions
+* [x] Confirm `lib/api-server.js` can start without errors
 
 ### Validation Commands
 
@@ -567,17 +567,17 @@ node -e "require('./lib/run-tracker.js'); console.log('OK')"
 
 ### Acceptance Criteria
 
-* [ ] All agent YAML/JSON files parse without errors
-* [ ] All contract JSON files parse without errors
-* [ ] Node.js version is 18 or higher
-* [ ] npm version is 8 or higher
-* [ ] All existing lib files are readable and functional
-* [ ] Baseline report is complete and accurate
-* [ ] Decision made: preserve or refactor each major asset
-* [ ] **NEW: Asset Classification Table is complete** (all assets documented)
-* [ ] **NEW: All assets assigned an action** (Preserve, Migrate, Refactor, Archive, Deprecate)
-* [ ] **NEW: Migration schedule is clear** (know which phases use which assets)
-* [ ] **NEW: ASSET_MIGRATION_STATUS.md is accurate** and matches Existing Asset Migration Policy
+* [x] All agent YAML/JSON files parse without errors
+* [x] All contract JSON files parse without errors
+* [x] Node.js version is 18 or higher
+* [x] npm version is 8 or higher
+* [x] All existing lib files are readable and functional
+* [x] Baseline report is complete and accurate
+* [x] Decision made: preserve or refactor each major asset
+* [x] **NEW: Asset Classification Table is complete** (all assets documented)
+* [x] **NEW: All assets assigned an action** (Preserve, Migrate, Refactor, Archive, Deprecate)
+* [x] **NEW: Migration schedule is clear** (know which phases use which assets)
+* [x] **NEW: ASSET_MIGRATION_STATUS.md is accurate** and matches Existing Asset Migration Policy
 
 ### Human Review Gate
 
@@ -2578,22 +2578,22 @@ The orchestration engine is stateful. The state machine ensures correctness and 
 
 ### Deliverables
 
-- [ ] RunStateMachine class
-- [ ] Valid state transitions defined
-- [ ] State persistence
-- [ ] State transition events logged to audit
-- [ ] Tests for state machine logic
+- [x] RunStateMachine class
+- [x] Valid state transitions defined
+- [x] State persistence
+- [x] State transition events logged to audit
+- [x] Tests for state machine logic
 
 ### Implementation Tasks
 
-- [ ] Define valid states: pending, executing, paused, complete, failed
-- [ ] Define valid transitions (e.g., pending → executing → complete)
-- [ ] Prevent invalid transitions
-- [ ] Create `backend/src/services/run-state-machine.ts`
-- [ ] Implement state getters and setters
-- [ ] Log state transitions to audit
-- [ ] Persist state changes to Run record
-- [ ] Write comprehensive state transition tests
+- [x] Define valid states: pending, executing, paused, complete, failed
+- [x] Define valid transitions (e.g., pending → executing → complete)
+- [x] Prevent invalid transitions
+- [x] Create `backend/src/services/run-state-machine.ts`
+- [x] Implement state getters and setters
+- [x] Log state transitions to audit
+- [x] Persist state changes to Run record
+- [x] Write comprehensive state transition tests
 
 ### Files Expected to Be Created or Modified
 
@@ -2609,10 +2609,10 @@ backend/tests/services/run-state-machine.test.ts
 
 ### Testing Requirements
 
-* [ ] Tests for valid state transitions
-* [ ] Tests for invalid transition rejection
-* [ ] Tests for state persistence
-* [ ] Tests for audit logging of transitions
+* [x] Tests for valid state transitions
+* [x] Tests for invalid transition rejection
+* [x] Tests for state persistence
+* [x] Tests for audit logging of transitions
 
 ### Validation Commands
 
@@ -2623,11 +2623,11 @@ npm run typecheck
 
 ### Acceptance Criteria
 
-* [ ] State machine enforces valid transitions
-* [ ] Invalid transitions rejected
-* [ ] State persists correctly
-* [ ] Transitions logged to audit
-* [ ] All tests pass
+* [x] State machine enforces valid transitions
+* [x] Invalid transitions rejected
+* [x] State persists correctly
+* [x] Transitions logged to audit
+* [x] All tests pass
 
 ### Human Review Gate
 
@@ -2669,22 +2669,22 @@ Task queuing and dependency resolution are non-trivial. Separating this from the
 
 ### Deliverables
 
-- [ ] **Software task ownership contract** (`software_task_contract.v1`) with task_id, owner_agent, goal, target_files, read_context_files, write_scope, conflict_group, dependencies, expected_exports, acceptance_criteria, validation_commands, merge_strategy, rollback_strategy, risk_level
-- [ ] TaskQueue class
-- [ ] Dependency resolution logic
-- [ ] Parallel vs. sequential execution decision
-- [ ] Queue progression logic
-- [ ] Task contract enforcement (owner verification, scope validation)
-- [ ] Tests for queue, dependency logic, and task contracts
+- [x] **Software task ownership contract** (`software_task_contract.v1`) with task_id, owner_agent, goal, target_files, read_context_files, write_scope, conflict_group, dependencies, expected_exports, acceptance_criteria, validation_commands, merge_strategy, rollback_strategy, risk_level
+- [x] TaskQueue class
+- [x] Dependency resolution logic
+- [x] Parallel vs. sequential execution decision
+- [x] Queue progression logic
+- [x] Task contract enforcement (owner verification, scope validation)
+- [x] Tests for queue, dependency logic, and task contracts
 
 ### Implementation Tasks
 
-- [ ] Create `backend/src/services/task-queue.ts`
-- [ ] Implement dependency graph traversal
-- [ ] Determine which tasks can run in parallel
-- [ ] Implement queue progression (dequeue task, mark complete)
-- [ ] Handle task failures (keep task in queue, mark failed, allow retry or skip)
-- [ ] Write tests for all scenarios
+- [x] Create `backend/src/services/task-queue.ts`
+- [x] Implement dependency graph traversal
+- [x] Determine which tasks can run in parallel
+- [x] Implement queue progression (dequeue task, mark complete)
+- [x] Handle task failures (keep task in queue, mark failed, allow retry or skip)
+- [x] Write tests for all scenarios
 
 ### Files Expected to Be Created or Modified
 
@@ -2699,11 +2699,11 @@ backend/tests/services/task-queue.test.ts
 
 ### Testing Requirements
 
-* [ ] Tests for dependency resolution
-* [ ] Tests for parallel task identification
-* [ ] Tests for queue progression
-* [ ] Tests for task failure handling
-* [ ] Tests with circular dependencies (should reject)
+* [x] Tests for dependency resolution
+* [x] Tests for parallel task identification
+* [x] Tests for queue progression
+* [x] Tests for task failure handling
+* [x] Tests with circular dependencies (should reject)
 
 ### Validation Commands
 
@@ -2714,12 +2714,12 @@ npm run typecheck
 
 ### Acceptance Criteria
 
-* [ ] Dependencies resolved correctly
-* [ ] Parallel tasks identified
-* [ ] Sequential execution enforced where needed
-* [ ] Queue progresses correctly
-* [ ] Failures handled appropriately
-* [ ] All tests pass
+* [x] Dependencies resolved correctly
+* [x] Parallel tasks identified
+* [x] Sequential execution enforced where needed
+* [x] Queue progresses correctly
+* [x] Failures handled appropriately
+* [x] All tests pass
 
 ### Human Review Gate
 
@@ -2762,25 +2762,25 @@ The adapter bridges the orchestration engine and the execution abstraction. It h
 
 ### Deliverables
 
-- [ ] AgentExecutorAdapter class
-- [ ] Input preparation (load context, substitute variables)
-- [ ] Input contract validation before execution
-- [ ] Output contract validation after execution
-- [ ] Error mapping and classification
-- [ ] Cost extraction from results
-- [ ] Tests for adapter logic
+- [x] AgentExecutorAdapter class
+- [x] Input preparation (load context, substitute variables)
+- [x] Input contract validation before execution
+- [x] Output contract validation after execution
+- [x] Error mapping and classification
+- [x] Cost extraction from results
+- [x] Tests for adapter logic
 
 ### Implementation Tasks
 
-- [ ] Create `backend/src/services/agent-executor-adapter.ts`
-- [ ] Implement input preparation with context loading
-- [ ] Implement input contract validation
-- [ ] Call AgentExecutor.execute()
-- [ ] Implement output contract validation
-- [ ] Handle execution errors (timeout, API error, etc.)
-- [ ] Extract cost/token data from results
-- [ ] Classify errors (schema invalid, tool denied, etc.)
-- [ ] Write tests
+- [x] Create `backend/src/services/agent-executor-adapter.ts`
+- [x] Implement input preparation with context loading
+- [x] Implement input contract validation
+- [x] Call AgentExecutor.execute()
+- [x] Implement output contract validation
+- [x] Handle execution errors (timeout, API error, etc.)
+- [x] Extract cost/token data from results
+- [x] Classify errors (schema invalid, tool denied, etc.)
+- [x] Write tests
 
 ### Files Expected to Be Created or Modified
 
@@ -2795,12 +2795,12 @@ backend/tests/services/agent-executor-adapter.test.ts
 
 ### Testing Requirements
 
-* [ ] Tests for input preparation
-* [ ] Tests for input contract validation
-* [ ] Tests for output contract validation
-* [ ] Tests for error mapping
-* [ ] Tests for cost extraction
-* [ ] Tests for edge cases (null output, missing fields, etc.)
+* [x] Tests for input preparation
+* [x] Tests for input contract validation
+* [x] Tests for output contract validation
+* [x] Tests for error mapping
+* [x] Tests for cost extraction
+* [x] Tests for edge cases (null output, missing fields, etc.)
 
 ### Validation Commands
 
@@ -2811,12 +2811,12 @@ npm run typecheck
 
 ### Acceptance Criteria
 
-* [ ] Input preparation works
-* [ ] Input contract validation enforced
-* [ ] Output contract validation enforced
-* [ ] Errors mapped correctly
-* [ ] Costs extracted correctly
-* [ ] All tests pass
+* [x] Input preparation works
+* [x] Input contract validation enforced
+* [x] Output contract validation enforced
+* [x] Errors mapped correctly
+* [x] Costs extracted correctly
+* [x] All tests pass
 
 ### Human Review Gate
 
@@ -2859,24 +2859,24 @@ Handoff contracts are the core safety mechanism. This phase makes them enforceab
 
 ### Deliverables
 
-- [ ] HandoffValidator service
-- [ ] Handoff contract matching logic
-- [ ] Input schema matching logic
-- [ ] Output contract validation before handoff
-- [ ] Input contract validation after handoff receipt
-- [ ] Failure routing (repair or escalate)
-- [ ] Tests for handoff validation
+- [x] HandoffValidator service
+- [x] Handoff contract matching logic
+- [x] Input schema matching logic
+- [x] Output contract validation before handoff
+- [x] Input contract validation after handoff receipt
+- [x] Failure routing (repair or escalate)
+- [x] Tests for handoff validation
 
 ### Implementation Tasks
 
-- [ ] Create `backend/src/services/handoff-validator.ts`
-- [ ] Load handoff contracts from registry
-- [ ] Implement contract matching (from/to agent pairs)
-- [ ] Validate output matches handoff contract
-- [ ] Validate handoff payload matches input contract of next agent
-- [ ] Log validation results to audit
-- [ ] Route failures (repair attempt, escalation)
-- [ ] Write tests
+- [x] Create `backend/src/services/handoff-validator.ts`
+- [x] Load handoff contracts from registry
+- [x] Implement contract matching (from/to agent pairs)
+- [x] Validate output matches handoff contract
+- [x] Validate handoff payload matches input contract of next agent
+- [x] Log validation results to audit
+- [x] Route failures (repair attempt, escalation)
+- [x] Write tests
 
 ### Files Expected to Be Created or Modified
 
@@ -2892,11 +2892,11 @@ shared/types/index.ts (add HandoffContract if needed)
 
 ### Testing Requirements
 
-* [ ] Tests for contract matching
-* [ ] Tests for valid handoffs
-* [ ] Tests for invalid handoff rejection
-* [ ] Tests for repair suggestion
-* [ ] Tests for escalation routing
+* [x] Tests for contract matching
+* [x] Tests for valid handoffs
+* [x] Tests for invalid handoff rejection
+* [x] Tests for repair suggestion
+* [x] Tests for escalation routing
 
 ### Validation Commands
 
@@ -2907,11 +2907,11 @@ npm run typecheck
 
 ### Acceptance Criteria
 
-* [ ] Handoff contracts loaded and matched
-* [ ] Valid handoffs pass
-* [ ] Invalid handoffs rejected
-* [ ] Failure routing logic works
-* [ ] All tests pass
+* [x] Handoff contracts loaded and matched
+* [x] Valid handoffs pass
+* [x] Invalid handoffs rejected
+* [x] Failure routing logic works
+* [x] All tests pass
 
 ### Human Review Gate
 
@@ -2954,26 +2954,26 @@ Artifacts are the deliverables of orchestration. They must be stored reliably an
 
 ### Deliverables
 
-- [ ] Artifact model and persistence
-- [ ] Artifact storage (file system or blob)
-- [ ] Artifact linking to Run/Task records
-- [ ] Artifact metadata (type, size, checksum)
-- [ ] Artifact retrieval and download
-- [ ] Artifact viewer (UI component)
-- [ ] Tests for artifact persistence
+- [x] Artifact model and persistence
+- [x] Artifact storage (file system or blob)
+- [x] Artifact linking to Run/Task records
+- [x] Artifact metadata (type, size, checksum)
+- [x] Artifact retrieval and download
+- [x] Artifact viewer (UI component)
+- [x] Tests for artifact persistence
 
 ### Implementation Tasks
 
-- [ ] Create `backend/src/services/artifact-store.ts`
-- [ ] Create `data/artifacts/` directory structure
-- [ ] Implement artifact save (with checksum)
-- [ ] Implement artifact retrieval by ID
-- [ ] Implement artifact linking to run/task
-- [ ] Create GET /api/artifacts/:id endpoint
-- [ ] Create GET /api/artifacts/:id/download endpoint
-- [ ] Create `frontend/src/components/ArtifactViewer.tsx`
-- [ ] Add artifact links to execution console
-- [ ] Write tests
+- [x] Create `backend/src/services/artifact-store.ts`
+- [x] Create `data/artifacts/` directory structure
+- [x] Implement artifact save (with checksum)
+- [x] Implement artifact retrieval by ID
+- [x] Implement artifact linking to run/task
+- [x] Create GET /api/artifacts/:id endpoint
+- [x] Create GET /api/artifacts/:id/download endpoint
+- [x] Create `frontend/src/components/ArtifactViewer.tsx`
+- [x] Add artifact links to execution console
+- [x] Write tests
 
 ### Files Expected to Be Created or Modified
 
@@ -2993,11 +2993,11 @@ data/artifacts/index.json
 
 ### Testing Requirements
 
-* [ ] Tests for artifact save/retrieve
-* [ ] Tests for checksum verification
-* [ ] Tests for artifact linking
-* [ ] Tests for download endpoint
-* [ ] Tests for artifact cleanup
+* [x] Tests for artifact save/retrieve
+* [x] Tests for checksum verification
+* [x] Tests for artifact linking
+* [x] Tests for download endpoint
+* [x] Tests for artifact cleanup
 
 ### Validation Commands
 
@@ -3009,12 +3009,12 @@ npm run dev
 
 ### Acceptance Criteria
 
-* [ ] Artifacts persisted reliably
-* [ ] Artifacts checksummed and verified
-* [ ] Artifacts linked to runs/tasks
-* [ ] Download endpoint works
-* [ ] Artifact viewer displays artifacts
-* [ ] All tests pass
+* [x] Artifacts persisted reliably
+* [x] Artifacts checksummed and verified
+* [x] Artifacts linked to runs/tasks
+* [x] Download endpoint works
+* [x] Artifact viewer displays artifacts
+* [x] All tests pass
 
 ### Human Review Gate
 
@@ -3354,24 +3354,24 @@ Failures are inevitable. Handling them gracefully, transparently, and with clear
 
 ### Deliverables
 
-- [ ] **Failure taxonomy** with 11 standard failure types (requirements_missing, schema_invalid, tool_denied, command_failed, env_missing, dependency_unavailable, test_failed, merge_conflict, scope_violation, low_confidence, human_approval_required)
-- [ ] Failure classification logic
-- [ ] **Recovery protocol** with recovery routing, retry policies, escalation paths, and repair suggestions
-- [ ] Repair strategy selection logic
-- [ ] Repair attempt tracking and limits
-- [ ] Escalation to human with evidence
+- [x] **Failure taxonomy** with 11 standard failure types (requirements_missing, schema_invalid, tool_denied, command_failed, env_missing, dependency_unavailable, test_failed, merge_conflict, scope_violation, low_confidence, human_approval_required)
+- [x] Failure classification logic
+- [x] **Recovery protocol** with recovery routing, retry policies, escalation paths, and repair suggestions
+- [x] Repair strategy selection logic
+- [x] Repair attempt tracking and limits
+- [x] Escalation to human with evidence
 - [ ] FailureDetail and RepairOptions UI
-- [ ] Tests for failure classification, recovery routing, and repair handling
+- [x] Tests for failure classification, recovery routing, and repair handling
 
 ### Implementation Tasks
 
-- [ ] Create `backend/src/services/failure-classifier.ts` with taxonomy
-- [ ] Create `backend/src/services/repair-strategist.ts`
-- [ ] Implement repair attempt limits
+- [x] Create `backend/src/services/failure-classifier.ts` with taxonomy
+- [x] Create `backend/src/services/repair-strategist.ts`
+- [x] Implement repair attempt limits
 - [ ] Create `frontend/src/components/FailureDetail.tsx`
 - [ ] Create `frontend/src/components/RepairOptions.tsx`
 - [ ] Add failure display to execution console
-- [ ] Write tests
+- [x] Write tests
 
 ### Files Expected to Be Created or Modified
 
@@ -3409,10 +3409,10 @@ A repair modal that only calls `setShowModal(false)` provides no value: the run 
 
 ### Testing Requirements
 
-* [ ] Tests for failure classification
-* [ ] Tests for repair strategy selection
-* [ ] Tests for repair attempt limits
-* [ ] Tests for escalation
+* [x] Tests for failure classification
+* [x] Tests for repair strategy selection
+* [x] Tests for repair attempt limits
+* [x] Tests for escalation
 
 ### Validation Commands
 
@@ -3423,10 +3423,10 @@ npm run dev
 
 ### Acceptance Criteria
 
-* [ ] Failures classified correctly
-* [ ] Repair strategies appropriate
-* [ ] Repair attempts tracked
-* [ ] Escalation works
+* [x] Failures classified correctly
+* [x] Repair strategies appropriate
+* [x] Repair attempts tracked
+* [x] Escalation works
 * [ ] UI shows failures and options
 * [ ] Repair/error modal's action buttons call backend endpoints — not just `setShowModal(false)`
 * [ ] Modal shows loading state while action is in flight and inline error if the API call fails

@@ -1,68 +1,16 @@
-import express, { Express, Request, Response } from 'express';
-import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { PersistenceService } from './services/persistence.js';
-import { ValidationService } from './services/validation.js';
-import { createApiRoutes } from './routes/index.js';
-import { createAuditLogRoutes } from './routes/audit-logs.js';
-import { createErrorLogRoutes } from './routes/error-logs.js';
-import { createExecutionRoutes } from './routes/execution.js';
-import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
-import { createAuditMiddleware } from './middleware/audit-middleware.js';
-import { createResponse } from './types/responses.js';
-
-dotenv.config();
+import { createApp } from './app.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const app: Express = express();
-const port = process.env.PORT || 3001;
+dotenv.config({ path: path.resolve(__dirname, '..', '..', '.env') });
+
+const port = process.env.BACKEND_PORT || '3007';
 const dataDir = path.join(__dirname, '..', '..', 'data');
 const schemasDir = path.join(__dirname, '..', '..', 'shared', 'src', 'schemas');
 
-// Services
-const persistence = new PersistenceService({ dataDir });
-const validation = new ValidationService(schemasDir);
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(createAuditMiddleware(persistence));
-
-// Health check
-app.get('/api/health', (req: Request, res: Response) => {
-  res.json(createResponse({ status: 'ok' }));
-});
-
-// Root endpoint
-app.get('/', (req: Request, res: Response) => {
-  res.json(createResponse({
-    name: 'UnifiedAIToolbox API',
-    version: '0.1.0',
-    status: 'running',
-    message: 'Phase 3: Backend API Foundation'
-  }));
-});
-
-// API routes
-app.use('/api', createApiRoutes(persistence, validation));
-
-// Audit log routes
-app.use('/api/audit-logs', createAuditLogRoutes(persistence));
-
-// Error log routes
-app.use('/api/error-logs', createErrorLogRoutes(persistence));
-
-// Execution routes
-app.use('/api/execution', createExecutionRoutes(persistence));
-
-// Error handling
-app.use(notFoundHandler);
-app.use(errorHandler);
-
-// Start server
-app.listen(port, () => {
+const printStartupBanner = () => {
   console.log(`✓ Backend server running on http://localhost:${port}`);
   console.log(`✓ Persistence layer ready (data dir: ${dataDir})`);
   console.log(`✓ Validation service ready (schemas dir: ${schemasDir})`);
@@ -113,6 +61,11 @@ app.listen(port, () => {
   console.log(`  POST /api/execution/:runId/phase/:phaseId/execute (execute phase)`);
   console.log(`  GET  /api/execution/:runId/phase/:phaseId/task/:taskId/plan (task plan)`);
   console.log(`  GET  /api/execution/:runId/phase/:phaseId/plan (phase plan)`);
-});
+};
 
-export default app;
+async function startServer(): Promise<void> {
+  const app = await createApp();
+  app.listen(port, printStartupBanner);
+}
+
+void startServer();

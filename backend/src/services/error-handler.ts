@@ -9,6 +9,14 @@ export interface ErrorContext {
 }
 
 export class ErrorHandler {
+  private getStringField(obj: Record<string, unknown>, key: string): string {
+    return typeof obj[key] === 'string' ? (obj[key] as string) : '';
+  }
+
+  private getNumberField(obj: Record<string, unknown>, key: string): number | undefined {
+    return typeof obj[key] === 'number' ? (obj[key] as number) : undefined;
+  }
+
   // Classify errors as transient (retriable) or permanent (non-retriable)
   classifyError(error: unknown): ErrorType {
     const errorObj = this.normalizeError(error);
@@ -42,7 +50,7 @@ export class ErrorHandler {
     const errorObj = this.normalizeError(error);
 
     // Check error code/status
-    const code = (errorObj as any).code || (errorObj as any).status;
+    const code = this.getNumberField(errorObj, 'status') ?? this.getNumberField(errorObj, 'code') ?? 0;
 
     // Critical: 500, unhandled, system errors
     if (code >= 500 || this.isSystemError(errorObj)) {
@@ -80,8 +88,9 @@ export class ErrorHandler {
       return 'Too many requests. Please wait a moment before retrying.';
     }
 
-    if ((errorObj as any).message) {
-      return (errorObj as any).message;
+    const message = this.getStringField(errorObj, 'message');
+    if (message) {
+      return message;
     }
 
     return 'An unexpected error occurred. Please try again.';
@@ -91,16 +100,19 @@ export class ErrorHandler {
   getErrorCode(error: unknown): string {
     const errorObj = this.normalizeError(error);
 
-    if ((errorObj as any).code) {
-      return (errorObj as any).code;
+    const code = this.getStringField(errorObj, 'code');
+    if (code) {
+      return code;
     }
 
-    if ((errorObj as any).status) {
-      return `HTTP_${(errorObj as any).status}`;
+    const status = this.getNumberField(errorObj, 'status');
+    if (status !== undefined) {
+      return `HTTP_${status}`;
     }
 
-    if ((errorObj as any).name) {
-      return (errorObj as any).name;
+    const name = this.getStringField(errorObj, 'name');
+    if (name) {
+      return name;
     }
 
     return 'UNKNOWN_ERROR';
@@ -124,7 +136,7 @@ export class ErrorHandler {
       errorType,
       severity,
       context,
-      stack: (errorObj as any).stack,
+      stack: this.getStringField(errorObj, 'stack') || undefined,
       retryCount,
       maxRetries,
     };
@@ -148,8 +160,8 @@ export class ErrorHandler {
   }
 
   private isNetworkError(error: Record<string, unknown>): boolean {
-    const msg = String((error as any).message || '').toLowerCase();
-    const code = String((error as any).code || '').toUpperCase();
+    const msg = this.getStringField(error, 'message').toLowerCase();
+    const code = this.getStringField(error, 'code').toUpperCase();
 
     return (
       msg.includes('network') ||
@@ -163,8 +175,8 @@ export class ErrorHandler {
   }
 
   private isTimeoutError(error: Record<string, unknown>): boolean {
-    const msg = String((error as any).message || '').toLowerCase();
-    const code = String((error as any).code || '').toUpperCase();
+    const msg = this.getStringField(error, 'message').toLowerCase();
+    const code = this.getStringField(error, 'code').toUpperCase();
 
     return (
       msg.includes('timeout') ||
@@ -175,22 +187,22 @@ export class ErrorHandler {
   }
 
   private isRateLimitError(error: Record<string, unknown>): boolean {
-    const status = (error as any).status || (error as any).statusCode;
-    const msg = String((error as any).message || '').toLowerCase();
+    const status = this.getNumberField(error, 'status') ?? this.getNumberField(error, 'statusCode');
+    const msg = this.getStringField(error, 'message').toLowerCase();
 
     return status === 429 || msg.includes('rate limit');
   }
 
   private isTemporaryServerError(error: Record<string, unknown>): boolean {
-    const status = (error as any).status || (error as any).statusCode;
+    const status = this.getNumberField(error, 'status') ?? this.getNumberField(error, 'statusCode');
 
     // 500, 502, 503, 504 are temporary server errors
-    return status >= 500 && status <= 599;
+    return status !== undefined && status >= 500 && status <= 599;
   }
 
   private isSystemError(error: Record<string, unknown>): boolean {
-    const code = String((error as any).code || '').toUpperCase();
-    const name = String((error as any).name || '').toLowerCase();
+    const code = this.getStringField(error, 'code').toUpperCase();
+    const name = this.getStringField(error, 'name').toLowerCase();
 
     return (
       name.includes('system') ||

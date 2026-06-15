@@ -16,6 +16,13 @@ interface Prompt {
   sourceFile?: string;
 }
 
+interface PromptStats {
+  totalPrompts: number;
+  categories?: string[];
+  promptsByTag?: Record<string, number>;
+  mostUsedPrompts?: Array<{ usageCount: number }>;
+}
+
 export function PromptList() {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,7 +32,7 @@ export function PromptList() {
   const [categories, setCategories] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [filterTag, setFilterTag] = useState<string>('');
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<PromptStats | null>(null);
 
   const fetchPrompts = useCallback(async () => {
     try {
@@ -41,7 +48,7 @@ export function PromptList() {
         apiClient.get<Prompt[]>(url),
         apiClient.get<{ categories: string[] }>('/prompts/meta/categories'),
         apiClient.get<{ tags: string[] }>('/prompts/meta/tags'),
-        apiClient.get('/prompts/meta/stats'),
+        apiClient.get<PromptStats>('/prompts/meta/stats'),
       ]);
 
       setPrompts(data || []);

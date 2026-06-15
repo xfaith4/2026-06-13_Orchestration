@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
 import { PersistenceService } from '../services/persistence.js';
 import { ValidationService } from '../services/validation.js';
 import { createApplicationRoutes } from './applications.js';

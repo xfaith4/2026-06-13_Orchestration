@@ -19,6 +19,7 @@ describe('Run Pause/Resume', () => {
         description: 'A test roadmap',
         phases: [],
         estimatedDuration: '2 weeks',
+        status: 'approved',
       });
 
     const roadmapId = roadmapRes.body.data?.id;

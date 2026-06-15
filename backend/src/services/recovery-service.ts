@@ -149,7 +149,7 @@ export class RecoveryService {
   }
 
   // Get retry recommendation
-  getRetryRecommendation(retryResult: RetryResult<any>): {
+  getRetryRecommendation(retryResult: RetryResult<unknown>): {
     shouldRetry: boolean;
     message: string;
     nextRetryDelayMs?: number;

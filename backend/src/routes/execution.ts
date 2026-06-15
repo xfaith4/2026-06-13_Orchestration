@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { PersistenceService } from '../services/persistence.js';
-import { Run, ExecutionPhase } from '@unifiedaitoolbox/shared';
+import { Run, ExecutionPhase, TaskStatus } from '@unifiedaitoolbox/shared';
 import { createResponse, ApiError } from '../types/responses.js';
 import { TaskExecutor } from '../services/task-executor.js';
 import { PhaseExecutor } from '../services/phase-executor.js';
@@ -87,8 +87,9 @@ export const createExecutionRoutes = (persistence: PersistenceService) => {
 
       // Update task status using state machine
       const newTaskStatus = result.success ? ('completed' as const) : ('failed' as const);
-      if (stateMachine.canTransitionTask(task.status as any, newTaskStatus)) {
-        stateMachine.transitionTask(runId, phaseId, taskId, task.status as any, newTaskStatus, 'Task execution completed');
+      const currentTaskStatus = task.status as TaskStatus;
+      if (stateMachine.canTransitionTask(currentTaskStatus, newTaskStatus)) {
+        stateMachine.transitionTask(runId, phaseId, taskId, currentTaskStatus, newTaskStatus, 'Task execution completed');
       }
 
       const updatedTask = {
