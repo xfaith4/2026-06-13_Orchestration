@@ -355,6 +355,72 @@ export interface ArtifactMetadata {
   tags?: string[];
 }
 
+// Run Completion
+export interface TaskResult {
+  taskId: string;
+  taskName: string;
+  status: 'completed' | 'failed' | 'skipped';
+  duration: number;
+  error?: string;
+  repairAttempts?: number;
+}
+
+export interface FailureSummary {
+  taskId: string;
+  taskName: string;
+  error: string;
+  errorType: ErrorType;
+  severity: ErrorSeverity;
+  repaired: boolean;
+  repairAttempts: number;
+}
+
+export interface LessonLearned {
+  id: string;
+  category: string; // 'performance', 'reliability', 'cost', 'design'
+  insight: string;
+  priority: 'low' | 'medium' | 'high';
+  affectedTasks?: string[];
+  actionItems?: string[];
+}
+
+export interface RunSummary extends BaseEntity {
+  runId: string;
+  success: boolean;
+  outcome: 'completed' | 'failed' | 'partial';
+  duration: number;
+  startedAt: string;
+  completedAt: string;
+
+  // Task Results
+  taskResults: TaskResult[];
+  tasksCompleted: number;
+  tasksFailed: number;
+  tasksSkipped: number;
+
+  // Failures
+  failures: FailureSummary[];
+
+  // Costs
+  totalCost: number;
+  costByPhase: Record<string, number>;
+  estimatedSavings?: number;
+
+  // Artifacts
+  artifacts: {
+    totalCount: number;
+    totalSize: number;
+    byType: Record<string, number>;
+  };
+
+  // Lessons
+  lessonsLearned: LessonLearned[];
+
+  // Metadata
+  generatedBy?: string;
+  notes?: string;
+}
+
 export interface CircuitBreakerState {
   state: 'closed' | 'open' | 'half-open';
   failureCount: number;
