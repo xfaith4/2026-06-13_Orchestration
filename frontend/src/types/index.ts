@@ -104,6 +104,25 @@ export interface Roadmap {
   updatedAt: string;
 }
 
+export interface CostMetrics {
+  tokenInputs: number;
+  tokenOutputs: number;
+  estimatedCost: number;
+  currency: string;
+}
+
+export interface TaskCost extends CostMetrics {
+  taskId: string;
+  taskName: string;
+  duration?: number;
+}
+
+export interface PhaseCost extends CostMetrics {
+  phaseId: string;
+  phaseName: string;
+  taskCosts: TaskCost[];
+}
+
 export interface Run {
   id: string;
   roadmapId: string;
@@ -116,6 +135,8 @@ export interface Run {
   completedAt?: string;
   summary?: string;
   errorMessage?: string;
+  totalCost?: CostMetrics;
+  phaseCosts?: PhaseCost[];
   createdAt: string;
   updatedAt: string;
 }

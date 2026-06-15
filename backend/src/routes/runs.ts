@@ -107,6 +107,35 @@ export const createRunRoutes = (
     }
   });
 
+  // Resume run
+  router.patch('/:id/resume', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      const run = await persistence.read<Run>('runs', id);
+      if (!run) {
+        throw new ApiError(404, 'Run not found');
+      }
+
+      const updated = runService.resumeRun(run);
+      const result = await persistence.update<Run>('runs', id, updated);
+
+      res.json(createResponse(result));
+    } catch (error) {
+      if (error instanceof ApiError) {
+        res.status(error.statusCode).json({
+          error: error.message,
+          timestamp: new Date().toISOString(),
+        });
+      } else {
+        res.status(400).json({
+          error: error instanceof Error ? error.message : 'Failed to resume run',
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
+  });
+
   // Assign task
   router.patch('/:id/phase/:phaseId/task/:taskId/assign', async (req: Request, res: Response) => {
     try {

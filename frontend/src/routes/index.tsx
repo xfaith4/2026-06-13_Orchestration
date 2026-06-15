@@ -10,6 +10,7 @@ import { RoadmapList } from '../pages/RoadmapList';
 import { RoadmapDetail } from '../pages/RoadmapDetail';
 import { RunList } from '../pages/RunList';
 import { RunDetail } from '../pages/RunDetail';
+import { ExecutionConsole } from '../pages/ExecutionConsole';
 import { AuditLog } from '../pages/AuditLog';
 import { AgentList } from '../pages/AgentList';
 import { PromptList } from '../pages/PromptList';
@@ -95,6 +96,14 @@ export function AppRoutes() {
           element={
             <MainLayout>
               <RunDetail />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/runs/:id/console"
+          element={
+            <MainLayout>
+              <ExecutionConsole />
             </MainLayout>
           }
         />

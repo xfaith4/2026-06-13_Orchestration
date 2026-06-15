@@ -32,14 +32,26 @@ export class RunService {
   }
 
   startRun(run: Run): Run {
-    if (run.status !== 'draft' && run.status !== 'pending') {
-      throw new Error(`Can only start draft or pending runs, current status: ${run.status}`);
+    if (run.status !== 'draft' && run.status !== 'pending' && run.status !== 'paused') {
+      throw new Error(`Can only start draft, pending, or paused runs, current status: ${run.status}`);
     }
 
     return {
       ...run,
       status: 'running',
-      startedAt: new Date().toISOString(),
+      startedAt: run.startedAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  resumeRun(run: Run): Run {
+    if (run.status !== 'paused') {
+      throw new Error(`Can only resume paused runs, current status: ${run.status}`);
+    }
+
+    return {
+      ...run,
+      status: 'running',
       updatedAt: new Date().toISOString(),
     };
   }
