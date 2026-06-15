@@ -1,6 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { MainLayout } from '../layouts/MainLayout';
 import { Dashboard } from '../pages/Dashboard';
+import { ApplicationsList } from '../pages/ApplicationsList';
+import { NewApplication } from '../pages/NewApplication';
+import { ApplicationDetail } from '../pages/ApplicationDetail';
 
 export function AppRoutes() {
   return (
@@ -18,10 +21,23 @@ export function AppRoutes() {
           path="/applications"
           element={
             <MainLayout>
-              <div>
-                <h1 className="text-3xl font-bold">Applications</h1>
-                <p className="text-gray-600 mt-2">Coming soon</p>
-              </div>
+              <ApplicationsList />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/applications/new"
+          element={
+            <MainLayout>
+              <NewApplication />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/applications/:id"
+          element={
+            <MainLayout>
+              <ApplicationDetail />
             </MainLayout>
           }
         />
