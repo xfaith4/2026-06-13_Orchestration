@@ -160,6 +160,38 @@ export interface User extends BaseEntity {
   role?: string;
 }
 
+// Error Handling
+export type ErrorSeverity = 'low' | 'medium' | 'high' | 'critical';
+export type ErrorType = 'transient' | 'permanent' | 'unknown';
+
+export interface ErrorRecord extends BaseEntity {
+  timestamp: string;
+  errorMessage: string;
+  errorCode?: string;
+  errorType: ErrorType;
+  severity: ErrorSeverity;
+  context: {
+    runId?: string;
+    phaseId?: string;
+    taskId?: string;
+    service?: string;
+    operation?: string;
+  };
+  stack?: string;
+  retryCount: number;
+  maxRetries: number;
+  nextRetryAt?: string;
+  resolvedAt?: string;
+  resolution?: string;
+}
+
+export interface CircuitBreakerState {
+  state: 'closed' | 'open' | 'half-open';
+  failureCount: number;
+  lastFailureAt?: string;
+  successCount?: number;
+}
+
 // Audit Logging
 export interface AuditLogEntry extends BaseEntity {
   timestamp: string;

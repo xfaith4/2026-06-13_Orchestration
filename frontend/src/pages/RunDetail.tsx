@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { apiClient } from '../services/api';
 import { Run, ExecutionTask } from '../types';
 import { CostBreakdown } from '../components/CostBreakdown';
+import { ErrorDisplay } from '../components/ErrorDisplay';
+import { ErrorHistory } from '../components/ErrorHistory';
 
 export function RunDetail() {
   const { id } = useParams<{ id: string }>();
@@ -223,8 +225,11 @@ export function RunDetail() {
         </div>
 
         {actionError && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-3">
-            <p className="text-sm text-red-800">{actionError}</p>
+          <div className="mb-6">
+            <ErrorDisplay
+              error={actionError}
+              severity="high"
+            />
           </div>
         )}
 
@@ -260,6 +265,11 @@ export function RunDetail() {
         {/* Cost Breakdown */}
         <div className="mb-8">
           <CostBreakdown run={run} />
+        </div>
+
+        {/* Error History */}
+        <div className="mb-8">
+          <ErrorHistory runId={id} />
         </div>
 
         <div className="space-y-6">

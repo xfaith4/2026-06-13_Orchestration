@@ -7,6 +7,7 @@ import { PersistenceService } from './services/persistence.js';
 import { ValidationService } from './services/validation.js';
 import { createApiRoutes } from './routes/index.js';
 import { createAuditLogRoutes } from './routes/audit-logs.js';
+import { createErrorLogRoutes } from './routes/error-logs.js';
 import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
 import { createAuditMiddleware } from './middleware/audit-middleware.js';
 import { createResponse } from './types/responses.js';
@@ -49,6 +50,9 @@ app.use('/api', createApiRoutes(persistence, validation));
 // Audit log routes
 app.use('/api/audit-logs', createAuditLogRoutes(persistence));
 
+// Error log routes
+app.use('/api/error-logs', createErrorLogRoutes(persistence));
+
 // Error handling
 app.use(notFoundHandler);
 app.use(errorHandler);
@@ -78,6 +82,12 @@ app.listen(port, () => {
   console.log(`  GET  /api/audit-logs/:id`);
   console.log(`  GET  /api/audit-logs/stats/summary`);
   console.log(`  GET  /api/audit-logs/user/:userId`);
+  console.log(`  GET  /api/error-logs (with filters: severity, errorType, runId, taskId, resolved)`);
+  console.log(`  GET  /api/error-logs/:id`);
+  console.log(`  GET  /api/error-logs/stats/summary`);
+  console.log(`  GET  /api/error-logs/severity/:level (low|medium|high|critical)`);
+  console.log(`  GET  /api/error-logs/run/:runId`);
+  console.log(`  PATCH /api/error-logs/:id/resolve (mark error as resolved)`);
   console.log(`  GET  /api/agents, POST, GET/:id, PUT/:id, DELETE/:id`);
   console.log(`  GET  /api/prompts, POST, GET/:id, PUT/:id, DELETE/:id`);
   console.log(`  GET  /api/contracts, POST, GET/:id, PUT/:id, DELETE/:id`);
