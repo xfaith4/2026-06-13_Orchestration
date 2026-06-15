@@ -17,7 +17,7 @@ dotenv.config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app: Express = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 const dataDir = path.join(__dirname, '..', '..', 'data');
 const schemasDir = path.join(__dirname, '..', '..', 'shared', 'src', 'schemas');
 
