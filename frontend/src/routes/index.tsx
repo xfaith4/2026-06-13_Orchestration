@@ -6,6 +6,8 @@ import { NewApplication } from '../pages/NewApplication';
 import { ApplicationDetail } from '../pages/ApplicationDetail';
 import { DesignPlansList } from '../pages/DesignPlansList';
 import { DesignPlanDetail } from '../pages/DesignPlanDetail';
+import { RoadmapList } from '../pages/RoadmapList';
+import { RoadmapDetail } from '../pages/RoadmapDetail';
 
 export function AppRoutes() {
   return (
@@ -63,10 +65,15 @@ export function AppRoutes() {
           path="/roadmaps"
           element={
             <MainLayout>
-              <div>
-                <h1 className="text-3xl font-bold">Roadmaps</h1>
-                <p className="text-gray-600 mt-2">Coming soon</p>
-              </div>
+              <RoadmapList />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/roadmaps/:id"
+          element={
+            <MainLayout>
+              <RoadmapDetail />
             </MainLayout>
           }
         />

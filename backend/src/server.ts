@@ -59,6 +59,7 @@ app.listen(port, () => {
   console.log(`  PATCH /api/design-plans/:id/review`);
   console.log(`  PATCH /api/design-plans/:id/decision/{approve|reject}`);
   console.log(`  GET  /api/design-plans, POST, GET/:id, PUT/:id, DELETE/:id`);
+  console.log(`  POST /api/roadmaps/generate/:designPlanId`);
   console.log(`  GET  /api/roadmaps, POST, GET/:id, PUT/:id, DELETE/:id`);
   console.log(`  GET  /api/runs, POST, GET/:id, PUT/:id, DELETE/:id`);
   console.log(`  GET  /api/agents, POST, GET/:id, PUT/:id, DELETE/:id`);

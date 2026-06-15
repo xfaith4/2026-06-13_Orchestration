@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { apiClient } from '../services/api';
-import { DesignPlan } from '../types';
+import { DesignPlan, Roadmap } from '../types';
 
 export function DesignPlanDetail() {
   const { id } = useParams<{ id: string }>();
@@ -11,6 +11,8 @@ export function DesignPlanDetail() {
   const [error, setError] = useState<string | null>(null);
   const [approvalLoading, setApprovalLoading] = useState(false);
   const [approvalError, setApprovalError] = useState<string | null>(null);
+  const [roadmapGenerating, setRoadmapGenerating] = useState(false);
+  const [roadmapError, setRoadmapError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDesignPlan = async () => {
@@ -76,6 +78,23 @@ export function DesignPlanDetail() {
       setApprovalError(err instanceof Error ? err.message : 'Failed to reject design plan');
     } finally {
       setApprovalLoading(false);
+    }
+  };
+
+  const handleGenerateRoadmap = async () => {
+    if (!id) return;
+    try {
+      setRoadmapGenerating(true);
+      setRoadmapError(null);
+      const roadmap = await apiClient.post<Roadmap>(
+        `/roadmaps/generate/${id}`,
+        {}
+      );
+      navigate(`/roadmaps/${roadmap.id}`);
+    } catch (err) {
+      setRoadmapError(err instanceof Error ? err.message : 'Failed to generate roadmap');
+    } finally {
+      setRoadmapGenerating(false);
     }
   };
 
@@ -249,7 +268,7 @@ export function DesignPlanDetail() {
           )}
 
           {(designPlan.status === 'approved' || designPlan.status === 'rejected') && designPlan.approvedBy && (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <p className="text-sm font-semibold text-gray-900">
                 {designPlan.status === 'approved' ? '✓ Approved' : '✗ Rejected'}
               </p>
@@ -257,6 +276,22 @@ export function DesignPlanDetail() {
                 by <span className="font-semibold">{designPlan.approvedBy}</span> on{' '}
                 <span className="font-semibold">{new Date(designPlan.approvedAt || '').toLocaleDateString()}</span>
               </p>
+              {designPlan.status === 'approved' && (
+                <>
+                  {roadmapError && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                      <p className="text-sm text-red-800">{roadmapError}</p>
+                    </div>
+                  )}
+                  <button
+                    onClick={handleGenerateRoadmap}
+                    disabled={roadmapGenerating}
+                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {roadmapGenerating ? 'Generating Roadmap...' : 'Generate Roadmap'}
+                  </button>
+                </>
+              )}
             </div>
           )}
         </div>

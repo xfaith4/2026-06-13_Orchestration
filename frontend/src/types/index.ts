@@ -35,6 +35,44 @@ export interface DesignPlan {
   updatedAt: string;
 }
 
+// Roadmap
+export interface Phase {
+  id: string;
+  number: number;
+  name: string;
+  goal: string;
+  tasks: Task[];
+  startDate?: string;
+  endDate?: string;
+  estimatedHours?: number;
+  dependencies: string[];
+}
+
+export interface Task {
+  id: string;
+  name: string;
+  description: string;
+  status: 'pending' | 'in-progress' | 'completed' | 'blocked';
+  assignee?: string;
+  estimatedHours?: number;
+  dependencies: string[];
+}
+
+export interface Roadmap {
+  id: string;
+  applicationId: string;
+  designPlanId: string;
+  title: string;
+  description: string;
+  phases: Phase[];
+  estimatedDuration: string;
+  approvedBy?: string;
+  approvedAt?: string;
+  status: 'draft' | 'reviewing' | 'approved' | 'rejected';
+  createdAt: string;
+  updatedAt: string;
+}
+
 // User
 export interface User {
   id: string;
