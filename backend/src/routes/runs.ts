@@ -263,6 +263,31 @@ export const createRunRoutes = (
     }
   });
 
+  // Get logs for a specific run
+  router.get('/:id/logs', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      const run = await persistence.read<Run>('runs', id);
+      if (!run) {
+        throw new ApiError(404, 'Run not found');
+      }
+
+      const allLogs = await persistence.list<{ id: string; runId: string; timestamp: string; level: string; message: string; phaseId?: string; taskId?: string; source?: string }>('run-logs');
+      const runLogs = allLogs.filter(log => log.runId === id).sort(
+        (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      );
+
+      res.json(createResponse(runLogs));
+    } catch (error) {
+      if (error instanceof ApiError) {
+        res.status(error.statusCode).json({ error: error.message, timestamp: new Date().toISOString() });
+      } else {
+        res.status(500).json({ error: error instanceof Error ? error.message : 'Failed to fetch logs', timestamp: new Date().toISOString() });
+      }
+    }
+  });
+
   // Cost tracking endpoints
   const costTracker = new CostTracker();
 

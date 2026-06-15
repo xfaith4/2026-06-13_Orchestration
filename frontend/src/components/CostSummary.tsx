@@ -51,7 +51,7 @@ export function CostSummary() {
   }, []);
 
   const formatCurrency = (amount: number) => {
-    return `$${amount.toFixed(4)}`;
+    return `$${amount.toFixed(2)}`;
   };
 
   if (loading) {

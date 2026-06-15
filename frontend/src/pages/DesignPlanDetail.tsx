@@ -38,7 +38,7 @@ export function DesignPlanDetail() {
     try {
       setApprovalLoading(true);
       setApprovalError(null);
-      const updated = await apiClient.put<DesignPlan>(`/design-plans/${id}/review`, {});
+      const updated = await apiClient.patch<DesignPlan>(`/design-plans/${id}/review`, {});
       setDesignPlan(updated);
     } catch (err) {
       setApprovalError(err instanceof Error ? err.message : 'Failed to move to review');
@@ -52,7 +52,7 @@ export function DesignPlanDetail() {
     try {
       setApprovalLoading(true);
       setApprovalError(null);
-      const updated = await apiClient.put<DesignPlan>(
+      const updated = await apiClient.patch<DesignPlan>(
         `/design-plans/${id}/decision/approve`,
         { approver: 'current-user' }
       );
@@ -69,7 +69,7 @@ export function DesignPlanDetail() {
     try {
       setApprovalLoading(true);
       setApprovalError(null);
-      const updated = await apiClient.put<DesignPlan>(
+      const updated = await apiClient.patch<DesignPlan>(
         `/design-plans/${id}/decision/reject`,
         { approver: 'current-user' }
       );
@@ -111,7 +111,7 @@ export function DesignPlanDetail() {
       <div className="p-6">
         <div className="mb-4">
           <button
-            onClick={() => navigate('/design-plans')}
+            onClick={() => navigate(-1)}
             className="text-blue-600 hover:text-blue-800"
           >
             ← Back to Design Plans

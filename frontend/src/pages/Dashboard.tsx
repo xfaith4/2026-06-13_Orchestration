@@ -1,12 +1,52 @@
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { apiClient } from '../services/api';
+import { Application, Roadmap, Run } from '../types';
 import { CostSummary } from '../components/CostSummary';
 
+interface DashboardStats {
+  totalApplications: number;
+  activeRoadmaps: number;
+  completedRuns: number;
+}
+
 export function Dashboard() {
-  const stats = [
-    { label: 'Total Applications', value: '0', href: '/applications' },
-    { label: 'Active Roadmaps', value: '0', href: '/roadmaps' },
-    { label: 'Completed Runs', value: '0', href: '/runs' },
-    { label: 'Agents', value: '0', href: '/agents' },
+  const [stats, setStats] = useState<DashboardStats>({
+    totalApplications: 0,
+    activeRoadmaps: 0,
+    completedRuns: 0,
+  });
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [apps, roadmaps, runs] = await Promise.allSettled([
+          apiClient.get<Application[]>('/applications'),
+          apiClient.get<Roadmap[]>('/roadmaps'),
+          apiClient.get<Run[]>('/runs'),
+        ]);
+
+        setStats({
+          totalApplications: apps.status === 'fulfilled' ? (apps.value ?? []).length : 0,
+          activeRoadmaps: roadmaps.status === 'fulfilled' ? (roadmaps.value ?? []).length : 0,
+          completedRuns:
+            runs.status === 'fulfilled'
+              ? (runs.value ?? []).filter((r) => r.status === 'completed').length
+              : 0,
+        });
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  const statCards = [
+    { label: 'Total Applications', value: stats.totalApplications, href: '/applications' },
+    { label: 'Active Roadmaps', value: stats.activeRoadmaps, href: '/roadmaps' },
+    { label: 'Completed Runs', value: stats.completedRuns, href: '/runs' },
   ];
 
   return (
@@ -16,15 +56,19 @@ export function Dashboard() {
         <p className="mt-2 text-gray-600">Welcome to UnifiedAIToolbox</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+        {statCards.map((stat) => (
           <Link
             key={stat.label}
             to={stat.href}
             className="bg-white rounded-lg shadow px-6 py-4 hover:shadow-lg transition-shadow"
           >
             <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-            <p className="text-3xl font-bold text-gray-900 mt-2">{stat.value}</p>
+            {statsLoading ? (
+              <div className="h-9 w-16 bg-gray-200 rounded animate-pulse mt-2" />
+            ) : (
+              <p className="text-3xl font-bold text-gray-900 mt-2">{stat.value}</p>
+            )}
           </Link>
         ))}
       </div>

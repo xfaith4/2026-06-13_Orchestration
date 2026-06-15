@@ -6,6 +6,11 @@ import { CostBreakdown } from '../components/CostBreakdown';
 import { ErrorDisplay } from '../components/ErrorDisplay';
 import { ErrorHistory } from '../components/ErrorHistory';
 
+interface FailModalState {
+  phaseId: string;
+  taskId: string;
+}
+
 export function RunDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -14,6 +19,8 @@ export function RunDetail() {
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [failModal, setFailModal] = useState<FailModalState | null>(null);
+  const [failReason, setFailReason] = useState('');
 
   useEffect(() => {
     const fetchRun = async () => {
@@ -39,7 +46,7 @@ export function RunDetail() {
     try {
       setActionLoading(true);
       setActionError(null);
-      const updated = await apiClient.put<Run>(`/runs/${id}/start`, {});
+      const updated = await apiClient.patch<Run>(`/runs/${id}/start`, {});
       setRun(updated);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Failed to start run');
@@ -53,7 +60,7 @@ export function RunDetail() {
     try {
       setActionLoading(true);
       setActionError(null);
-      const updated = await apiClient.put<Run>(`/runs/${id}/pause`, {});
+      const updated = await apiClient.patch<Run>(`/runs/${id}/pause`, {});
       setRun(updated);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Failed to pause run');
@@ -67,7 +74,7 @@ export function RunDetail() {
     try {
       setActionLoading(true);
       setActionError(null);
-      const updated = await apiClient.put<Run>(
+      const updated = await apiClient.patch<Run>(
         `/runs/${id}/phase/${phaseId}/task/${taskId}/start`,
         {}
       );
@@ -84,7 +91,7 @@ export function RunDetail() {
     try {
       setActionLoading(true);
       setActionError(null);
-      const updated = await apiClient.put<Run>(
+      const updated = await apiClient.patch<Run>(
         `/runs/${id}/phase/${phaseId}/task/${taskId}/complete`,
         {}
       );
@@ -96,19 +103,22 @@ export function RunDetail() {
     }
   };
 
-  const handleFailTask = async (phaseId: string, taskId: string) => {
-    if (!id) return;
-    const errorMsg = prompt('Enter error message:');
-    if (!errorMsg) return;
+  const openFailModal = (phaseId: string, taskId: string) => {
+    setFailReason('');
+    setFailModal({ phaseId, taskId });
+  };
 
+  const handleConfirmFail = async () => {
+    if (!id || !failModal || !failReason.trim()) return;
     try {
       setActionLoading(true);
       setActionError(null);
-      const updated = await apiClient.put<Run>(
-        `/runs/${id}/phase/${phaseId}/task/${taskId}/fail`,
-        { error: errorMsg }
+      const updated = await apiClient.patch<Run>(
+        `/runs/${id}/phase/${failModal.phaseId}/task/${failModal.taskId}/fail`,
+        { error: failReason.trim() }
       );
       setRun(updated);
+      setFailModal(null);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Failed to fail task');
     } finally {
@@ -162,10 +172,10 @@ export function RunDetail() {
       <div className="p-6">
         <div className="mb-4">
           <button
-            onClick={() => navigate('/runs')}
+            onClick={() => navigate(-1)}
             className="text-blue-600 hover:text-blue-800"
           >
-            ← Back to Runs
+            ← Back
           </button>
         </div>
         <div className="text-red-600">{error || 'Run not found'}</div>
@@ -175,16 +185,61 @@ export function RunDetail() {
 
   const totalTasks = run.phases.flatMap(p => p.tasks).length;
   const completedTasks = run.phases.flatMap(p => p.tasks).filter(t => t.status === 'completed').length;
+  const isLive = run.status === 'running' || run.status === 'paused';
 
   return (
     <div className="p-6">
-      <div className="mb-4">
+      {/* Fail Task Modal */}
+      {failModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-bold text-gray-900 mb-3">Fail Task</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Describe what went wrong. This reason will be recorded in the audit log.
+            </p>
+            <input
+              type="text"
+              value={failReason}
+              onChange={(e) => setFailReason(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleConfirmFail()}
+              placeholder="e.g. API timeout, contract validation failed"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 mb-4"
+              autoFocus
+            />
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setFailModal(null)}
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmFail}
+                disabled={!failReason.trim() || actionLoading}
+                className="px-4 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {actionLoading ? 'Failing...' : 'Confirm Failure'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="mb-4 flex items-center justify-between">
         <button
-          onClick={() => navigate('/runs')}
+          onClick={() => navigate(-1)}
           className="text-blue-600 hover:text-blue-800"
         >
-          ← Back to Runs
+          ← Back
         </button>
+        {(isLive || run.status === 'completed' || run.status === 'failed') && (
+          <button
+            onClick={() => navigate(`/runs/${id}/console`)}
+            className="px-3 py-1.5 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700"
+          >
+            Open Execution Console
+          </button>
+        )}
       </div>
 
       <div className="bg-white rounded-lg shadow p-6">
@@ -335,7 +390,7 @@ export function RunDetail() {
                               )}
                               {actions.includes('fail') && (
                                 <button
-                                  onClick={() => handleFailTask(phase.id, task.id)}
+                                  onClick={() => openFailModal(phase.id, task.id)}
                                   disabled={actionLoading}
                                   className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >

@@ -645,7 +645,10 @@ All subsequent work depends on a working development environment.
 - [ ] Create `backend/src/server.ts` with Express bootstrap
 - [ ] Create `.eslintrc.json` and `.prettierrc.json`
 - [ ] Add npm scripts: `dev`, `build`, `lint`, `test`
-- [ ] Create `.env.example`
+- [ ] Create `.env.example` with all required vars including correct `VITE_API_BASE_URL=http://localhost:3001/api` (the `/api` suffix is required)
+- [ ] Create a `.env` file from `.env.example` for local development (do not commit it; add to `.gitignore`)
+- [ ] Configure `frontend/src/services/api.ts` so the API base URL fallback is a relative path `/api`, enabling the Vite dev-server proxy to route calls correctly without a `.env` file
+- [ ] Configure `vite.config.ts` with a proxy entry: `/api` → `http://localhost:<BACKEND_PORT>` so relative-path API calls work in dev without CORS issues
 - [ ] Verify `npm run dev` starts both servers
 
 ### Files Expected to Be Created or Modified
@@ -691,7 +694,10 @@ npm run dev
 * [ ] TypeScript compiles without errors
 * [ ] ESLint and Prettier pass
 * [ ] `npm run dev` starts both servers
-* [ ] Frontend runs on port 5173, backend on port 3000
+* [ ] Frontend and backend ports are driven by environment variables, not hardcoded in source
+* [ ] `.env.example` contains every variable the app needs, with correct values including path suffixes (e.g., `VITE_API_BASE_URL` ends in `/api`)
+* [ ] API calls work out-of-the-box without a `.env` file (via Vite proxy fallback to relative `/api` path)
+* [ ] No source file contains a hardcoded `localhost:PORT` string that belongs in an env variable
 
 ### Human Review Gate
 
@@ -699,6 +705,8 @@ A human should verify:
 - Tooling choices are appropriate
 - Project structure is clean
 - Dev server starts without warnings
+- API calls reach the backend with and without a `.env` file present
+- `.env.example` values are correct end-to-end (copy it to `.env` and the app works)
 
 ### Rollback Notes
 
@@ -915,13 +923,29 @@ npm run typecheck
 npm test
 ```
 
+### HTTP Method Contract
+
+Every endpoint must follow these method semantics — this becomes the binding contract the frontend must match exactly:
+
+| Verb     | Semantics                              | Examples                                                                       |
+| -------- | -------------------------------------- | ------------------------------------------------------------------------------ |
+| `GET`    | Read, no side effects                  | GET /applications, GET /applications/:id                                       |
+| `POST`   | Create new resource                    | POST /applications, POST /design-plans/generate/:id                            |
+| `PUT`    | Full replacement of a resource         | PUT /applications/:id (all fields)                                             |
+| `PATCH`  | Partial mutation or state transition   | PATCH /design-plans/:id/review, PATCH /runs/:id/start, PATCH /runs/:id/pause  |
+| `DELETE` | Remove resource                        | DELETE /applications/:id                                                       |
+
+**Rule:** State transitions (approve, reject, start, pause, resume, assign, complete, fail) are always `PATCH`. A frontend calling `PUT` for a `PATCH` endpoint will receive a 404 and silently fail. Every route file must use the correct verb.
+
 ### Acceptance Criteria
 
 * [ ] All 7 resource types have full CRUD API
 * [ ] All endpoints validate input
 * [ ] Response format is consistent
 * [ ] Error messages are helpful
-* [ ] HTTP status codes are correct
+* [ ] HTTP status codes are correct (201 Create, 200 read/update, 204 delete, 400 validation, 404 not found)
+* [ ] All state-transition endpoints use `PATCH`, not `PUT`
+* [ ] Integration tests verify the correct HTTP method is accepted and the wrong method returns 405
 * [ ] All integration tests pass
 * [ ] No TypeScript errors
 
@@ -932,6 +956,7 @@ A human should verify:
 - Error messages are helpful
 - Status codes follow REST conventions
 - All required endpoints exist
+- State transitions use PATCH throughout (verify in route files)
 
 ### Rollback Notes
 
@@ -1033,11 +1058,55 @@ None; presentation layer.
 - Loading and error states
 - Accessibility (ARIA, semantic HTML, keyboard navigation)
 
+### Dashboard Data Requirements
+
+The Dashboard page **must fetch all stats from the API** — no hardcoded values are permitted. The component must call at minimum:
+
+- `GET /api/applications` → total applications count
+- `GET /api/roadmaps` → total roadmaps count
+- `GET /api/runs` → derive completed runs count
+- `GET /api/agents` (or agents config) → active agents count
+
+Display loading skeletons while fetching and an error banner if any request fails. Stats must reflect the live database state on every page load.
+
+### Loading and Empty State Contract
+
+`LoadingSpinner` and `EmptyState` are infrastructure components — every list page and every detail page must use them consistently:
+
+- **`LoadingSpinner`**: shown while any `isLoading` flag is true. Must accept a `size` prop (`sm | md | lg`) and render a spinning SVG accessible to screen readers (`role="status"`, `aria-label="Loading"`).
+- **`EmptyState`**: shown when a list is empty and not loading. Must accept `title`, `description`, and optional `action` (label + onClick) props. Must not show a blank white rectangle with no explanation.
+- **`ErrorBanner`** (new component): shown when an API call fails. Must display the error message and a "Retry" button that re-fires the request. Never render `null` on error — always surface the failure to the user.
+
+### Layout Padding Rule
+
+`MainLayout` must **not** apply padding to the `<main>` content area. Each page component owns its own padding via `className="p-6"` or equivalent. If `MainLayout` adds padding and a page also adds padding, the result is double-padding that breaks the visual rhythm. The acceptance test: the Dashboard page background color must reach flush to the layout edge.
+
+### Back-Navigation Rule
+
+Any "Back" or "← Return" button in a detail page must call `navigate(-1)` (React Router's history-based back navigation), **not** `navigate('/hardcoded-path')`. Hardcoded paths break the user's browsing history and fail when the same page is reachable from multiple parent pages. The only exception is a top-level navigation element (the sidebar or breadcrumb trail).
+
+### Sidebar Link Guard Rule
+
+The sidebar navigation array must only contain links to routes that are fully implemented. Placeholder sidebar entries that point to `NotFound` or stub pages confuse users. During this phase, stub pages (Agents, Prompts, Contracts) must either be removed from the sidebar or display a clear "Coming Soon" `EmptyState` — never a blank or error page.
+
+### Additional Implementation Tasks
+
+- [ ] Create `frontend/src/components/ErrorBanner.tsx` with retry callback
+- [ ] Dashboard page must call the API for all four stat values (no hardcoded values)
+- [ ] Each stub page (Agents, Prompts, Contracts) must render an `EmptyState` component — not a blank view
+- [ ] `LoadingSpinner` must include `role="status"` and `aria-label`
+- [ ] `EmptyState` must accept optional `action` prop for a CTA button
+- [ ] `MainLayout` must not apply padding to the main content container
+- [ ] All "Back" buttons must use `navigate(-1)`, not `navigate('/...')`
+
 ### Testing Requirements
 
 * [ ] Unit tests for page components
 * [ ] Unit tests for navigation routing
 * [ ] Unit tests for API client error handling
+* [ ] Dashboard stat fetch is tested with mocked API responses
+* [ ] EmptyState renders title, description, and action button
+* [ ] LoadingSpinner has correct ARIA attributes
 * [ ] Accessibility audit (no critical issues)
 
 ### Validation Commands
@@ -1057,6 +1126,11 @@ npm run dev
 * [ ] No TypeScript errors
 * [ ] Accessibility audit passes
 * [ ] Professional appearance
+* [ ] Dashboard stats are fetched from the API — no hardcoded values in any stat card
+* [ ] All "Back" buttons in detail pages use `navigate(-1)`
+* [ ] All stub pages show an `EmptyState` rather than a blank or error screen
+* [ ] `MainLayout` does not double-pad page content
+* [ ] `LoadingSpinner` renders `role="status"` accessible markup
 
 ### Human Review Gate
 
@@ -1064,6 +1138,8 @@ A human should verify:
 - UI appearance (colors, typography, spacing)
 - Navigation usability
 - Responsive design on multiple devices
+- Dashboard shows live counts that change as data is added
+- Back buttons return to the correct previous page regardless of how the detail page was reached
 - Accessibility compliance
 
 ### Rollback Notes
@@ -1147,6 +1223,12 @@ frontend/tests/e2e/application-workflow.e2e.ts
 - List shows status clearly
 - Detail view is organized
 
+### Cross-Entity Navigation Requirement
+
+`ApplicationDetail` must display a section listing **all design plans associated with this application**. Each entry shows at minimum: plan title, status badge, and a link to the `DesignPlanDetail` page. After a user generates a design plan from `ApplicationDetail` (by clicking "Generate Design Plan"), the new plan must immediately appear in this list — the user must not have to manually navigate to `/design-plans` to find it. If no plans exist yet, show an `EmptyState` with the call-to-action "Generate Design Plan."
+
+This cross-linking requirement applies symmetrically: `DesignPlanDetail` must show the name of its parent Application with a clickable link back to `ApplicationDetail`.
+
 ### API Requirements
 
 - POST /api/applications (already exists from Phase 3)
@@ -1154,6 +1236,14 @@ frontend/tests/e2e/application-workflow.e2e.ts
 - GET /api/applications/:id
 - PUT /api/applications/:id
 - DELETE /api/applications/:id
+- GET /api/design-plans?applicationId=:id (filter plans by application — must be supported for the cross-linking section)
+
+### Cross-Linking Implementation Tasks
+
+- [ ] Add "Associated Design Plans" section to `ApplicationDetail` that fetches `GET /api/design-plans?applicationId=:id`
+- [ ] Show `EmptyState` with "Generate Design Plan" CTA when no plans exist for this application
+- [ ] After plan generation succeeds, refresh the design plan list in `ApplicationDetail` without a full page reload
+- [ ] `DesignPlanDetail` must include parent application name as a clickable breadcrumb or back-link
 
 ### Testing Requirements
 
@@ -1161,6 +1251,8 @@ frontend/tests/e2e/application-workflow.e2e.ts
 * [ ] Unit tests for form validation
 * [ ] API integration tests
 * [ ] E2E test for complete workflow
+* [ ] ApplicationDetail renders the design plan list section with plans when they exist
+* [ ] ApplicationDetail renders EmptyState with CTA when no plans exist
 
 ### Validation Commands
 
@@ -1180,6 +1272,9 @@ npm run dev
 * [ ] User can view details
 * [ ] User can edit application
 * [ ] User can delete application
+* [ ] ApplicationDetail shows all associated design plans in a dedicated section
+* [ ] After generating a design plan, it appears immediately in ApplicationDetail without manual navigation
+* [ ] DesignPlanDetail links back to its parent Application
 * [ ] All tests pass
 
 ### Human Review Gate
@@ -1190,6 +1285,7 @@ A human should verify:
 - Validation appropriate
 - Error messages helpful
 - Professional appearance
+- Clicking "Generate Design Plan" from ApplicationDetail creates the plan and shows it in the list
 
 ### Rollback Notes
 
@@ -1346,8 +1442,9 @@ Approval gates are critical. No roadmap should generate from unapproved designs.
 ### Implementation Tasks
 
 - [ ] Add approval fields to DesignPlan model (status, approvedBy, approvedAt)
-- [ ] Create PUT /api/design-plans/:id/approve endpoint
-- [ ] Create PUT /api/design-plans/:id/reject endpoint
+- [ ] Create `PATCH /api/design-plans/:id/review` endpoint (transitions draft → in_review)
+- [ ] Create `PATCH /api/design-plans/:id/decision/approve` endpoint (transitions in_review → approved)
+- [ ] Create `PATCH /api/design-plans/:id/decision/reject` endpoint (transitions in_review → rejected)
 - [ ] Create `frontend/src/pages/DesignPlanReview.tsx`
 - [ ] Create `frontend/src/components/DesignPlanApprovalGate.tsx`
 - [ ] Implement role-based access control
@@ -1355,11 +1452,13 @@ Approval gates are critical. No roadmap should generate from unapproved designs.
 - [ ] Prevent roadmap generation from non-approved plans
 - [ ] Write tests
 
+> **HTTP Method Note:** Approval and rejection are state transitions — they use `PATCH`, not `PUT`. `PUT` is reserved for full resource replacement. A frontend calling `PUT` on these endpoints will receive a 404. See Phase 3 HTTP Method Contract for the full rule set.
+
 ### Files Expected to Be Created or Modified
 
 ```text
 shared/types/index.ts (DesignPlan: add approval fields)
-backend/src/routes/design-plans.ts (add approve/reject)
+backend/src/routes/design-plans.ts (add review/approve/reject as PATCH)
 backend/tests/integration/design-plans.test.ts
 frontend/src/pages/DesignPlanReview.tsx
 frontend/src/components/DesignPlanApprovalGate.tsx
@@ -1376,18 +1475,23 @@ frontend/src/components/DesignPlanApprovalHistory.tsx
 - Status badge shows state
 - Approved plans locked from editing
 - Approval history visible
+- "Move to Review", "Approve", and "Reject" buttons call their respective PATCH endpoints
 
 ### API Requirements
 
-- PUT /api/design-plans/:id/approve
-- PUT /api/design-plans/:id/reject
-- PUT /api/design-plans/:id (edit, draft only)
+- `PATCH /api/design-plans/:id/review` — state transition: draft → in_review
+- `PATCH /api/design-plans/:id/decision/approve` — state transition: in_review → approved
+- `PATCH /api/design-plans/:id/decision/reject` — state transition: in_review → rejected
+- `PUT /api/design-plans/:id` — full resource update (draft only; body must contain all writable fields)
 
 ### Testing Requirements
 
 * [ ] Tests for approval logic
 * [ ] Tests for gate enforcement
 * [ ] Tests for locked approved plans
+* [ ] Integration test: `PATCH /design-plans/:id/review` returns 200; `PUT /design-plans/:id/review` returns 405
+* [ ] Integration test: `PATCH /design-plans/:id/decision/approve` returns 200; `PUT` returns 405
+* [ ] Frontend unit test: "Move to Review" button calls `apiClient.patch()`, not `apiClient.put()`
 
 ### Validation Commands
 
@@ -1399,7 +1503,8 @@ npm run dev
 
 ### Acceptance Criteria
 
-* [ ] Design plan can be approved or rejected
+* [ ] Design plan can be moved to review, then approved or rejected
+* [ ] All three state transitions use `PATCH` — calling them with `PUT` returns 405
 * [ ] Approval recorded with timestamp
 * [ ] Approved plans locked
 * [ ] Approval history visible
@@ -1568,23 +1673,38 @@ Parallel to Phase 7 but for roadmaps. Roadmap approval is the final gate before 
 
 ### Implementation Tasks
 
-- [ ] Add approval fields to Roadmap model
-- [ ] Create PUT /api/roadmaps/:id/approve endpoint
-- [ ] Create PUT /api/roadmaps/:id/reject endpoint
-- [ ] Create PUT /api/roadmaps/:id endpoint for editing
+- [ ] Add approval fields to Roadmap model (`status`, `approvedBy`, `approvedAt`)
+- [ ] Create `PATCH /api/roadmaps/:id/approve` endpoint (state transition → approved)
+- [ ] Create `PATCH /api/roadmaps/:id/reject` endpoint (state transition → rejected)
+- [ ] Create `PUT /api/roadmaps/:id` endpoint for full roadmap replacement (editing, draft only)
 - [ ] Create `frontend/src/pages/RoadmapReview.tsx`
 - [ ] Create `frontend/src/components/RoadmapEditor.tsx`
 - [ ] Implement drag-to-reorder phases and tasks
 - [ ] Create add/remove task UI
 - [ ] Create approval gate component
+- [ ] **Add "Approve" and "Reject" buttons directly to `RoadmapDetail.tsx`** — users must be able to approve a roadmap from its detail page without navigating to a separate review page
 - [ ] Write tests
+
+> **HTTP Method Note:** Approve and reject are state transitions — they use `PATCH`, not `PUT`. See Phase 3 HTTP Method Contract.
+
+### Roadmap Detail Page — Approve/Reject Requirement
+
+`RoadmapDetail` must show an approval action panel when the roadmap is in a state that allows approval (`status === 'pending_review'`). The panel must include:
+
+- An "Approve Roadmap" button that calls `PATCH /api/roadmaps/:id/approve`
+- A "Reject" button that calls `PATCH /api/roadmaps/:id/reject` and prompts for a rejection reason (via inline form — not `window.prompt()`)
+- A status badge that reflects the current approval state
+- The "Create Execution Run" button must only appear **after** the roadmap is approved (`status === 'approved'`), and must be visible on the detail page when that state is reached
+
+This requirement exists because there is no other UI path to approve a roadmap once it is generated. If the detail page doesn't show approval controls, the roadmap is permanently stuck in pending state.
 
 ### Files Expected to Be Created or Modified
 
 ```text
 shared/types/index.ts (Roadmap: add approval fields)
-backend/src/routes/roadmaps.ts (add approve/reject/edit)
+backend/src/routes/roadmaps.ts (add PATCH approve/reject)
 backend/tests/integration/roadmaps.test.ts
+frontend/src/pages/RoadmapDetail.tsx (add approval panel)
 frontend/src/pages/RoadmapReview.tsx
 frontend/src/components/RoadmapEditor.tsx
 frontend/src/components/RoadmapApprovalGate.tsx
@@ -1599,18 +1719,23 @@ frontend/src/components/RoadmapApprovalGate.tsx
 - Editing UI intuitive (drag-and-drop)
 - Changes previewed before save
 - Approval is clear and final
+- Approval panel visible on `RoadmapDetail` when roadmap is pending review
+- "Create Execution Run" button gated behind `status === 'approved'` and visible on detail page once approved
 
 ### API Requirements
 
-- PUT /api/roadmaps/:id/approve
-- PUT /api/roadmaps/:id/reject
-- PUT /api/roadmaps/:id (edit)
+- `PATCH /api/roadmaps/:id/approve` — state transition: pending_review → approved
+- `PATCH /api/roadmaps/:id/reject` — state transition: pending_review → rejected
+- `PUT /api/roadmaps/:id` — full resource replacement (editing, draft only)
 
 ### Testing Requirements
 
 * [ ] Tests for editing operations
 * [ ] Tests for approval workflow
 * [ ] UI tests for drag-and-drop
+* [ ] Integration test: `PATCH /roadmaps/:id/approve` returns 200; `PUT /roadmaps/:id/approve` returns 405
+* [ ] Frontend unit test: RoadmapDetail shows "Approve" and "Reject" buttons when `status === 'pending_review'`
+* [ ] Frontend unit test: "Create Execution Run" button is hidden when `status !== 'approved'`, visible when `status === 'approved'`
 
 ### Validation Commands
 
@@ -1622,8 +1747,10 @@ npm run dev
 ### Acceptance Criteria
 
 * [ ] Roadmap can be edited (phases and tasks)
-* [ ] Roadmap can be approved or rejected
-* [ ] Approved roadmaps locked
+* [ ] Roadmap can be approved or rejected from `RoadmapDetail` — no separate page navigation required
+* [ ] Approve and reject endpoints use `PATCH`; calling them with `PUT` returns 405
+* [ ] "Create Execution Run" button appears on `RoadmapDetail` only after approval
+* [ ] Approved roadmaps locked from further editing
 * [ ] All tests pass
 
 ### Human Review Gate
@@ -1631,6 +1758,8 @@ npm run dev
 A human should verify:
 - Editing UI intuitive
 - Approval gates enforced
+- "Approve" and "Reject" buttons appear on the RoadmapDetail page when the roadmap is pending review
+- "Create Execution Run" appears after approval without page refresh
 - Authorization correct
 
 ### Rollback Notes
@@ -3041,13 +3170,48 @@ backend/tests/integration/runs.test.ts (add pause/resume tests)
 - Repair approval obvious and easy
 - Professional appearance
 
+### Run Control HTTP Methods
+
+All run state transitions from the frontend must use `PATCH` — not `PUT` and not `POST`:
+
+- `PATCH /api/runs/:id/start` — transition: pending → running
+- `PATCH /api/runs/:id/pause` — transition: running → paused
+- `PATCH /api/runs/:id/resume` — transition: paused → running
+- `PATCH /api/runs/:id/tasks/:taskId/start` — task state transition: pending → in_progress
+- `PATCH /api/runs/:id/tasks/:taskId/complete` — task state transition: in_progress → completed
+- `PATCH /api/runs/:id/tasks/:taskId/fail` — task state transition: in_progress → failed
+
+A frontend component calling `PUT` on these endpoints will receive a 404 and silently fail. See Phase 3 HTTP Method Contract for the complete rule.
+
+### Execution Logs Backend Requirement
+
+`GET /api/runs/:id/logs` must be a real backend endpoint that reads persisted log entries from the data store and returns them as JSON. It must not be omitted or stubbed.
+
+`useExecutionUpdates.ts` must fetch logs from this endpoint — it must not maintain a module-level in-memory Map that stores mock logs. Module-level state in a React hook is not cleared between navigations (the Map lives for the lifetime of the JS module, not the component), and more importantly, logs are never added to it because there is no code path that populates it. The result is that the Logs tab in the Execution Console is always empty.
+
+The correct pattern: on mount (or on each poll tick), fetch `GET /api/runs/:id/logs` and set local state. Append new entries on each subsequent poll rather than replacing the array.
+
+### RunDetail → ExecutionConsole Navigation Requirement
+
+`RunDetail.tsx` must include a prominent "Open Execution Console" link or button that navigates to `/runs/:id/console` (the `ExecutionConsole` page for this run). Without this link, users who navigate to a run's detail page have no way to reach the live monitoring view. The link must appear whenever the run's status is `running` or `paused`; it may also appear for `completed` and `failed` runs as a way to view historical logs.
+
+### Task Failure UI Requirement
+
+When a user manually marks a task as failed in `RunDetail`, the failure reason must be collected via an **inline modal dialog** — not `window.prompt()`. `window.prompt()` is a browser-native blocking call that cannot be styled, cannot be tested in unit tests, and blocks the JS thread.
+
+Implement a `FailureReasonModal` component (or reuse any existing modal) that renders an `<input>` field for the failure message and "Confirm Failure" / "Cancel" buttons.
+
 ### API Requirements
 
-- GET /api/runs/:id/log (streaming logs)
-- POST /api/runs/:id/pause
-- POST /api/runs/:id/resume
-- POST /api/runs/:id/approve-repair
-- WebSocket or polling for live updates
+- `GET /api/runs/:id/logs` — returns persisted log entries as `ExecutionLog[]`; must be a real endpoint backed by the data store
+- `PATCH /api/runs/:id/start` — state transition (not POST, not PUT)
+- `PATCH /api/runs/:id/pause` — state transition
+- `PATCH /api/runs/:id/resume` — state transition
+- `PATCH /api/runs/:id/tasks/:taskId/start` — task state transition
+- `PATCH /api/runs/:id/tasks/:taskId/complete` — task state transition
+- `PATCH /api/runs/:id/tasks/:taskId/fail` — task state transition; body `{ reason: string }`
+- `POST /api/runs/:id/approve-repair` — repair approval (POST is correct here; it creates a repair decision record)
+- WebSocket or polling for live progress updates
 
 ### Testing Requirements
 
@@ -3055,6 +3219,10 @@ backend/tests/integration/runs.test.ts (add pause/resume tests)
 * [x] Tests for log filtering
 * [x] Tests for pause/resume
 * [ ] Tests for repair approval UI
+* [ ] `useExecutionUpdates` fetches from `GET /api/runs/:id/logs` — no module-level mock Map
+* [ ] Logs tab in ExecutionConsole renders log entries returned by the API
+* [ ] All run/task state transition buttons call `apiClient.patch()` (not `put()` or `post()`)
+* [ ] Task failure modal is a React component — test that it renders an input field and "Confirm Failure" button
 
 ### Validation Commands
 
@@ -3066,19 +3234,24 @@ npm run dev
 ### Acceptance Criteria
 
 * [x] Live updates show progress
-* [x] Logs stream in real-time
 * [x] Cost tracking accurate
 * [x] Pause/resume works
 * [ ] Repair approval UI works
 * [x] All tests pass
+* [ ] Logs tab shows real log entries fetched from `GET /api/runs/:id/logs` — not always empty
+* [ ] All run and task state transitions call `PATCH`; `PUT` on these endpoints returns 405
+* [ ] `RunDetail` has an "Open Execution Console" link to `/runs/:id/console`
+* [ ] Task failure reason is collected via a modal component, not `window.prompt()`
 
 ### Human Review Gate
 
 A human should verify:
 - Updates feel responsive
-- Logs readable
+- Logs readable and actually populated (not blank)
 - Cost tracking accurate
 - Repair UI intuitive
+- "Open Execution Console" link visible on RunDetail for in-progress runs
+- Clicking "Fail Task" opens a modal, not a browser prompt dialog
 
 ### Rollback Notes
 

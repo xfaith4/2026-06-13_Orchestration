@@ -1,16 +1,34 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect, useState, useCallback } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { apiClient } from '../services/api';
 import { Application, DesignPlan } from '../types';
+
+const STATUS_COLORS: Record<string, string> = {
+  draft: 'bg-yellow-100 text-yellow-800',
+  reviewing: 'bg-blue-100 text-blue-800',
+  approved: 'bg-green-100 text-green-800',
+  rejected: 'bg-red-100 text-red-800',
+};
 
 export function ApplicationDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [application, setApplication] = useState<Application | null>(null);
+  const [designPlans, setDesignPlans] = useState<DesignPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
+
+  const fetchDesignPlans = useCallback(async () => {
+    if (!id) return;
+    try {
+      const plans = await apiClient.get<DesignPlan[]>(`/design-plans?applicationId=${id}`);
+      setDesignPlans(plans ?? []);
+    } catch {
+      setDesignPlans([]);
+    }
+  }, [id]);
 
   useEffect(() => {
     if (!id) return;
@@ -18,7 +36,10 @@ export function ApplicationDetail() {
     const fetchApplication = async () => {
       try {
         setLoading(true);
-        const data = await apiClient.get<Application>(`/applications/${id}`);
+        const [data] = await Promise.all([
+          apiClient.get<Application>(`/applications/${id}`),
+          fetchDesignPlans(),
+        ]);
         setApplication(data);
       } catch (err) {
         setError('Failed to load application');
@@ -29,7 +50,7 @@ export function ApplicationDetail() {
     };
 
     fetchApplication();
-  }, [id]);
+  }, [id, fetchDesignPlans]);
 
   const handleGenerateDesignPlan = async () => {
     if (!application) return;
@@ -37,11 +58,8 @@ export function ApplicationDetail() {
     try {
       setGenerating(true);
       setGenerateError(null);
-      const designPlan = await apiClient.post<DesignPlan>(
-        `/design-plans/generate/${application.id}`,
-        {}
-      );
-      navigate(`/design-plans/${designPlan.id}`);
+      await apiClient.post<DesignPlan>(`/design-plans/generate/${application.id}`, {});
+      await fetchDesignPlans();
     } catch (err) {
       setGenerateError(err instanceof Error ? err.message : 'Failed to generate design plan');
     } finally {
@@ -57,10 +75,10 @@ export function ApplicationDetail() {
     return (
       <div className="space-y-4">
         <button
-          onClick={() => navigate('/applications')}
+          onClick={() => navigate(-1)}
           className="text-blue-600 hover:text-blue-700"
         >
-          ← Back to Applications
+          ← Back
         </button>
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-800">{error || 'Application not found'}</p>
@@ -72,10 +90,10 @@ export function ApplicationDetail() {
   return (
     <div className="space-y-6">
       <button
-        onClick={() => navigate('/applications')}
+        onClick={() => navigate(-1)}
         className="text-blue-600 hover:text-blue-700"
       >
-        ← Back to Applications
+        ← Back
       </button>
 
       <div className="bg-white rounded-lg shadow p-6">
@@ -104,9 +122,7 @@ export function ApplicationDetail() {
               <h3 className="text-sm font-medium text-gray-700 mb-2">Requirements</h3>
               <ul className="list-disc pl-5 space-y-1">
                 {application.requirements.map((req, i) => (
-                  <li key={i} className="text-gray-900">
-                    {req}
-                  </li>
+                  <li key={i} className="text-gray-900">{req}</li>
                 ))}
               </ul>
             </div>
@@ -124,9 +140,7 @@ export function ApplicationDetail() {
               <h3 className="text-sm font-medium text-gray-700 mb-2">Constraints</h3>
               <ul className="list-disc pl-5 space-y-1">
                 {application.constraints.map((constraint, i) => (
-                  <li key={i} className="text-gray-900">
-                    {constraint}
-                  </li>
+                  <li key={i} className="text-gray-900">{constraint}</li>
                 ))}
               </ul>
             </div>
@@ -140,19 +154,58 @@ export function ApplicationDetail() {
             </p>
           </div>
 
-          {generateError && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-sm text-red-800">{generateError}</p>
-            </div>
-          )}
-
-          <button
-            onClick={handleGenerateDesignPlan}
-            disabled={generating}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {generating ? 'Generating Design Plan...' : 'Generate Design Plan'}
-          </button>
+          {/* Design Plans section */}
+          <div className="border-t pt-4">
+            <h2 className="text-lg font-bold text-gray-900 mb-3">Design Plans</h2>
+            {designPlans.length === 0 ? (
+              <div className="text-center py-6 bg-gray-50 rounded-lg">
+                <p className="text-gray-500 mb-3">No design plans yet.</p>
+                {generateError && (
+                  <div className="mb-3 bg-red-50 border border-red-200 rounded-lg p-3">
+                    <p className="text-sm text-red-800">{generateError}</p>
+                  </div>
+                )}
+                <button
+                  onClick={handleGenerateDesignPlan}
+                  disabled={generating}
+                  className="bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {generating ? 'Generating...' : 'Generate Design Plan'}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {designPlans.map((plan) => (
+                  <Link
+                    key={plan.id}
+                    to={`/design-plans/${plan.id}`}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <span className="text-sm font-medium text-gray-900">
+                      Design Plan — {new Date(plan.createdAt).toLocaleDateString()}
+                    </span>
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${STATUS_COLORS[plan.status] ?? 'bg-gray-100 text-gray-800'}`}>
+                      {plan.status}
+                    </span>
+                  </Link>
+                ))}
+                <div className="pt-2">
+                  {generateError && (
+                    <div className="mb-2 bg-red-50 border border-red-200 rounded-lg p-3">
+                      <p className="text-sm text-red-800">{generateError}</p>
+                    </div>
+                  )}
+                  <button
+                    onClick={handleGenerateDesignPlan}
+                    disabled={generating}
+                    className="text-sm text-blue-600 hover:text-blue-700 disabled:opacity-50"
+                  >
+                    {generating ? 'Generating...' : '+ Generate new Design Plan'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

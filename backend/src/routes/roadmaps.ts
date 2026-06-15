@@ -55,6 +55,54 @@ export const createRoadmapRoutes = (
     }
   });
 
+  // Approve roadmap (state transition — PATCH, not PUT)
+  router.patch('/:id/approve', async (req: Request, res: Response) => {
+    try {
+      const roadmap = await persistence.read<Roadmap>('roadmaps', req.params.id);
+      if (!roadmap) {
+        throw new ApiError(404, 'Roadmap not found');
+      }
+
+      const updated = await persistence.update<Roadmap>('roadmaps', req.params.id, {
+        status: 'approved',
+        approvedBy: (req.body as { approver?: string }).approver || 'unknown',
+        approvedAt: new Date().toISOString(),
+      });
+
+      res.json(createResponse(updated));
+    } catch (error) {
+      if (error instanceof ApiError) {
+        res.status(error.statusCode).json({ error: error.message, timestamp: new Date().toISOString() });
+      } else {
+        res.status(500).json({ error: error instanceof Error ? error.message : 'Failed to approve roadmap', timestamp: new Date().toISOString() });
+      }
+    }
+  });
+
+  // Reject roadmap (state transition — PATCH, not PUT)
+  router.patch('/:id/reject', async (req: Request, res: Response) => {
+    try {
+      const roadmap = await persistence.read<Roadmap>('roadmaps', req.params.id);
+      if (!roadmap) {
+        throw new ApiError(404, 'Roadmap not found');
+      }
+
+      const updated = await persistence.update<Roadmap>('roadmaps', req.params.id, {
+        status: 'rejected',
+        approvedBy: (req.body as { approver?: string }).approver || 'unknown',
+        approvedAt: new Date().toISOString(),
+      });
+
+      res.json(createResponse(updated));
+    } catch (error) {
+      if (error instanceof ApiError) {
+        res.status(error.statusCode).json({ error: error.message, timestamp: new Date().toISOString() });
+      } else {
+        res.status(500).json({ error: error instanceof Error ? error.message : 'Failed to reject roadmap', timestamp: new Date().toISOString() });
+      }
+    }
+  });
+
   // Attach generic CRUD routes
   const crudRoutes = createGenericCrudRoutes(persistence, validation, 'roadmaps', 'roadmap');
   router.use(crudRoutes);

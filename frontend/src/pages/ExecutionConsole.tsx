@@ -18,7 +18,7 @@ export function ExecutionConsole() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [showRepairModal, setShowRepairModal] = useState(false);
 
-  const { data, loading, error, addLog, clearLogs } = useExecutionUpdates({
+  const { data, loading, error } = useExecutionUpdates({
     runId: id || '',
     pollingInterval: 2000,
     enabled: !!id,

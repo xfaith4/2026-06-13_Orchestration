@@ -1,9 +1,20 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
-import { useExecutionUpdates, ExecutionLog } from '../../src/hooks/useExecutionUpdates';
+import { useExecutionUpdates } from '../../src/hooks/useExecutionUpdates';
 import { apiClient } from '../../src/services/api';
 
 vi.mock('../../src/services/api');
+
+const mockRun = {
+  id: 'run-1',
+  title: 'Test Run',
+  status: 'running',
+  phases: [],
+};
+
+const mockLogs = [
+  { id: 'log-1', timestamp: new Date().toISOString(), level: 'info', message: 'Started' },
+];
 
 describe('useExecutionUpdates', () => {
   beforeEach(() => {
@@ -12,17 +23,13 @@ describe('useExecutionUpdates', () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.clearAllMocks();
   });
 
-  it('should fetch initial run data', async () => {
-    const mockRun = {
-      id: 'run-1',
-      title: 'Test Run',
-      status: 'running',
-      phases: [],
-    };
-
-    (apiClient.get as any).mockResolvedValueOnce(mockRun);
+  it('should fetch initial run data and logs from the API', async () => {
+    (apiClient.get as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce(mockRun)
+      .mockResolvedValueOnce(mockLogs);
 
     const { result } = renderHook(() =>
       useExecutionUpdates({ runId: 'run-1', enabled: true })
@@ -33,13 +40,42 @@ describe('useExecutionUpdates', () => {
     });
 
     expect(result.current.data?.run).toEqual(mockRun);
+    expect(result.current.data?.logs).toEqual(mockLogs);
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeNull();
   });
 
-  it('should handle fetch errors', async () => {
+  it('should call /runs/:id/logs endpoint for log data', async () => {
+    (apiClient.get as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce(mockRun)
+      .mockResolvedValueOnce([]);
+
+    renderHook(() => useExecutionUpdates({ runId: 'run-1', enabled: true }));
+
+    await waitFor(() => {
+      expect(apiClient.get).toHaveBeenCalledWith('/runs/run-1/logs');
+    });
+  });
+
+  it('should return empty logs array when logs endpoint fails', async () => {
+    (apiClient.get as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce(mockRun)
+      .mockRejectedValueOnce(new Error('logs endpoint not found'));
+
+    const { result } = renderHook(() =>
+      useExecutionUpdates({ runId: 'run-1', enabled: true })
+    );
+
+    await waitFor(() => {
+      expect(result.current.data).toBeDefined();
+    });
+
+    expect(result.current.data?.logs).toEqual([]);
+  });
+
+  it('should handle run fetch errors', async () => {
     const error = new Error('Network error');
-    (apiClient.get as any).mockRejectedValueOnce(error);
+    (apiClient.get as ReturnType<typeof vi.fn>).mockRejectedValueOnce(error);
 
     const { result } = renderHook(() =>
       useExecutionUpdates({ runId: 'run-1', enabled: true })
@@ -53,114 +89,36 @@ describe('useExecutionUpdates', () => {
   });
 
   it('should poll for updates at specified interval', async () => {
-    const mockRun = {
-      id: 'run-1',
-      title: 'Test Run',
-      status: 'running',
-      phases: [],
-    };
+    (apiClient.get as ReturnType<typeof vi.fn>).mockResolvedValue(mockRun);
 
-    (apiClient.get as any).mockResolvedValue(mockRun);
-
-    const { result } = renderHook(() =>
+    renderHook(() =>
       useExecutionUpdates({ runId: 'run-1', pollingInterval: 1000, enabled: true })
     );
 
-    expect(apiClient.get).toHaveBeenCalledTimes(1);
-
-    // Advance time by polling interval
-    vi.advanceTimersByTime(1000);
-
+    // Initial fetch calls /runs/run-1 and /runs/run-1/logs = 2 calls
     await waitFor(() => {
       expect(apiClient.get).toHaveBeenCalledTimes(2);
     });
+
+    vi.advanceTimersByTime(1000);
+
+    await waitFor(() => {
+      expect(apiClient.get).toHaveBeenCalledTimes(4);
+    });
   });
 
-  it('should not poll when disabled', async () => {
-    const mockRun = {
-      id: 'run-1',
-      title: 'Test Run',
-      status: 'running',
-      phases: [],
-    };
+  it('should not poll when disabled', () => {
+    (apiClient.get as ReturnType<typeof vi.fn>).mockResolvedValue(mockRun);
 
-    (apiClient.get as any).mockResolvedValue(mockRun);
-
-    const { result } = renderHook(() =>
-      useExecutionUpdates({ runId: 'run-1', enabled: false })
-    );
+    renderHook(() => useExecutionUpdates({ runId: 'run-1', enabled: false }));
 
     vi.advanceTimersByTime(5000);
 
     expect(apiClient.get).not.toHaveBeenCalled();
   });
 
-  it('should allow adding logs', () => {
-    const mockRun = {
-      id: 'run-1',
-      title: 'Test Run',
-      status: 'running',
-      phases: [],
-    };
-
-    (apiClient.get as any).mockResolvedValueOnce(mockRun);
-
-    const { result } = renderHook(() =>
-      useExecutionUpdates({ runId: 'run-1', enabled: true })
-    );
-
-    waitFor(() => {
-      expect(result.current.data).toBeDefined();
-    });
-
-    const newLog: ExecutionLog = {
-      id: 'log-1',
-      timestamp: new Date().toISOString(),
-      level: 'info',
-      message: 'Test log',
-    };
-
-    result.current.addLog(newLog);
-
-    expect(result.current.data?.logs).toContain(newLog);
-  });
-
-  it('should allow clearing logs', () => {
-    const mockRun = {
-      id: 'run-1',
-      title: 'Test Run',
-      status: 'running',
-      phases: [],
-    };
-
-    (apiClient.get as any).mockResolvedValueOnce(mockRun);
-
-    const { result } = renderHook(() =>
-      useExecutionUpdates({ runId: 'run-1', enabled: true })
-    );
-
-    waitFor(() => {
-      expect(result.current.data).toBeDefined();
-    });
-
-    const newLog: ExecutionLog = {
-      id: 'log-1',
-      timestamp: new Date().toISOString(),
-      level: 'info',
-      message: 'Test log',
-    };
-
-    result.current.addLog(newLog);
-    expect(result.current.data?.logs.length).toBeGreaterThan(0);
-
-    result.current.clearLogs();
-    expect(result.current.data?.logs).toEqual([]);
-  });
-
   it('should not poll when runId is empty', () => {
-    const { result } = renderHook(() =>
-      useExecutionUpdates({ runId: '', enabled: true })
-    );
+    renderHook(() => useExecutionUpdates({ runId: '', enabled: true }));
 
     expect(apiClient.get).not.toHaveBeenCalled();
   });

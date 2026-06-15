@@ -9,8 +9,12 @@ export function RoadmapDetail() {
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [approvalLoading, setApprovalLoading] = useState(false);
+  const [approvalError, setApprovalError] = useState<string | null>(null);
   const [runCreating, setRunCreating] = useState(false);
   const [runError, setRunError] = useState<string | null>(null);
+  const [showRejectInput, setShowRejectInput] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
 
   useEffect(() => {
     const fetchRoadmap = async () => {
@@ -31,15 +35,47 @@ export function RoadmapDetail() {
     }
   }, [id]);
 
+  const handleApprove = async () => {
+    if (!id) return;
+    try {
+      setApprovalLoading(true);
+      setApprovalError(null);
+      const updated = await apiClient.patch<Roadmap>(`/roadmaps/${id}/approve`, {
+        approver: 'current-user',
+      });
+      setRoadmap(updated);
+    } catch (err) {
+      setApprovalError(err instanceof Error ? err.message : 'Failed to approve roadmap');
+    } finally {
+      setApprovalLoading(false);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!id || !rejectReason.trim()) return;
+    try {
+      setApprovalLoading(true);
+      setApprovalError(null);
+      const updated = await apiClient.patch<Roadmap>(`/roadmaps/${id}/reject`, {
+        approver: 'current-user',
+        reason: rejectReason.trim(),
+      });
+      setRoadmap(updated);
+      setShowRejectInput(false);
+      setRejectReason('');
+    } catch (err) {
+      setApprovalError(err instanceof Error ? err.message : 'Failed to reject roadmap');
+    } finally {
+      setApprovalLoading(false);
+    }
+  };
+
   const handleCreateRun = async () => {
     if (!id) return;
     try {
       setRunCreating(true);
       setRunError(null);
-      const run = await apiClient.post<Run>(
-        `/runs/from-roadmap/${id}`,
-        {}
-      );
+      const run = await apiClient.post<Run>(`/runs/from-roadmap/${id}`, {});
       navigate(`/runs/${run.id}`);
     } catch (err) {
       setRunError(err instanceof Error ? err.message : 'Failed to create run');
@@ -61,10 +97,10 @@ export function RoadmapDetail() {
       <div className="p-6">
         <div className="mb-4">
           <button
-            onClick={() => navigate('/roadmaps')}
+            onClick={() => navigate(-1)}
             className="text-blue-600 hover:text-blue-800"
           >
-            ← Back to Roadmaps
+            ← Back
           </button>
         </div>
         <div className="text-red-600">
@@ -93,14 +129,17 @@ export function RoadmapDetail() {
     return roadmap.phases.reduce((total, phase) => total + (phase.estimatedHours || 0), 0);
   };
 
+  const isPendingReview = roadmap.status === 'draft' || roadmap.status === 'reviewing';
+  const isApproved = roadmap.status === 'approved';
+
   return (
     <div className="p-6">
       <div className="mb-4">
         <button
-          onClick={() => navigate('/roadmaps')}
+          onClick={() => navigate(-1)}
           className="text-blue-600 hover:text-blue-800"
         >
-          ← Back to Roadmaps
+          ← Back
         </button>
       </div>
 
@@ -132,7 +171,7 @@ export function RoadmapDetail() {
         </div>
 
         <div className="space-y-6">
-          {roadmap.phases.map((phase, idx) => (
+          {roadmap.phases.map((phase) => (
             <div key={phase.id} className="border-l-4 border-blue-500 pl-4 py-4">
               <div className="flex items-start justify-between mb-3">
                 <div>
@@ -206,13 +245,74 @@ export function RoadmapDetail() {
           </div>
         </div>
 
-        {roadmap.approvedBy && (
+        {/* Approval Panel — visible when roadmap is not yet approved or rejected */}
+        {isPendingReview && (
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">Review Decision</h3>
+            {approvalError && (
+              <div className="mb-3 bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-sm text-red-800">{approvalError}</p>
+              </div>
+            )}
+            {!showRejectInput ? (
+              <div className="flex gap-3">
+                <button
+                  onClick={handleApprove}
+                  disabled={approvalLoading}
+                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {approvalLoading ? 'Approving...' : 'Approve Roadmap'}
+                </button>
+                <button
+                  onClick={() => setShowRejectInput(true)}
+                  disabled={approvalLoading}
+                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Reject
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <input
+                  type="text"
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="Reason for rejection..."
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                  autoFocus
+                />
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleReject}
+                    disabled={!rejectReason.trim() || approvalLoading}
+                    className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {approvalLoading ? 'Rejecting...' : 'Confirm Rejection'}
+                  </button>
+                  <button
+                    onClick={() => { setShowRejectInput(false); setRejectReason(''); }}
+                    className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Approved state — show who approved and Create Run button */}
+        {isApproved && (
           <div className="mt-6 pt-6 border-t border-gray-200">
             <div className="space-y-3">
-              <p className="text-sm text-gray-600">
-                ✓ Approved by <span className="font-semibold">{roadmap.approvedBy}</span> on{' '}
-                <span className="font-semibold">{new Date(roadmap.approvedAt || '').toLocaleDateString()}</span>
-              </p>
+              {roadmap.approvedBy && (
+                <p className="text-sm text-gray-600">
+                  ✓ Approved by <span className="font-semibold">{roadmap.approvedBy}</span>
+                  {roadmap.approvedAt && (
+                    <> on <span className="font-semibold">{new Date(roadmap.approvedAt).toLocaleDateString()}</span></>
+                  )}
+                </p>
+              )}
               {runError && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3">
                   <p className="text-sm text-red-800">{runError}</p>
@@ -226,6 +326,13 @@ export function RoadmapDetail() {
                 {runCreating ? 'Creating Run...' : 'Create Execution Run'}
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Rejected state */}
+        {roadmap.status === 'rejected' && (
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <p className="text-sm font-semibold text-red-700">✗ Roadmap Rejected</p>
           </div>
         )}
       </div>

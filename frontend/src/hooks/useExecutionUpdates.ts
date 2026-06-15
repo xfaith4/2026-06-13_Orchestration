@@ -24,9 +24,6 @@ interface UseExecutionUpdatesOptions {
   enabled?: boolean;
 }
 
-// Mock logs storage - in production, logs would come from backend
-const mockLogs = new Map<string, ExecutionLog[]>();
-
 export function useExecutionUpdates({
   runId,
   pollingInterval = 2000,
@@ -36,21 +33,20 @@ export function useExecutionUpdates({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const pollTimeoutRef = useRef<NodeJS.Timeout>();
-  const lastUpdateRef = useRef<number>(0);
 
   useEffect(() => {
     if (!enabled || !runId) return;
 
     const fetchUpdate = async () => {
       try {
-        const run = await apiClient.get<Run>(`/runs/${runId}`);
-
-        // Get mock logs for this run (in real implementation, fetch from backend)
-        const logs = mockLogs.get(runId) || [];
+        const [run, logs] = await Promise.all([
+          apiClient.get<Run>(`/runs/${runId}`),
+          apiClient.get<ExecutionLog[]>(`/runs/${runId}/logs`).catch(() => [] as ExecutionLog[]),
+        ]);
 
         setData({
           run,
-          logs,
+          logs: logs ?? [],
           lastUpdate: new Date(),
         });
         setError(null);
@@ -81,40 +77,9 @@ export function useExecutionUpdates({
     };
   }, [runId, pollingInterval, enabled]);
 
-  // Function to add logs (for testing/simulation)
-  const addLog = (log: ExecutionLog) => {
-    if (!mockLogs.has(runId)) {
-      mockLogs.set(runId, []);
-    }
-    mockLogs.get(runId)!.push(log);
-
-    // Update state if data exists
-    if (data) {
-      setData({
-        ...data,
-        logs: mockLogs.get(runId)!,
-        lastUpdate: new Date(),
-      });
-    }
-  };
-
-  // Function to clear logs
-  const clearLogs = () => {
-    mockLogs.delete(runId);
-    if (data) {
-      setData({
-        ...data,
-        logs: [],
-        lastUpdate: new Date(),
-      });
-    }
-  };
-
   return {
     data,
     loading,
     error,
-    addLog,
-    clearLogs,
   };
 }
