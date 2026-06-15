@@ -5,6 +5,7 @@ import { createApplicationRoutes } from './applications.js';
 import { createDesignPlanRoutes } from './design-plans.js';
 import { createRoadmapRoutes } from './roadmaps.js';
 import { createRunRoutes } from './runs.js';
+import { createAgentRoutes } from './agents.js';
 import { createGenericCrudRoutes } from './generic-crud.js';
 
 export const createApiRoutes = (
@@ -17,7 +18,7 @@ export const createApiRoutes = (
   router.use('/design-plans', createDesignPlanRoutes(persistence, validation));
   router.use('/roadmaps', createRoadmapRoutes(persistence, validation));
   router.use('/runs', createRunRoutes(persistence, validation));
-  router.use('/agents', createGenericCrudRoutes(persistence, validation, 'agents'));
+  router.use('/agents', createAgentRoutes(persistence, validation));
   router.use('/prompts', createGenericCrudRoutes(persistence, validation, 'prompts'));
   router.use('/contracts', createGenericCrudRoutes(persistence, validation, 'contracts'));
 

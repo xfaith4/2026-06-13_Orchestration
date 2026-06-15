@@ -88,7 +88,13 @@ app.listen(port, () => {
   console.log(`  GET  /api/error-logs/severity/:level (low|medium|high|critical)`);
   console.log(`  GET  /api/error-logs/run/:runId`);
   console.log(`  PATCH /api/error-logs/:id/resolve (mark error as resolved)`);
-  console.log(`  GET  /api/agents, POST, GET/:id, PUT/:id, DELETE/:id`);
+  console.log(`  GET  /api/agents (with filters: type, search, capability)`);
+  console.log(`  GET  /api/agents/:id`);
+  console.log(`  GET  /api/agents/type/:type (agents by type)`);
+  console.log(`  GET  /api/agents/capability/:capability (agents by capability)`);
+  console.log(`  GET  /api/agents/meta/types (list all agent types)`);
+  console.log(`  GET  /api/agents/meta/stats (agent statistics)`);
+  console.log(`  POST /api/agents, PUT /api/agents/:id, DELETE /api/agents/:id`);
   console.log(`  GET  /api/prompts, POST, GET/:id, PUT/:id, DELETE/:id`);
   console.log(`  GET  /api/contracts, POST, GET/:id, PUT/:id, DELETE/:id`);
 });
