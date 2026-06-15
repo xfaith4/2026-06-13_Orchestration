@@ -2486,10 +2486,10 @@ feat(phase-16): run state machine
 
 ## Phase 17 — Task Execution Queue
 
-**Status:** Not Started
-**Completed:**
-**Completed By:**
-**Completion Notes:**
+**Status:** Complete
+**Completed:** 2026-06-14 23:13 UTC
+**Completed By:** Claude Haiku 4.5
+**Completion Notes:** All acceptance criteria met. Implemented TaskQueue with 22 unit tests (100% passing). Features: topological dependency resolution, circular dependency detection, parallel task identification, batch execution planning, task state transitions (start/complete/fail/retry/skip), max retry limits, queue statistics. Skipped tasks properly unblock dependents. Commit: e76a2c8
 
 ### Goal
 
