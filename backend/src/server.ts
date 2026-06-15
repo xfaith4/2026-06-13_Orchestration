@@ -8,6 +8,7 @@ import { ValidationService } from './services/validation.js';
 import { createApiRoutes } from './routes/index.js';
 import { createAuditLogRoutes } from './routes/audit-logs.js';
 import { createErrorLogRoutes } from './routes/error-logs.js';
+import { createExecutionRoutes } from './routes/execution.js';
 import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
 import { createAuditMiddleware } from './middleware/audit-middleware.js';
 import { createResponse } from './types/responses.js';
@@ -52,6 +53,9 @@ app.use('/api/audit-logs', createAuditLogRoutes(persistence));
 
 // Error log routes
 app.use('/api/error-logs', createErrorLogRoutes(persistence));
+
+// Execution routes
+app.use('/api/execution', createExecutionRoutes(persistence));
 
 // Error handling
 app.use(notFoundHandler);
@@ -105,6 +109,10 @@ app.listen(port, () => {
   console.log(`  POST /api/prompts, PUT /api/prompts/:id, DELETE /api/prompts/:id`);
   console.log(`  PATCH /api/prompts/:id/use (record prompt usage)`);
   console.log(`  GET  /api/contracts, POST, GET/:id, PUT/:id, DELETE/:id`);
+  console.log(`  POST /api/execution/:runId/phase/:phaseId/task/:taskId/execute (execute task)`);
+  console.log(`  POST /api/execution/:runId/phase/:phaseId/execute (execute phase)`);
+  console.log(`  GET  /api/execution/:runId/phase/:phaseId/task/:taskId/plan (task plan)`);
+  console.log(`  GET  /api/execution/:runId/phase/:phaseId/plan (phase plan)`);
 });
 
 export default app;
