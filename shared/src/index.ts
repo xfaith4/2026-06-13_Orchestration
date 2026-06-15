@@ -244,6 +244,49 @@ export interface QueuedTask {
   completedAt?: string;
 }
 
+// Agent Execution
+export interface AgentExecutionInput {
+  agentId: string;
+  agentName: string;
+  prompt: string;
+  inputData: Record<string, unknown>;
+  inputSchema?: Record<string, unknown>;
+  outputSchema?: Record<string, unknown>;
+  timeout?: number;
+}
+
+export interface AgentExecutionResult {
+  success: boolean;
+  output?: Record<string, unknown>;
+  tokensIn?: number;
+  tokensOut?: number;
+  durationMs?: number;
+  model?: string;
+  error?: string;
+  errorType?: string;
+  errorCode?: string;
+}
+
+export interface AgentExecutor {
+  execute(input: AgentExecutionInput): Promise<AgentExecutionResult>;
+}
+
+export interface ExecutionContext {
+  runId: string;
+  phaseId: string;
+  taskId: string;
+  requestId?: string;
+  timestamp?: string;
+}
+
+export interface AdapterExecutionOptions {
+  timeout?: number;
+  validateInput?: boolean;
+  validateOutput?: boolean;
+  extractCosts?: boolean;
+  retryOnValidationFailure?: boolean;
+}
+
 export interface CircuitBreakerState {
   state: 'closed' | 'open' | 'half-open';
   failureCount: number;
