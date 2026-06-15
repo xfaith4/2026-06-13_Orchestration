@@ -133,3 +133,23 @@ export interface User extends BaseEntity {
   name: string;
   role?: string;
 }
+
+// Audit Logging
+export interface AuditLogEntry extends BaseEntity {
+  timestamp: string;
+  userId: string;
+  action: 'CREATE' | 'UPDATE' | 'DELETE';
+  resourceType: string;
+  resourceId: string;
+  resourceName?: string;
+  changes?: {
+    field: string;
+    oldValue?: unknown;
+    newValue?: unknown;
+  }[];
+  ipAddress?: string;
+  userAgent?: string;
+  status: 'success' | 'failure';
+  errorMessage?: string;
+  metadata?: Record<string, unknown>;
+}

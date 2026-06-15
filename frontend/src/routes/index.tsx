@@ -10,6 +10,7 @@ import { RoadmapList } from '../pages/RoadmapList';
 import { RoadmapDetail } from '../pages/RoadmapDetail';
 import { RunList } from '../pages/RunList';
 import { RunDetail } from '../pages/RunDetail';
+import { AuditLog } from '../pages/AuditLog';
 
 export function AppRoutes() {
   return (
@@ -114,6 +115,14 @@ export function AppRoutes() {
                 <h1 className="text-3xl font-bold">Prompts</h1>
                 <p className="text-gray-600 mt-2">Coming soon</p>
               </div>
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/audit-logs"
+          element={
+            <MainLayout>
+              <AuditLog />
             </MainLayout>
           }
         />

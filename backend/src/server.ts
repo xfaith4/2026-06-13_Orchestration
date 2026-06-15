@@ -6,7 +6,9 @@ import { fileURLToPath } from 'url';
 import { PersistenceService } from './services/persistence.js';
 import { ValidationService } from './services/validation.js';
 import { createApiRoutes } from './routes/index.js';
+import { createAuditLogRoutes } from './routes/audit-logs.js';
 import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
+import { createAuditMiddleware } from './middleware/audit-middleware.js';
 import { createResponse } from './types/responses.js';
 
 dotenv.config();
@@ -24,6 +26,7 @@ const validation = new ValidationService(schemasDir);
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(createAuditMiddleware(persistence));
 
 // Health check
 app.get('/api/health', (req: Request, res: Response) => {
@@ -42,6 +45,9 @@ app.get('/', (req: Request, res: Response) => {
 
 // API routes
 app.use('/api', createApiRoutes(persistence, validation));
+
+// Audit log routes
+app.use('/api/audit-logs', createAuditLogRoutes(persistence));
 
 // Error handling
 app.use(notFoundHandler);
@@ -66,7 +72,10 @@ app.listen(port, () => {
   console.log(`  PATCH /api/runs/:id/pause`);
   console.log(`  PATCH /api/runs/:id/phase/:phaseId/task/:taskId/{assign|start|complete|fail}`);
   console.log(`  GET  /api/runs, POST, GET/:id, PUT/:id, DELETE/:id`);
-  console.log(`  GET  /api/runs, POST, GET/:id, PUT/:id, DELETE/:id`);
+  console.log(`  GET  /api/audit-logs (with filters: startDate, endDate, userId, action, resourceType, resourceId)`);
+  console.log(`  GET  /api/audit-logs/:id`);
+  console.log(`  GET  /api/audit-logs/stats/summary`);
+  console.log(`  GET  /api/audit-logs/user/:userId`);
   console.log(`  GET  /api/agents, POST, GET/:id, PUT/:id, DELETE/:id`);
   console.log(`  GET  /api/prompts, POST, GET/:id, PUT/:id, DELETE/:id`);
   console.log(`  GET  /api/contracts, POST, GET/:id, PUT/:id, DELETE/:id`);
