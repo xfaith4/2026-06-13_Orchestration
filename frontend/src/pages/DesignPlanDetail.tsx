@@ -9,6 +9,8 @@ export function DesignPlanDetail() {
   const [designPlan, setDesignPlan] = useState<DesignPlan | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [approvalLoading, setApprovalLoading] = useState(false);
+  const [approvalError, setApprovalError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDesignPlan = async () => {
@@ -28,6 +30,54 @@ export function DesignPlanDetail() {
       fetchDesignPlan();
     }
   }, [id]);
+
+  const handleMoveToReview = async () => {
+    if (!id) return;
+    try {
+      setApprovalLoading(true);
+      setApprovalError(null);
+      const updated = await apiClient.put<DesignPlan>(`/design-plans/${id}/review`, {});
+      setDesignPlan(updated);
+    } catch (err) {
+      setApprovalError(err instanceof Error ? err.message : 'Failed to move to review');
+    } finally {
+      setApprovalLoading(false);
+    }
+  };
+
+  const handleApprove = async () => {
+    if (!id) return;
+    try {
+      setApprovalLoading(true);
+      setApprovalError(null);
+      const updated = await apiClient.put<DesignPlan>(
+        `/design-plans/${id}/decision/approve`,
+        { approver: 'current-user' }
+      );
+      setDesignPlan(updated);
+    } catch (err) {
+      setApprovalError(err instanceof Error ? err.message : 'Failed to approve design plan');
+    } finally {
+      setApprovalLoading(false);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!id) return;
+    try {
+      setApprovalLoading(true);
+      setApprovalError(null);
+      const updated = await apiClient.put<DesignPlan>(
+        `/design-plans/${id}/decision/reject`,
+        { approver: 'current-user' }
+      );
+      setDesignPlan(updated);
+    } catch (err) {
+      setApprovalError(err instanceof Error ? err.message : 'Failed to reject design plan');
+    } finally {
+      setApprovalLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -156,14 +206,60 @@ export function DesignPlanDetail() {
           </section>
         </div>
 
-        {designPlan.approvedBy && (
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <p className="text-sm text-gray-600">
-              Approved by <span className="font-semibold">{designPlan.approvedBy}</span> on{' '}
-              <span className="font-semibold">{new Date(designPlan.approvedAt || '').toLocaleDateString()}</span>
-            </p>
+        {approvalError && (
+          <div className="mt-8 bg-red-50 border border-red-200 rounded-lg p-3">
+            <p className="text-sm text-red-800">{approvalError}</p>
           </div>
         )}
+
+        <div className="mt-8 pt-6 border-t border-gray-200">
+          {designPlan.status === 'draft' && (
+            <div className="space-y-3">
+              <p className="text-sm text-gray-600 mb-4">Ready for review?</p>
+              <button
+                onClick={handleMoveToReview}
+                disabled={approvalLoading}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {approvalLoading ? 'Moving to Review...' : 'Move to Review'}
+              </button>
+            </div>
+          )}
+
+          {designPlan.status === 'reviewing' && (
+            <div className="space-y-3">
+              <p className="text-sm text-gray-600 mb-4">Review complete. Approve or reject?</p>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleApprove}
+                  disabled={approvalLoading}
+                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {approvalLoading ? 'Approving...' : 'Approve'}
+                </button>
+                <button
+                  onClick={handleReject}
+                  disabled={approvalLoading}
+                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {approvalLoading ? 'Rejecting...' : 'Reject'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {(designPlan.status === 'approved' || designPlan.status === 'rejected') && designPlan.approvedBy && (
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-gray-900">
+                {designPlan.status === 'approved' ? '✓ Approved' : '✗ Rejected'}
+              </p>
+              <p className="text-sm text-gray-600">
+                by <span className="font-semibold">{designPlan.approvedBy}</span> on{' '}
+                <span className="font-semibold">{new Date(designPlan.approvedAt || '').toLocaleDateString()}</span>
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

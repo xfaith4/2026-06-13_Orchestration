@@ -56,6 +56,8 @@ app.listen(port, () => {
   console.log(`  GET  /api/health`);
   console.log(`  GET  /api/applications, POST, GET/:id, PUT/:id, DELETE/:id`);
   console.log(`  POST /api/design-plans/generate/:applicationId`);
+  console.log(`  PATCH /api/design-plans/:id/review`);
+  console.log(`  PATCH /api/design-plans/:id/decision/{approve|reject}`);
   console.log(`  GET  /api/design-plans, POST, GET/:id, PUT/:id, DELETE/:id`);
   console.log(`  GET  /api/roadmaps, POST, GET/:id, PUT/:id, DELETE/:id`);
   console.log(`  GET  /api/runs, POST, GET/:id, PUT/:id, DELETE/:id`);
