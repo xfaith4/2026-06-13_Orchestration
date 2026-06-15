@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { apiClient } from '../services/api';
 
 interface Prompt {
@@ -27,41 +27,37 @@ export function PromptList() {
   const [filterTag, setFilterTag] = useState<string>('');
   const [stats, setStats] = useState<any>(null);
 
-  useEffect(() => {
-    const fetchPrompts = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const fetchPrompts = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        // Fetch prompts
-        let url = '/prompts?limit=200';
-        if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
-        if (filterCategory) url += `&category=${encodeURIComponent(filterCategory)}`;
-        if (filterTag) url += `&tag=${encodeURIComponent(filterTag)}`;
+      let url = '/prompts?limit=200';
+      if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
+      if (filterCategory) url += `&category=${encodeURIComponent(filterCategory)}`;
+      if (filterTag) url += `&tag=${encodeURIComponent(filterTag)}`;
 
-        const data = await apiClient.get<Prompt[]>(url);
-        setPrompts(data || []);
+      const [data, catData, tagData, statsData] = await Promise.all([
+        apiClient.get<Prompt[]>(url),
+        apiClient.get<{ categories: string[] }>('/prompts/meta/categories'),
+        apiClient.get<{ tags: string[] }>('/prompts/meta/tags'),
+        apiClient.get('/prompts/meta/stats'),
+      ]);
 
-        // Fetch categories
-        const catData = await apiClient.get<{ categories: string[] }>('/prompts/meta/categories');
-        setCategories(catData?.categories || []);
-
-        // Fetch tags
-        const tagData = await apiClient.get<{ tags: string[] }>('/prompts/meta/tags');
-        setTags(tagData?.tags || []);
-
-        // Fetch stats
-        const statsData = await apiClient.get('/prompts/meta/stats');
-        setStats(statsData);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load prompts');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPrompts();
+      setPrompts(data || []);
+      setCategories(catData?.categories || []);
+      setTags(tagData?.tags || []);
+      setStats(statsData);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load prompts');
+    } finally {
+      setLoading(false);
+    }
   }, [searchQuery, filterCategory, filterTag]);
+
+  useEffect(() => {
+    fetchPrompts();
+  }, [fetchPrompts]);
 
   const getCategoryColor = (category?: string) => {
     const colors: Record<string, string> = {
@@ -88,7 +84,7 @@ export function PromptList() {
       <div className="p-6">
         <div className="text-red-600 mb-4">{error}</div>
         <button
-          onClick={() => window.location.reload()}
+          onClick={fetchPrompts}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
           Try Again

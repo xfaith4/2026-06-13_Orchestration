@@ -1,30 +1,39 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../services/api';
-import { DesignPlan } from '../types';
+import { Application, DesignPlan } from '../types';
 
 export function DesignPlansList() {
   const navigate = useNavigate();
   const [designPlans, setDesignPlans] = useState<DesignPlan[]>([]);
+  const [applicationNames, setApplicationNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchDesignPlans = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await apiClient.get<DesignPlan[]>('/design-plans');
-        setDesignPlans(data || []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load design plans');
-      } finally {
-        setLoading(false);
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const [plans, apps] = await Promise.all([
+        apiClient.get<DesignPlan[]>('/design-plans'),
+        apiClient.get<Application[]>('/applications'),
+      ]);
+      setDesignPlans(plans || []);
+      const names: Record<string, string> = {};
+      for (const app of apps || []) {
+        names[app.id] = app.name;
       }
-    };
-
-    fetchDesignPlans();
+      setApplicationNames(names);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load design plans');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   if (loading) {
     return (
@@ -39,7 +48,7 @@ export function DesignPlansList() {
       <div className="p-6">
         <div className="text-red-600 mb-4">{error}</div>
         <button
-          onClick={() => window.location.reload()}
+          onClick={fetchData}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
           Try Again
@@ -56,7 +65,7 @@ export function DesignPlansList() {
           onClick={() => navigate('/applications')}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
-          Back to Applications
+          Go to Applications
         </button>
       </div>
 
@@ -84,10 +93,16 @@ export function DesignPlansList() {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    Design Plan for Application
+                    Design Plan for {applicationNames[plan.applicationId] ?? 'Unknown Application'}
                   </h3>
                   <p className="text-sm text-gray-600 mt-1">
-                    Application: <code className="bg-gray-100 px-2 py-1 rounded text-xs">{plan.applicationId}</code>
+                    Application:{' '}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); navigate(`/applications/${plan.applicationId}`); }}
+                      className="text-blue-600 hover:underline font-medium"
+                    >
+                      {applicationNames[plan.applicationId] ?? plan.applicationId}
+                    </button>
                   </p>
                   <p className="text-gray-700 mt-3 line-clamp-2">{plan.overview}</p>
                   <div className="flex gap-2 mt-4">

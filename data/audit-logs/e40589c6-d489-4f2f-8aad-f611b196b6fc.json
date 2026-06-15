@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-06-15T05:49:03.164Z",
+  "userId": "anonymous",
+  "action": "CREATE",
+  "resourceType": "api",
+  "resourceId": "unknown",
+  "changes": [
+    {
+      "field": "error",
+      "newValue": "Schema not found"
+    },
+    {
+      "field": "errors"
+    },
+    {
+      "field": "timestamp",
+      "newValue": "2026-06-15T05:49:03.164Z"
+    }
+  ],
+  "ipAddress": "::1",
+  "userAgent": "curl/8.19.0",
+  "status": "success",
+  "id": "e40589c6-d489-4f2f-8aad-f611b196b6fc",
+  "createdAt": "2026-06-15T05:49:03.165Z",
+  "updatedAt": "2026-06-15T05:49:03.165Z"
+}

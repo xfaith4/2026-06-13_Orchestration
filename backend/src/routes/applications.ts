@@ -20,7 +20,7 @@ export const createApplicationRoutes = (
 
   router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const schema = await validation.loadSchema('application');
+      const schema = await validation.loadSchema('application.schema');
       if (!schema) {
         throw new ApiError(500, 'Schema not found');
       }

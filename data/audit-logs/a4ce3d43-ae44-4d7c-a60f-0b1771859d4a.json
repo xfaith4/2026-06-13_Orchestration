@@ -1,0 +1,37 @@
+{
+  "timestamp": "2026-06-15T05:51:04.121Z",
+  "userId": "anonymous",
+  "action": "CREATE",
+  "resourceType": "unknown",
+  "resourceId": "unknown",
+  "changes": [
+    {
+      "field": "data",
+      "newValue": {
+        "name": "Test App",
+        "description": "A test application",
+        "goal": "Validate the system",
+        "requirements": [
+          "Requirement 1"
+        ],
+        "status": "draft",
+        "id": "795d6988-f830-458a-b4a5-0adff84ca973",
+        "createdAt": "2026-06-15T05:51:04.116Z",
+        "updatedAt": "2026-06-15T05:51:04.116Z"
+      }
+    },
+    {
+      "field": "error"
+    },
+    {
+      "field": "timestamp",
+      "newValue": "2026-06-15T05:51:04.120Z"
+    }
+  ],
+  "ipAddress": "::1",
+  "userAgent": "curl/8.19.0",
+  "status": "success",
+  "id": "a4ce3d43-ae44-4d7c-a60f-0b1771859d4a",
+  "createdAt": "2026-06-15T05:51:04.124Z",
+  "updatedAt": "2026-06-15T05:51:04.124Z"
+}

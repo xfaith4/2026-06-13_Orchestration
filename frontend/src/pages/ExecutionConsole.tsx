@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Run } from '../types';
 import { apiClient } from '../services/api';
-import { useExecutionUpdates, ExecutionLog } from '../hooks/useExecutionUpdates';
+import { useExecutionUpdates } from '../hooks/useExecutionUpdates';
 import { ExecutionProgress } from '../components/ExecutionProgress';
 import { RealTimeLogs } from '../components/RealTimeLogs';
 import { CostTracker } from '../components/CostTracker';
@@ -17,6 +17,8 @@ export function ExecutionConsole() {
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [showRepairModal, setShowRepairModal] = useState(false);
+  const [repairLoading, setRepairLoading] = useState(false);
+  const [repairError, setRepairError] = useState<string | null>(null);
 
   const { data, loading, error } = useExecutionUpdates({
     runId: id || '',
@@ -26,10 +28,9 @@ export function ExecutionConsole() {
 
   const run = data?.run;
 
-  // Auto-refresh run status when it changes to completed or failed
   useEffect(() => {
     if (run && (run.status === 'completed' || run.status === 'failed')) {
-      // Could trigger auto-refresh here if needed
+      // polling continues; no action needed here
     }
   }, [run?.status]);
 
@@ -38,8 +39,7 @@ export function ExecutionConsole() {
     try {
       setActionLoading(true);
       setActionError(null);
-      const updated = await apiClient.patch<Run>(`/runs/${id}/start`, {});
-      // Update would be auto-fetched by polling
+      await apiClient.patch<Run>(`/runs/${id}/start`, {});
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Failed to start run');
     } finally {
@@ -52,8 +52,7 @@ export function ExecutionConsole() {
     try {
       setActionLoading(true);
       setActionError(null);
-      const updated = await apiClient.patch<Run>(`/runs/${id}/pause`, {});
-      // Update would be auto-fetched by polling
+      await apiClient.patch<Run>(`/runs/${id}/pause`, {});
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Failed to pause run');
     } finally {
@@ -66,9 +65,7 @@ export function ExecutionConsole() {
     try {
       setActionLoading(true);
       setActionError(null);
-      // Resume would use the start endpoint since there's no separate resume
-      const updated = await apiClient.patch<Run>(`/runs/${id}/start`, {});
-      // Update would be auto-fetched by polling
+      await apiClient.patch<Run>(`/runs/${id}/resume`, {});
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Failed to resume run');
     } finally {
@@ -76,10 +73,18 @@ export function ExecutionConsole() {
     }
   };
 
-  const handleApproveRepair = async (repairId: string) => {
-    // This would be called when user approves a repair suggestion
-    // In a full implementation, this would update the run's repair state
-    setShowRepairModal(false);
+  const handleRetryFromError = async () => {
+    if (!id) return;
+    try {
+      setRepairLoading(true);
+      setRepairError(null);
+      await apiClient.patch<Run>(`/runs/${id}/resume`, {});
+      setShowRepairModal(false);
+    } catch (err) {
+      setRepairError(err instanceof Error ? err.message : 'Failed to retry run');
+    } finally {
+      setRepairLoading(false);
+    }
   };
 
   if (loading) {
@@ -95,7 +100,7 @@ export function ExecutionConsole() {
       <div className="p-6">
         <div className="mb-4">
           <button
-            onClick={() => navigate('/runs')}
+            onClick={() => navigate(-1)}
             className="text-blue-600 hover:text-blue-800"
           >
             ← Back to Runs
@@ -107,14 +112,14 @@ export function ExecutionConsole() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-100">
+    <div className="flex-1 flex flex-col overflow-auto bg-gray-100">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 shadow-sm">
         <div className="px-6 py-4">
           <div className="flex items-start justify-between mb-4">
             <div>
               <button
-                onClick={() => navigate('/runs')}
+                onClick={() => navigate(-1)}
                 className="text-blue-600 hover:text-blue-800 text-sm mb-2"
               >
                 ← Back to Runs
@@ -203,36 +208,19 @@ export function ExecutionConsole() {
       {/* View mode tabs */}
       <div className="bg-white border-b border-gray-200 px-6">
         <div className="flex gap-8">
-          <button
-            onClick={() => setViewMode('overview')}
-            className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-              viewMode === 'overview'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Overview
-          </button>
-          <button
-            onClick={() => setViewMode('logs')}
-            className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-              viewMode === 'logs'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Logs
-          </button>
-          <button
-            onClick={() => setViewMode('costs')}
-            className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-              viewMode === 'costs'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Costs
-          </button>
+          {(['overview', 'logs', 'costs'] as ViewMode[]).map((mode) => (
+            <button
+              key={mode}
+              onClick={() => setViewMode(mode)}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                viewMode === mode
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              {mode.charAt(0).toUpperCase() + mode.slice(1)}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -273,30 +261,36 @@ export function ExecutionConsole() {
                 </div>
               )}
 
+              {repairError && (
+                <div className="bg-red-50 border border-red-200 rounded p-3">
+                  <p className="text-sm text-red-800">{repairError}</p>
+                </div>
+              )}
+
               <div className="bg-blue-50 border border-blue-200 rounded p-4">
                 <p className="text-sm font-semibold text-blue-800">Suggested Actions</p>
                 <ul className="text-sm text-blue-700 mt-2 space-y-1 list-disc list-inside">
                   <li>Review the error message above</li>
-                  <li>Check the logs for more details</li>
-                  <li>Contact support if the issue persists</li>
+                  <li>Check the Logs tab for more details</li>
+                  <li>Use Retry to attempt to resume the run</li>
                 </ul>
               </div>
             </div>
 
             <div className="px-6 py-4 border-t border-gray-200 flex gap-3">
               <button
-                onClick={() => setShowRepairModal(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 text-sm font-medium"
+                onClick={() => { setShowRepairModal(false); setRepairError(null); }}
+                disabled={repairLoading}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 text-sm font-medium disabled:opacity-50"
               >
                 Close
               </button>
               <button
-                onClick={() => {
-                  handleApproveRepair('repair-1');
-                }}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium"
+                onClick={handleRetryFromError}
+                disabled={repairLoading}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Retry
+                {repairLoading ? 'Retrying...' : 'Retry Run'}
               </button>
             </div>
           </div>

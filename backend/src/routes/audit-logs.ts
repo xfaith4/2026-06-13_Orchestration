@@ -9,7 +9,7 @@ export const createAuditLogRoutes = (persistence: PersistenceService) => {
   // Get all audit logs with optional filtering
   router.get('/', async (req: Request, res: Response) => {
     try {
-      const { startDate, endDate, userId, action, resourceType, resourceId, limit = '100' } = req.query;
+      const { startDate, endDate, userId, action, resourceType, resourceId, status, limit = '100' } = req.query;
 
       let logs = await persistence.list<AuditLogEntry>('audit-logs');
 
@@ -42,6 +42,11 @@ export const createAuditLogRoutes = (persistence: PersistenceService) => {
       // Filter by resource ID
       if (resourceId) {
         logs = logs.filter(log => log.resourceId === resourceId);
+      }
+
+      // Filter by status
+      if (status) {
+        logs = logs.filter(log => log.status === (status as string));
       }
 
       // Sort by timestamp descending (most recent first)

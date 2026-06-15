@@ -52,6 +52,6 @@
       "description": "Last update timestamp"
     }
   },
-  "required": ["id", "name", "description", "goal", "requirements", "status", "createdAt", "updatedAt"],
-  "additionalProperties": false
+  "required": ["name", "description", "goal", "requirements", "status"],
+  "additionalProperties": true
 }

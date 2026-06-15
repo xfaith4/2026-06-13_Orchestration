@@ -1,30 +1,39 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../services/api';
-import { Run } from '../types';
+import { Roadmap, Run } from '../types';
 
 export function RunList() {
   const navigate = useNavigate();
   const [runs, setRuns] = useState<Run[]>([]);
+  const [roadmapTitles, setRoadmapTitles] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchRuns = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await apiClient.get<Run[]>('/runs');
-        setRuns(data || []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load runs');
-      } finally {
-        setLoading(false);
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const [runData, roadmapData] = await Promise.all([
+        apiClient.get<Run[]>('/runs'),
+        apiClient.get<Roadmap[]>('/roadmaps'),
+      ]);
+      setRuns(runData || []);
+      const titles: Record<string, string> = {};
+      for (const roadmap of roadmapData || []) {
+        titles[roadmap.id] = roadmap.title;
       }
-    };
-
-    fetchRuns();
+      setRoadmapTitles(titles);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load runs');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -65,7 +74,7 @@ export function RunList() {
       <div className="p-6">
         <div className="text-red-600 mb-4">{error}</div>
         <button
-          onClick={() => window.location.reload()}
+          onClick={fetchData}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
           Try Again
@@ -82,7 +91,7 @@ export function RunList() {
           onClick={() => navigate('/roadmaps')}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
-          Back to Roadmaps
+          Go to Roadmaps
         </button>
       </div>
 
@@ -115,7 +124,13 @@ export function RunList() {
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-gray-900">{run.title}</h3>
                     <p className="text-sm text-gray-600 mt-1">
-                      Roadmap: <code className="bg-gray-100 px-2 py-1 rounded text-xs">{run.roadmapId}</code>
+                      Roadmap:{' '}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); navigate(`/roadmaps/${run.roadmapId}`); }}
+                        className="text-blue-600 hover:underline font-medium"
+                      >
+                        {roadmapTitles[run.roadmapId] ?? run.roadmapId}
+                      </button>
                     </p>
                     <p className="text-gray-700 mt-3 line-clamp-2">{run.description}</p>
 

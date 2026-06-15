@@ -1,30 +1,41 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../services/api';
-import { Roadmap } from '../types';
+import { DesignPlan, Roadmap } from '../types';
 
 export function RoadmapList() {
   const navigate = useNavigate();
   const [roadmaps, setRoadmaps] = useState<Roadmap[]>([]);
+  const [designPlanLabels, setDesignPlanLabels] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchRoadmaps = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await apiClient.get<Roadmap[]>('/roadmaps');
-        setRoadmaps(data || []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load roadmaps');
-      } finally {
-        setLoading(false);
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const [roadmapData, planData] = await Promise.all([
+        apiClient.get<Roadmap[]>('/roadmaps'),
+        apiClient.get<DesignPlan[]>('/design-plans'),
+      ]);
+      setRoadmaps(roadmapData || []);
+      const labels: Record<string, string> = {};
+      for (const plan of planData || []) {
+        labels[plan.id] = plan.overview.length > 60
+          ? plan.overview.substring(0, 60) + '…'
+          : plan.overview;
       }
-    };
-
-    fetchRoadmaps();
+      setDesignPlanLabels(labels);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load roadmaps');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   if (loading) {
     return (
@@ -39,7 +50,7 @@ export function RoadmapList() {
       <div className="p-6">
         <div className="text-red-600 mb-4">{error}</div>
         <button
-          onClick={() => window.location.reload()}
+          onClick={fetchData}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
           Try Again
@@ -56,7 +67,7 @@ export function RoadmapList() {
           onClick={() => navigate('/design-plans')}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
-          Back to Design Plans
+          Go to Design Plans
         </button>
       </div>
 
@@ -85,7 +96,13 @@ export function RoadmapList() {
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-gray-900">{roadmap.title}</h3>
                   <p className="text-sm text-gray-600 mt-1">
-                    Design Plan: <code className="bg-gray-100 px-2 py-1 rounded text-xs">{roadmap.designPlanId}</code>
+                    Design Plan:{' '}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); navigate(`/design-plans/${roadmap.designPlanId}`); }}
+                      className="text-blue-600 hover:underline font-medium"
+                    >
+                      {designPlanLabels[roadmap.designPlanId] ?? roadmap.designPlanId}
+                    </button>
                   </p>
                   <p className="text-gray-700 mt-3 line-clamp-2">{roadmap.description}</p>
                   <div className="flex gap-2 mt-4">

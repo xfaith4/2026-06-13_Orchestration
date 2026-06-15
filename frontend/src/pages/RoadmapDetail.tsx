@@ -1,12 +1,13 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { apiClient } from '../services/api';
-import { Roadmap, Run } from '../types';
+import { DesignPlan, Roadmap, Run } from '../types';
 
 export function RoadmapDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
+  const [designPlan, setDesignPlan] = useState<DesignPlan | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [approvalLoading, setApprovalLoading] = useState(false);
@@ -23,6 +24,14 @@ export function RoadmapDetail() {
         setError(null);
         const data = await apiClient.get<Roadmap>(`/roadmaps/${id}`);
         setRoadmap(data);
+        if (data?.designPlanId) {
+          try {
+            const plan = await apiClient.get<DesignPlan>(`/design-plans/${data.designPlanId}`);
+            setDesignPlan(plan);
+          } catch {
+            // design plan fetch is best-effort
+          }
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load roadmap');
       } finally {
@@ -149,8 +158,17 @@ export function RoadmapDetail() {
           <p className="text-sm text-gray-600 mt-2">{roadmap.description}</p>
           <div className="flex gap-4 mt-4">
             <div>
-              <span className="text-xs font-semibold text-gray-600">DESIGN PLAN ID</span>
-              <code className="block bg-gray-100 px-2 py-1 rounded text-sm mt-1">{roadmap.designPlanId}</code>
+              <span className="text-xs font-semibold text-gray-600">DESIGN PLAN</span>
+              <div className="mt-1">
+                <Link
+                  to={`/design-plans/${roadmap.designPlanId}`}
+                  className="text-blue-600 hover:underline text-sm font-medium"
+                >
+                  {designPlan
+                    ? (designPlan.overview.length > 70 ? designPlan.overview.substring(0, 70) + '…' : designPlan.overview)
+                    : roadmap.designPlanId}
+                </Link>
+              </div>
             </div>
             <div>
               <span className="text-xs font-semibold text-gray-600">STATUS</span>

@@ -1,0 +1,12 @@
+{
+  "name": "Test App",
+  "description": "A test application",
+  "goal": "Validate the system",
+  "requirements": [
+    "Requirement 1"
+  ],
+  "status": "draft",
+  "id": "795d6988-f830-458a-b4a5-0adff84ca973",
+  "createdAt": "2026-06-15T05:51:04.116Z",
+  "updatedAt": "2026-06-15T05:51:04.116Z"
+}

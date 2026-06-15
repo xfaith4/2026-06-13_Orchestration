@@ -1093,11 +1093,13 @@ The sidebar navigation array must only contain links to routes that are fully im
 
 - [ ] Create `frontend/src/components/ErrorBanner.tsx` with retry callback
 - [ ] Dashboard page must call the API for all four stat values (no hardcoded values)
-- [ ] Each stub page (Agents, Prompts, Contracts) must render an `EmptyState` component — not a blank view
+- [ ] Each stub page (Agents, Prompts, Contracts) must render an `<EmptyState>` component imported from the component library — not an inline `<div>` or raw JSX string in the router file
 - [ ] `LoadingSpinner` must include `role="status"` and `aria-label`
 - [ ] `EmptyState` must accept optional `action` prop for a CTA button
 - [ ] `MainLayout` must not apply padding to the main content container
 - [ ] All "Back" buttons must use `navigate(-1)`, not `navigate('/...')`
+- [ ] All interactive navigation elements (sidebar buttons, header links, Profile button) must navigate to a real, implemented route or must not be rendered — a button or anchor with no `onClick` or `href` is not an acceptable placeholder
+- [ ] Error state "Retry" buttons in all list and detail pages must call the component's own data-fetch function — never `window.location.reload()`. Full-page reloads discard router state and are untestable
 
 ### Testing Requirements
 
@@ -1128,9 +1130,11 @@ npm run dev
 * [ ] Professional appearance
 * [ ] Dashboard stats are fetched from the API — no hardcoded values in any stat card
 * [ ] All "Back" buttons in detail pages use `navigate(-1)`
-* [ ] All stub pages show an `EmptyState` rather than a blank or error screen
+* [ ] All stub pages render the `<EmptyState>` component — not an inline div or raw string — and the component is imported from the components library
 * [ ] `MainLayout` does not double-pad page content
 * [ ] `LoadingSpinner` renders `role="status"` accessible markup
+* [ ] No interactive navigation element (button, link, profile icon) is rendered without a working destination
+* [ ] No error-state retry handler calls `window.location.reload()` — all retry callbacks invoke the component's fetch function
 
 ### Human Review Gate
 
@@ -1222,6 +1226,7 @@ frontend/tests/e2e/application-workflow.e2e.ts
 - Success message after submission
 - List shows status clearly
 - Detail view is organized
+- After a successful application create, the user is navigated to the new application's detail page (`/applications/:newId`) — not to the list page. The user just created a record; the next logical action is to work with it (e.g., generate a design plan), which requires being on the detail page. Navigating to the list forces an unnecessary extra click and breaks the user's flow.
 
 ### Cross-Entity Navigation Requirement
 
@@ -1268,6 +1273,7 @@ npm run dev
 * [ ] User can fill and submit form
 * [ ] Form validates required fields
 * [ ] Application is created
+* [ ] After successful creation, the user is redirected to `/applications/:id` (the new application's detail page) — not to the list
 * [ ] Application appears in list
 * [ ] User can view details
 * [ ] User can edit application
@@ -1597,6 +1603,14 @@ frontend/src/hooks/useRoadmaps.ts
 - Agent assignments clear
 - Estimated time/complexity shown
 
+### List Display Standard
+
+Every list page that shows a relationship to a parent entity must display a **human-readable name or title** for that entity — never a raw UUID or internal ID. Displaying a 36-character UUID gives users no useful information and indicates a data-model shortcut rather than a proper join.
+
+**Rule:** If `DesignPlansList` shows a column for the parent application, it must show the application's name, not its `applicationId` field. If `RoadmapList` shows a column for the parent design plan, it must show a human-readable identifier. If a single API call cannot supply the parent name, the list endpoint must be enhanced to embed it (e.g., via a `parentName` field), or the frontend must batch-fetch parent names using `Promise.all`.
+
+This rule applies to every list page in the application: `DesignPlansList`, `RoadmapList`, `RunList`, and any future list pages that reference parent entities.
+
 ### API Requirements
 
 - POST /api/roadmaps (create/generate)
@@ -1687,6 +1701,10 @@ Parallel to Phase 7 but for roadmaps. Roadmap approval is the final gate before 
 
 > **HTTP Method Note:** Approve and reject are state transitions — they use `PATCH`, not `PUT`. See Phase 3 HTTP Method Contract.
 
+### Roadmap Detail Page — Parent Design Plan Link Requirement
+
+`RoadmapDetail` must display the name of its parent Design Plan with a clickable link to `DesignPlanDetail`. Displaying only the raw `designPlanId` UUID (e.g., in a `<code>` block) gives the user no way to navigate back to the design that generated this roadmap and provides no human-readable context. If the roadmap record does not embed the design plan name, `RoadmapDetail` must fetch `GET /api/design-plans/:designPlanId` on load to retrieve the name and use it in the display.
+
 ### Roadmap Detail Page — Approve/Reject Requirement
 
 `RoadmapDetail` must show an approval action panel when the roadmap is in a state that allows approval (`status === 'pending_review'`). The panel must include:
@@ -1751,6 +1769,7 @@ npm run dev
 * [ ] Approve and reject endpoints use `PATCH`; calling them with `PUT` returns 405
 * [ ] "Create Execution Run" button appears on `RoadmapDetail` only after approval
 * [ ] Approved roadmaps locked from further editing
+* [ ] `RoadmapDetail` displays the parent Design Plan as a human-readable name with a clickable link — not a raw UUID
 * [ ] All tests pass
 
 ### Human Review Gate
@@ -1818,6 +1837,7 @@ Agent definitions are core. They must be manageable via UI. Validates existing Y
 - [ ] Create `frontend/src/pages/AgentDetail.tsx`
 - [ ] Create `frontend/src/pages/AgentEdit.tsx`
 - [ ] Create `frontend/src/components/AgentTestBench.tsx`
+- [ ] Batch all independent API calls on page load using `Promise.all` — fetching agents, agent types, and agent stats must be parallelized, not awaited sequentially. Serial awaits are unnecessary latency when the calls have no data dependency on each other.
 - [ ] Write tests
 
 ### Files Expected to Be Created or Modified
@@ -1875,6 +1895,7 @@ npm run dev
 * [ ] Agents can be edited
 * [ ] Agents can be disabled
 * [ ] Agent test interface works
+* [ ] AgentsList page fetches all independent data (agents list, types, stats) in parallel via `Promise.all` — not sequentially
 * [ ] All tests pass
 
 ### Human Review Gate
@@ -1939,6 +1960,7 @@ Prompts are the primary tuning mechanism. Must be manageable via UI without code
 - [ ] Create `frontend/src/components/PromptTestBench.tsx`
 - [ ] Implement version history view
 - [ ] Implement prompt comparison
+- [ ] Batch all independent API calls on page load using `Promise.all` — fetching prompts, categories, tags, and stats must be parallelized, not awaited sequentially
 - [ ] Write tests
 
 ### Files Expected to Be Created or Modified
@@ -1995,6 +2017,7 @@ npm run dev
 * [ ] Versions tracked
 * [ ] Test interface works
 * [ ] Comparison shows differences
+* [ ] PromptsList page fetches all independent data (prompts, categories, tags, stats) in parallel via `Promise.all` — not sequentially
 * [ ] All tests pass
 
 ### Human Review Gate
@@ -2474,6 +2497,16 @@ data/audit-logs/index.json
 - New: CostMetrics model
 - Run model (add cost and audit fields)
 
+### Audit Log Filter Consistency Requirement
+
+The Audit Log page must apply **all filters exclusively server-side** — not a mix of server-side query params and client-side JavaScript array filtering.
+
+Mixing strategies breaks correctness when server-side pagination or result limits are in play. For example: if the server returns only the first 100 records and the client then applies a status filter to that 100-record window, the displayed results are silently incomplete — the user sees only records that matched the status filter *within the first 100*, not across the full dataset. There is no way for the user to know results are incomplete.
+
+**Rule:** Every filter the UI exposes (date range, userId, action type, resource type, status, severity) must be passed to the backend as query parameters and evaluated against the full dataset before pagination. Client-side filtering of paginated results is not permitted.
+
+If the backend doesn't yet support a filter parameter, the filter must not be exposed in the UI until the backend supports it.
+
 ### Testing Requirements
 
 * [ ] Tests for audit event logging
@@ -2481,6 +2514,7 @@ data/audit-logs/index.json
 * [ ] Tests that approval events are logged
 * [ ] Tests that execution events are logged
 * [ ] Tests for persistence and retrieval
+* [ ] Integration test: applying each filter parameter to `GET /api/audit-logs` returns results filtered server-side, not all records
 
 ### Validation Commands
 
@@ -2499,6 +2533,7 @@ npm run dev
 * [ ] Failure/repair events logged
 * [ ] Audit log displayable
 * [ ] Cost summary displayable
+* [ ] All filter parameters (date, userId, action, status, severity) are applied server-side via query params — no client-side filtering of paginated results
 * [ ] All tests pass
 
 ### Human Review Gate
@@ -3183,6 +3218,29 @@ All run state transitions from the frontend must use `PATCH` — not `PUT` and n
 
 A frontend component calling `PUT` on these endpoints will receive a 404 and silently fail. See Phase 3 HTTP Method Contract for the complete rule.
 
+**Resume vs Start distinction:** `PATCH /api/runs/:id/resume` and `PATCH /api/runs/:id/start` are **separate endpoints with different semantics**. `/start` transitions a `pending` (never-started) run to `running`. `/resume` transitions a `paused` run back to `running`. The frontend "Resume Run" button must call `/resume`, not `/start`. Calling `/start` on an already-started run will be rejected by the state machine. This is enforced by the backend — the two endpoints are not interchangeable.
+
+### ExecutionConsole Layout Requirement
+
+`ExecutionConsole` renders inside `MainLayout`, which already establishes a full-height flex container. `ExecutionConsole` must therefore use `flex-1 overflow-auto` for its outermost element — it must **not** use `h-screen`. Two nested `h-screen` elements create competing height constraints: the inner one expands to the full viewport, pushing past the outer container's bounds and causing the console to clip or overflow depending on the viewport size. The correct pattern is `flex-1` (fill remaining space the parent allocates) with `overflow-auto` (scroll within that space).
+
+### State Transition Handler Discipline
+
+When a state transition handler (`handleStartRun`, `handlePauseRun`, `handleResumeRun`) calls `apiClient.patch(...)`, it must either:
+
+1. Use the returned updated run object to update local state immediately (so the UI reflects the change before the next poll tick), or
+2. Omit the assignment entirely (`await apiClient.patch(...)` with no `const result =`)
+
+Assigning the result to a variable that is never read (`const updated = await apiClient.patch(...)`) is a latent bug: it suggests the intent was to update state, but the update silently never happens. TypeScript strict mode will warn; more importantly, the UX is degraded — a user who starts a run won't see the status change until the next polling interval.
+
+### Progress Calculation Guard
+
+Any component that computes a percentage by dividing task counts (e.g., `completedTasks / totalTasks * 100`) must guard against a zero-length tasks array. When `totalTasks === 0`, division produces `NaN`, which is silently ignored by the browser when applied as a CSS `width` value but is technically wrong and indicates the component is rendering in an unhandled state. The guard is `totalTasks > 0 ? (completed / totalTasks) * 100 : 0`.
+
+### Phase Cost Label Rule
+
+`CostTracker` (and any component that renders cost data broken down by phase) must label each phase using the **actual phase name or number from the data** — not by the array index of the cost entry. Array index is fragile: if phases are reordered, inserted, or removed, every label shifts incorrectly. Use `phaseCost.phaseName` or `phaseCost.phaseNumber` from the data model, not `index + 1`.
+
 ### Execution Logs Backend Requirement
 
 `GET /api/runs/:id/logs` must be a real backend endpoint that reads persisted log entries from the data store and returns them as JSON. It must not be omitted or stubbed.
@@ -3223,6 +3281,9 @@ Implement a `FailureReasonModal` component (or reuse any existing modal) that re
 * [ ] Logs tab in ExecutionConsole renders log entries returned by the API
 * [ ] All run/task state transition buttons call `apiClient.patch()` (not `put()` or `post()`)
 * [ ] Task failure modal is a React component — test that it renders an input field and "Confirm Failure" button
+* [ ] Unit test: "Resume Run" button calls `apiClient.patch('/runs/:id/resume')` — not `/start`
+* [ ] Unit test: `ExecutionConsole` root element does not have `h-screen` class when rendered inside `MainLayout`
+* [ ] Unit test: progress bar width is 0 (not `NaN`) when tasks array is empty
 
 ### Validation Commands
 
@@ -3240,6 +3301,12 @@ npm run dev
 * [x] All tests pass
 * [ ] Logs tab shows real log entries fetched from `GET /api/runs/:id/logs` — not always empty
 * [ ] All run and task state transitions call `PATCH`; `PUT` on these endpoints returns 405
+* [ ] "Resume Run" button calls `PATCH /api/runs/:id/resume` — not `/api/runs/:id/start`
+* [ ] `ExecutionConsole` root element uses `flex-1 overflow-auto` — not `h-screen` — to avoid conflicting with `MainLayout`'s height container
+* [ ] All back navigation buttons in `ExecutionConsole` use `navigate(-1)`, not hardcoded paths
+* [ ] Progress percentage calculations guard against `totalTasks === 0` to prevent `NaN` width values
+* [ ] State transition handlers either use the API response to update local state, or omit the assignment — no unused `const updated = ...` bindings
+* [ ] Phase cost entries in `CostTracker` are labeled by phase name or number from the data model — not by array index
 * [ ] `RunDetail` has an "Open Execution Console" link to `/runs/:id/console`
 * [ ] Task failure reason is collected via a modal component, not `window.prompt()`
 
@@ -3322,6 +3389,17 @@ backend/tests/services/failure-classifier.test.ts
 
 - Run and TaskRun (add failure and repair fields)
 
+### Repair Action Requirement
+
+The repair/error modal presented to the user when a run encounters a failure must implement **real actions**, not stubs. At minimum:
+
+- A "Retry" button must call a backend endpoint (e.g., `POST /api/runs/:id/retry-task` or `PATCH /api/runs/:id/resume`) and handle the response — not merely close the modal
+- A "Skip Task" or "Escalate" option must similarly call the appropriate backend endpoint
+- The modal must be dismissible and must indicate loading state while the action is in flight
+- If the action fails, an inline error message must be shown — the modal must not silently close on API error
+
+A repair modal that only calls `setShowModal(false)` provides no value: the run remains in a failed state and the user has no way to recover it. This is the same pattern issue as using `window.prompt()` for task failure input — a UI element that looks functional but does nothing.
+
 ### UI/UX Requirements
 
 - Failures shown clearly
@@ -3350,6 +3428,8 @@ npm run dev
 * [ ] Repair attempts tracked
 * [ ] Escalation works
 * [ ] UI shows failures and options
+* [ ] Repair/error modal's action buttons call backend endpoints — not just `setShowModal(false)`
+* [ ] Modal shows loading state while action is in flight and inline error if the API call fails
 * [ ] All tests pass
 
 ### Human Review Gate

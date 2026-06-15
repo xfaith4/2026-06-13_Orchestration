@@ -1,0 +1,40 @@
+{
+  "timestamp": "2026-06-15T05:50:35.520Z",
+  "userId": "anonymous",
+  "action": "CREATE",
+  "resourceType": "unknown",
+  "resourceId": "unknown",
+  "changes": [
+    {
+      "field": "error",
+      "newValue": "Validation failed"
+    },
+    {
+      "field": "errors",
+      "newValue": [
+        {
+          "path": "id",
+          "message": "Required field missing"
+        },
+        {
+          "path": "createdAt",
+          "message": "Required field missing"
+        },
+        {
+          "path": "updatedAt",
+          "message": "Required field missing"
+        }
+      ]
+    },
+    {
+      "field": "timestamp",
+      "newValue": "2026-06-15T05:50:35.520Z"
+    }
+  ],
+  "ipAddress": "::1",
+  "userAgent": "curl/8.19.0",
+  "status": "success",
+  "id": "4caf5e0b-4e11-42de-8dbc-552a9a6ef9fa",
+  "createdAt": "2026-06-15T05:50:35.521Z",
+  "updatedAt": "2026-06-15T05:50:35.521Z"
+}
