@@ -287,6 +287,45 @@ export interface AdapterExecutionOptions {
   retryOnValidationFailure?: boolean;
 }
 
+// Handoff Contracts
+export interface HandoffContract extends BaseEntity {
+  version: string;
+  fromAgent: string;
+  toAgent: string;
+  trigger: string;
+  preconditions: {
+    field: string;
+    condition: string;
+    expectedType?: string;
+  }[];
+  payloadSchema: Record<string, unknown>;
+  statePatches?: Record<string, unknown>;
+  artifactRefsRequired?: string[];
+  failureRoute: 'repair' | 'escalate' | 'skip';
+  repairSuggestions?: string[];
+  maxRetries?: number;
+}
+
+export interface HandoffValidationResult {
+  valid: boolean;
+  fromAgent: string;
+  toAgent: string;
+  errors: string[];
+  warnings: string[];
+  repairSuggestions: string[];
+  failureRoute: 'repair' | 'escalate' | 'skip';
+  timestamp: string;
+}
+
+export interface HandoffMessage {
+  messageId: string;
+  fromAgent: string;
+  toAgent: string;
+  payload: Record<string, unknown>;
+  timestamp: string;
+  traceId?: string;
+}
+
 export interface CircuitBreakerState {
   state: 'closed' | 'open' | 'half-open';
   failureCount: number;
