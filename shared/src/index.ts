@@ -213,6 +213,37 @@ export interface ErrorRecord extends BaseEntity {
   resolution?: string;
 }
 
+// Task Queue & Execution
+export interface SoftwareTaskOwnershipContract extends BaseEntity {
+  taskId: string;
+  version: string;
+  ownerAgent: string;
+  goal: string;
+  targetFiles: string[];
+  readContextFiles: string[];
+  writeScope: string[];
+  conflictGroup?: string;
+  dependencies: string[];
+  expectedExports: Record<string, unknown>;
+  acceptanceCriteria: string[];
+  validationCommands: string[];
+  mergeStrategy: 'auto' | 'manual' | 'conflict-required';
+  rollbackStrategy: 'atomic' | 'best-effort' | 'none';
+  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  estimatedDuration?: number;
+}
+
+export interface QueuedTask {
+  taskId: string;
+  status: 'pending' | 'executing' | 'completed' | 'failed' | 'skipped';
+  dependencies: string[];
+  retryCount: number;
+  maxRetries: number;
+  output?: unknown;
+  error?: string;
+  completedAt?: string;
+}
+
 export interface CircuitBreakerState {
   state: 'closed' | 'open' | 'half-open';
   failureCount: number;
