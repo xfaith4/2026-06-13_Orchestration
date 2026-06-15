@@ -326,6 +326,35 @@ export interface HandoffMessage {
   traceId?: string;
 }
 
+// Artifacts
+export interface Artifact extends BaseEntity {
+  runId: string;
+  phaseId?: string;
+  taskId?: string;
+  name: string;
+  type: string; // e.g., 'code', 'log', 'report', 'document'
+  mimeType?: string;
+  size: number; // bytes
+  checksum: string; // SHA256 or similar
+  contentPath: string; // internal storage path
+  downloadUrl?: string;
+  metadata?: Record<string, unknown>;
+  uploadedBy?: string;
+  expiresAt?: string;
+  tags?: string[];
+}
+
+export interface ArtifactMetadata {
+  type: string;
+  mimeType?: string;
+  name: string;
+  size: number;
+  checksum: string;
+  uploadedBy?: string;
+  uploadedAt: string;
+  tags?: string[];
+}
+
 export interface CircuitBreakerState {
   state: 'closed' | 'open' | 'half-open';
   failureCount: number;
