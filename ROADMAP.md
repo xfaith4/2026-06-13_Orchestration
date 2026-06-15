@@ -2394,10 +2394,10 @@ feat(phase-15): basic audit and cost tracking
 
 ## Phase 16 — Run State Machine
 
-**Status:** Not Started
-**Completed:**
-**Completed By:**
-**Completion Notes:**
+**Status:** Complete
+**Completed:** 2026-06-14 23:01 UTC
+**Completed By:** Claude Haiku 4.5
+**Completion Notes:** All acceptance criteria met. Created RunStateMachine service with 36 unit tests (100% passing). Implemented state transition validation for runs (draft→pending→running→completed|failed|paused), phases (pending→in-progress→completed|failed), and tasks (pending→assigned→in-progress→completed|failed|blocked). Integrated into execution routes for proper state tracking. Terminal state detection and transition history tracking implemented. Commit: c9d149e
 
 ### Goal
 
