@@ -61,6 +61,11 @@ app.listen(port, () => {
   console.log(`  GET  /api/design-plans, POST, GET/:id, PUT/:id, DELETE/:id`);
   console.log(`  POST /api/roadmaps/generate/:designPlanId`);
   console.log(`  GET  /api/roadmaps, POST, GET/:id, PUT/:id, DELETE/:id`);
+  console.log(`  POST /api/runs/from-roadmap/:roadmapId`);
+  console.log(`  PATCH /api/runs/:id/start`);
+  console.log(`  PATCH /api/runs/:id/pause`);
+  console.log(`  PATCH /api/runs/:id/phase/:phaseId/task/:taskId/{assign|start|complete|fail}`);
+  console.log(`  GET  /api/runs, POST, GET/:id, PUT/:id, DELETE/:id`);
   console.log(`  GET  /api/runs, POST, GET/:id, PUT/:id, DELETE/:id`);
   console.log(`  GET  /api/agents, POST, GET/:id, PUT/:id, DELETE/:id`);
   console.log(`  GET  /api/prompts, POST, GET/:id, PUT/:id, DELETE/:id`);

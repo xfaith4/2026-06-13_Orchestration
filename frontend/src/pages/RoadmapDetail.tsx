@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { apiClient } from '../services/api';
-import { Roadmap } from '../types';
+import { Roadmap, Run } from '../types';
 
 export function RoadmapDetail() {
   const { id } = useParams<{ id: string }>();
@@ -9,6 +9,8 @@ export function RoadmapDetail() {
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [runCreating, setRunCreating] = useState(false);
+  const [runError, setRunError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchRoadmap = async () => {
@@ -28,6 +30,23 @@ export function RoadmapDetail() {
       fetchRoadmap();
     }
   }, [id]);
+
+  const handleCreateRun = async () => {
+    if (!id) return;
+    try {
+      setRunCreating(true);
+      setRunError(null);
+      const run = await apiClient.post<Run>(
+        `/runs/from-roadmap/${id}`,
+        {}
+      );
+      navigate(`/runs/${run.id}`);
+    } catch (err) {
+      setRunError(err instanceof Error ? err.message : 'Failed to create run');
+    } finally {
+      setRunCreating(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -189,10 +208,24 @@ export function RoadmapDetail() {
 
         {roadmap.approvedBy && (
           <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-sm text-gray-600">
-              ✓ Approved by <span className="font-semibold">{roadmap.approvedBy}</span> on{' '}
-              <span className="font-semibold">{new Date(roadmap.approvedAt || '').toLocaleDateString()}</span>
-            </p>
+            <div className="space-y-3">
+              <p className="text-sm text-gray-600">
+                ✓ Approved by <span className="font-semibold">{roadmap.approvedBy}</span> on{' '}
+                <span className="font-semibold">{new Date(roadmap.approvedAt || '').toLocaleDateString()}</span>
+              </p>
+              {runError && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                  <p className="text-sm text-red-800">{runError}</p>
+                </div>
+              )}
+              <button
+                onClick={handleCreateRun}
+                disabled={runCreating}
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {runCreating ? 'Creating Run...' : 'Create Execution Run'}
+              </button>
+            </div>
           </div>
         )}
       </div>

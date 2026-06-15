@@ -35,7 +35,7 @@ export interface DesignPlan {
   updatedAt: string;
 }
 
-// Roadmap
+// Roadmap & Execution
 export interface Phase {
   id: string;
   number: number;
@@ -58,6 +58,37 @@ export interface Task {
   dependencies: string[];
 }
 
+export interface ExecutionTask {
+  id: string;
+  name: string;
+  description: string;
+  status: 'pending' | 'assigned' | 'in-progress' | 'completed' | 'failed' | 'blocked';
+  assignee?: string;
+  estimatedHours?: number;
+  dependencies: string[];
+  assignedTo?: string;
+  assignedAt?: string;
+  startedAt?: string;
+  completedAt?: string;
+  output?: unknown;
+  error?: string;
+}
+
+export interface ExecutionPhase {
+  id: string;
+  number: number;
+  name: string;
+  goal: string;
+  tasks: ExecutionTask[];
+  status: 'pending' | 'in-progress' | 'completed' | 'failed';
+  startDate?: string;
+  endDate?: string;
+  estimatedHours?: number;
+  dependencies: string[];
+  startedAt?: string;
+  completedAt?: string;
+}
+
 export interface Roadmap {
   id: string;
   applicationId: string;
@@ -69,6 +100,22 @@ export interface Roadmap {
   approvedBy?: string;
   approvedAt?: string;
   status: 'draft' | 'reviewing' | 'approved' | 'rejected';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Run {
+  id: string;
+  roadmapId: string;
+  applicationId: string;
+  title: string;
+  description: string;
+  phases: ExecutionPhase[];
+  status: 'draft' | 'pending' | 'running' | 'completed' | 'failed' | 'paused';
+  startedAt?: string;
+  completedAt?: string;
+  summary?: string;
+  errorMessage?: string;
   createdAt: string;
   updatedAt: string;
 }

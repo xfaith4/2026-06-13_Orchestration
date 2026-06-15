@@ -8,6 +8,8 @@ import { DesignPlansList } from '../pages/DesignPlansList';
 import { DesignPlanDetail } from '../pages/DesignPlanDetail';
 import { RoadmapList } from '../pages/RoadmapList';
 import { RoadmapDetail } from '../pages/RoadmapDetail';
+import { RunList } from '../pages/RunList';
+import { RunDetail } from '../pages/RunDetail';
 
 export function AppRoutes() {
   return (
@@ -81,10 +83,15 @@ export function AppRoutes() {
           path="/runs"
           element={
             <MainLayout>
-              <div>
-                <h1 className="text-3xl font-bold">Execution Runs</h1>
-                <p className="text-gray-600 mt-2">Coming soon</p>
-              </div>
+              <RunList />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/runs/:id"
+          element={
+            <MainLayout>
+              <RunDetail />
             </MainLayout>
           }
         />
