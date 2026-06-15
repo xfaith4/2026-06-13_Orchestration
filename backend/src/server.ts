@@ -71,6 +71,8 @@ app.listen(port, () => {
   console.log(`  PATCH /api/runs/:id/start`);
   console.log(`  PATCH /api/runs/:id/pause`);
   console.log(`  PATCH /api/runs/:id/phase/:phaseId/task/:taskId/{assign|start|complete|fail}`);
+  console.log(`  GET  /api/runs/:id/costs (cost breakdown for specific run)`);
+  console.log(`  GET  /api/runs/costs/summary (cost statistics across all runs)`);
   console.log(`  GET  /api/runs, POST, GET/:id, PUT/:id, DELETE/:id`);
   console.log(`  GET  /api/audit-logs (with filters: startDate, endDate, userId, action, resourceType, resourceId)`);
   console.log(`  GET  /api/audit-logs/:id`);

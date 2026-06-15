@@ -106,6 +106,30 @@ export interface ExecutionPhase {
   completedAt?: string;
 }
 
+export interface CostMetrics {
+  tokenInputs: number;
+  tokenOutputs: number;
+  estimatedCost: number;
+  currency: string;
+}
+
+export interface TaskCost extends CostMetrics {
+  taskId: string;
+  taskName: string;
+  duration?: number;
+}
+
+export interface PhaseCost extends CostMetrics {
+  phaseId: string;
+  phaseName: string;
+  taskCosts: TaskCost[];
+}
+
+export interface RunCost extends CostMetrics {
+  runId: string;
+  phaseCosts: PhaseCost[];
+}
+
 export interface Run extends BaseEntity {
   roadmapId: string;
   applicationId: string;
@@ -117,6 +141,8 @@ export interface Run extends BaseEntity {
   completedAt?: string;
   summary?: string;
   errorMessage?: string;
+  totalCost?: CostMetrics;
+  phaseCosts?: PhaseCost[];
 }
 
 export interface AgentDefinition extends BaseEntity {

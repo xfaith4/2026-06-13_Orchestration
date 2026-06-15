@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { apiClient } from '../services/api';
 import { Run, ExecutionTask } from '../types';
+import { CostBreakdown } from '../components/CostBreakdown';
 
 export function RunDetail() {
   const { id } = useParams<{ id: string }>();
@@ -256,7 +257,13 @@ export function RunDetail() {
           )}
         </div>
 
+        {/* Cost Breakdown */}
+        <div className="mb-8">
+          <CostBreakdown run={run} />
+        </div>
+
         <div className="space-y-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Phases &amp; Tasks</h2>
           {run.phases.map((phase) => (
             <div key={phase.id} className="border-l-4 border-blue-500 pl-4 py-4">
               <div className="flex items-start justify-between mb-3">

@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { PersistenceService } from '../services/persistence.js';
 import { ValidationService } from '../services/validation.js';
 import { RunService } from '../services/run-service.js';
+import { CostTracker } from '../services/cost-tracker.js';
 import { Roadmap, Run } from '@unifiedaitoolbox/shared';
 import { createResponse, ApiError } from '../types/responses.js';
 import { createGenericCrudRoutes } from './generic-crud.js';
@@ -230,6 +231,64 @@ export const createRunRoutes = (
           timestamp: new Date().toISOString(),
         });
       }
+    }
+  });
+
+  // Cost tracking endpoints
+  const costTracker = new CostTracker();
+
+  // Get cost summary for a specific run
+  router.get('/:id/costs', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      const run = await persistence.read<Run>('runs', id);
+      if (!run) {
+        throw new ApiError(404, 'Run not found');
+      }
+
+      const costSummary = costTracker.getCostSummary(run);
+      const costBreakdown = costTracker.getCostBreakdown(run);
+
+      res.json(createResponse({
+        summary: costSummary,
+        breakdown: costBreakdown,
+        totalCost: run.totalCost,
+      }));
+    } catch (error) {
+      if (error instanceof ApiError) {
+        res.status(error.statusCode).json({
+          error: error.message,
+          timestamp: new Date().toISOString(),
+        });
+      } else {
+        res.status(500).json({
+          error: error instanceof Error ? error.message : 'Failed to fetch run costs',
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
+  });
+
+  // Get cost statistics across all runs
+  router.get('/costs/summary', async (req: Request, res: Response) => {
+    try {
+      const allRuns = await persistence.list<Run>('runs');
+
+      const statistics = costTracker.getStatistics(allRuns);
+      const trends = costTracker.getCostTrend(allRuns);
+
+      res.json(createResponse({
+        statistics,
+        trends,
+        runsCount: allRuns.length,
+        completedRunsCount: allRuns.filter(run => run.totalCost).length,
+      }));
+    } catch (error) {
+      res.status(500).json({
+        error: error instanceof Error ? error.message : 'Failed to fetch cost statistics',
+        timestamp: new Date().toISOString(),
+      });
     }
   });
 

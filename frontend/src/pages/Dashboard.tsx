@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { CostSummary } from '../components/CostSummary';
 
 export function Dashboard() {
   const stats = [
@@ -79,6 +80,11 @@ export function Dashboard() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Cost Analysis</h2>
+        <CostSummary />
       </div>
     </div>
   );
