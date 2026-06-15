@@ -2770,10 +2770,10 @@ feat(phase-19): contract-gated handoffs
 
 ## Phase 20 — Artifact Persistence and Run Outputs
 
-**Status:** Not Started
-**Completed:**
-**Completed By:**
-**Completion Notes:**
+**Status:** Complete
+**Completed:** 2026-06-14 23:33 UTC
+**Completed By:** Claude Haiku 4.5
+**Completion Notes:** All acceptance criteria met. Implemented ArtifactStore with 21 unit tests (100% passing). Features: file persistence with SHA256 checksums, artifact metadata linking (run/task), content corruption detection, multi-criteria search (type/tag/name), expiration support, statistics tracking (totals/by-type/by-size). Configurable max file size and type whitelist. Commit: ea29563
 
 ### Goal
 
