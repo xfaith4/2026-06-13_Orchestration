@@ -6,6 +6,7 @@ const navigation = [
   { name: 'Design Plans', href: '/design-plans', icon: '📐' },
   { name: 'Roadmaps', href: '/roadmaps', icon: '🗺️' },
   { name: 'Runs', href: '/runs', icon: '▶️' },
+  { name: 'Cost Analytics', href: '/cost-analytics', icon: '💰' },
   { name: 'Audit Logs', href: '/audit-logs', icon: '📜' },
   { name: 'Agents', href: '/agents', icon: '🤖' },
   { name: 'Prompts', href: '/prompts', icon: '💬' },

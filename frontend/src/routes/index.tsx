@@ -11,6 +11,7 @@ import { RoadmapDetail } from '../pages/RoadmapDetail';
 import { RunList } from '../pages/RunList';
 import { RunDetail } from '../pages/RunDetail';
 import { ExecutionConsole } from '../pages/ExecutionConsole';
+import { CostAnalyticsPage } from '../pages/CostAnalyticsPage';
 import { AuditLog } from '../pages/AuditLog';
 import { AgentList } from '../pages/AgentList';
 import { PromptList } from '../pages/PromptList';
@@ -128,6 +129,14 @@ export function AppRoutes() {
           element={
             <MainLayout>
               <AuditLog />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/cost-analytics"
+          element={
+            <MainLayout>
+              <CostAnalyticsPage />
             </MainLayout>
           }
         />
