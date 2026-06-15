@@ -5,6 +5,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { PersistenceService } from './services/persistence.js';
 import { ValidationService } from './services/validation.js';
+import { createApiRoutes } from './routes/index.js';
+import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
+import { createResponse } from './types/responses.js';
 
 dotenv.config();
 
@@ -24,65 +27,40 @@ app.use(express.json());
 
 // Health check
 app.get('/api/health', (req: Request, res: Response) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json(createResponse({ status: 'ok' }));
 });
 
 // Root endpoint
 app.get('/', (req: Request, res: Response) => {
-  res.json({
+  res.json(createResponse({
     name: 'UnifiedAIToolbox API',
     version: '0.1.0',
     status: 'running',
-    message: 'Phase 2: Core Data Models and Persistence'
-  });
+    message: 'Phase 3: Backend API Foundation'
+  }));
 });
 
-// Application endpoints
-app.get('/api/applications', async (req: Request, res: Response) => {
-  try {
-    const applications = await persistence.list('applications');
-    res.json({ data: applications });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch applications' });
-  }
-});
+// API routes
+app.use('/api', createApiRoutes(persistence, validation));
 
-app.post('/api/applications', async (req: Request, res: Response) => {
-  try {
-    const schema = await validation.loadSchema('application');
-    if (!schema) {
-      return res.status(500).json({ error: 'Schema not found' });
-    }
-
-    const errors = validation.validate(req.body, schema);
-    if (errors.length > 0) {
-      return res.status(400).json({ errors });
-    }
-
-    const application = await persistence.create('applications', req.body);
-    res.status(201).json({ data: application });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to create application' });
-  }
-});
-
-app.get('/api/applications/:id', async (req: Request, res: Response) => {
-  try {
-    const application = await persistence.read('applications', req.params.id);
-    if (!application) {
-      return res.status(404).json({ error: 'Application not found' });
-    }
-    res.json({ data: application });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch application' });
-  }
-});
+// Error handling
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 // Start server
 app.listen(port, () => {
   console.log(`✓ Backend server running on http://localhost:${port}`);
   console.log(`✓ Persistence layer ready (data dir: ${dataDir})`);
   console.log(`✓ Validation service ready (schemas dir: ${schemasDir})`);
+  console.log(`✓ Available endpoints:`);
+  console.log(`  GET  /api/health`);
+  console.log(`  GET  /api/applications, POST, GET/:id, PUT/:id, DELETE/:id`);
+  console.log(`  GET  /api/design-plans, POST, GET/:id, PUT/:id, DELETE/:id`);
+  console.log(`  GET  /api/roadmaps, POST, GET/:id, PUT/:id, DELETE/:id`);
+  console.log(`  GET  /api/runs, POST, GET/:id, PUT/:id, DELETE/:id`);
+  console.log(`  GET  /api/agents, POST, GET/:id, PUT/:id, DELETE/:id`);
+  console.log(`  GET  /api/prompts, POST, GET/:id, PUT/:id, DELETE/:id`);
+  console.log(`  GET  /api/contracts, POST, GET/:id, PUT/:id, DELETE/:id`);
 });
 
 export default app;
