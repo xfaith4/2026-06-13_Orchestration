@@ -15,6 +15,10 @@
 - The strongest truthful incomplete seam is Phase 31, not Phase 25: current code already saves raw task-output blobs, persisted run data shows real file-like output patterns, and the repo even contains a manually materialized artifact tree for run `90f372fb-*`.
 - Real task outputs use at least three extractable shapes: keyed `detailed_deliverables` containers, `code_artifacts` arrays, and direct `filename`/`file_path` + `content` objects.
 - The first implementation pass exposed a concrete runtime hardening bug: artifact output paths were hardcoded to the repo’s default `data/artifacts` tree instead of following the active persistence root.
+- After the Phase 31 work, the next best roadmap slice is Phase 30: no `stackConstraints` implementation exists anywhere in the codebase, and the roadmap ties it directly to the previously observed Python-vs-TypeScript drift in run `90f372fb`.
+- Phase 30 could be landed without broadening into the unfinished UI follow-up by threading optional `stackConstraints` through shared run metadata, run creation, phase/task execution, and warning logging.
+- The Phase 30 backend slice now exists end to end: task prompts receive a formatted stack block, generated outputs are scanned for language drift, and mismatch warnings are persisted with real run/phase/task context.
+- Targeted backend verification for the new Phase 30 slice passed, while repo-wide backend typecheck is still blocked by unresolved `@unifiedaitoolbox/shared` imports and older strict-mode errors outside this implementation seam.
 
 ## Technical Decisions
 | Decision | Rationale |
@@ -22,6 +26,7 @@
 | Judge the roadmap against live code instead of trusting phase labels | The roadmap already shows ordering drift and stale completion metadata. |
 | Use commit history plus current diffs to find the next slice | The user explicitly asked to investigate recent changes if roadmap design is weak. |
 | Implement Phase 31 as a bounded backend slice | It is already partially underway, directly tied to observed run output, and improves real usability without broadening into GitHub/auth/CI work. |
+| Implement Phase 30 as backend-core plumbing only | The roadmap already marks the run-creation UI field as a later follow-up, so the truthful next slice is stack enforcement in execution rather than form work. |
 | Add a dedicated `OutputParser` service instead of embedding ad-hoc parsing in the route | The same extraction logic is needed for auto-execution and retroactive materialization, and it benefits from direct unit coverage. |
 | Keep full backend typecheck failure as a repo-level blocker, not a regression from this slice | `npm run typecheck` still fails across many untouched files because the backend workspace cannot resolve `@unifiedaitoolbox/shared` and contains older type errors unrelated to this patch. |
 
@@ -43,6 +48,11 @@
 - `backend/src/routes/runs.ts`
 - `backend/src/services/output-parser.ts`
 - `backend/tests/integration/run-materialize.test.ts`
+- `backend/src/services/stack-constraint-builder.ts`
+- `backend/src/services/task-executor.ts`
+- `backend/src/services/phase-executor.ts`
+- `backend/src/services/run-service.ts`
+- `backend/src/routes/execution.ts`
 
 ## Visual/Browser Findings
 - No browser inspection yet in this turn.

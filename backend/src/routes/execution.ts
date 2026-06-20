@@ -3,6 +3,7 @@ import { PersistenceService } from '../services/persistence.js';
 import { Run, ExecutionPhase, TaskStatus } from '@unifiedaitoolbox/shared';
 import { createResponse, ApiError } from '../types/responses.js';
 import { TaskExecutor } from '../services/task-executor.js';
+import type { TaskExecutionWarning } from '../services/task-executor.js';
 import { PhaseExecutor } from '../services/phase-executor.js';
 import { AgentRegistry } from '../services/agent-registry.js';
 import { PromptRegistry } from '../services/prompt-registry.js';
@@ -13,6 +14,35 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const logTaskWarnings = async (
+  errorLogger: ErrorLogger,
+  runId: string,
+  phaseId: string,
+  taskId: string,
+  warnings: TaskExecutionWarning[] | undefined
+): Promise<void> => {
+  if (!warnings?.length) {
+    return;
+  }
+
+  for (const warning of warnings) {
+    await errorLogger.logError(
+      {
+        message: warning.message,
+        code: warning.code,
+        name: 'StackConstraintWarning',
+      },
+      {
+        runId,
+        phaseId,
+        taskId,
+        service: 'execution-routes',
+        operation: 'stackConstraintCheck',
+      }
+    );
+  }
+};
 
 export const createExecutionRoutes = (persistence: PersistenceService) => {
   const router = Router();
@@ -83,7 +113,12 @@ export const createExecutionRoutes = (persistence: PersistenceService) => {
         agentId,
         promptId,
         variables: variables || {},
+        runId,
+        phaseId,
+        stackConstraints: run.stackConstraints,
       });
+
+      await logTaskWarnings(errorLogger, runId, phaseId, taskId, result.warnings);
 
       // Update task status using state machine
       const newTaskStatus = result.success ? ('completed' as const) : ('failed' as const);
@@ -162,6 +197,8 @@ export const createExecutionRoutes = (persistence: PersistenceService) => {
         agentAssignments,
         promptAssignments: promptAssignments || {},
         variables: variables || {},
+        runId,
+        stackConstraints: run.stackConstraints,
       });
 
       // Update phase status using state machine

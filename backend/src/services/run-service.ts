@@ -1,4 +1,3 @@
-import { v4 as uuid } from 'uuid';
 import { Run, Roadmap, ExecutionPhase, ExecutionTask, Phase, Task } from '@unifiedaitoolbox/shared';
 
 export class RunService {
@@ -7,7 +6,6 @@ export class RunService {
       throw new Error(`Roadmap must be approved to create run, current status: ${roadmap.status}`);
     }
 
-    const now = new Date().toISOString();
     const phases = roadmap.phases.map(phase => this.convertPhaseToExecutionPhase(phase));
 
     return {
@@ -17,6 +15,7 @@ export class RunService {
       description: roadmap.description,
       phases,
       status: 'draft',
+      stackConstraints: roadmap.stackConstraints,
     };
   }
 

@@ -48,9 +48,23 @@ export interface Roadmap extends BaseEntity {
   description: string;
   phases: Phase[];
   estimatedDuration: string;
+  stackConstraints?: StackConstraints;
   approvedBy?: string;
   approvedAt?: string;
   status: 'draft' | 'reviewing' | 'approved' | 'rejected';
+}
+
+export interface StackConstraints {
+  language?: string;
+  runtime?: string;
+  framework?: string;
+  dependencies?: string[];
+  fileStructure?: string[];
+  allowedLanguages?: string[];
+  disallowedLanguages?: string[];
+  disallowedTechnologies?: string[];
+  additionalRequirements?: string[];
+  packageManifest?: string;
 }
 
 export interface Phase {
@@ -152,6 +166,7 @@ export interface Run extends BaseEntity {
   description: string;
   phases: ExecutionPhase[];
   status: RunStatus;
+  stackConstraints?: StackConstraints;
   startedAt?: string;
   completedAt?: string;
   summary?: string;
