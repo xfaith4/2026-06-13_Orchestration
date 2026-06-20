@@ -134,7 +134,7 @@ export function CostDashboard({ runs, currentRun }: CostDashboardProps) {
             <div className="bg-purple-50 rounded p-4">
               <span className="text-xs font-semibold text-purple-600">STATUS</span>
               <div className="text-lg font-bold text-purple-900 mt-1">
-                {currentRun.status.charAt(0).toUpperCase() + currentRun.status.slice(1)}
+                {currentRun.status ? currentRun.status.charAt(0).toUpperCase() + currentRun.status.slice(1) : 'Unknown'}
               </div>
             </div>
             <div className="bg-indigo-50 rounded p-4">

@@ -26,18 +26,21 @@ This roadmap guides the implementation of a web-based UI and expanded orchestrat
 This roadmap is designed for incremental execution by coding agents. Realistic expectations:
 
 **Prototype (Phases 0-13):** 8–12 focused coding-agent runs
+
 - Demonstrates full intake → approval → spike execution loop
 - Validates core abstractions
 - Shows value early
 - ~2–3 weeks
 
 **MVP (Phases 0-21):** 30–40 focused coding-agent runs
+
 - Complete application intake → design → roadmap → basic execution
 - Live monitoring and basic failure handling
 - GitHub integration
 - ~5–8 weeks
 
 **Production v1 (Phases 0-27):** 60–80 focused coding-agent runs
+
 - Complete feature set
 - Full test suite and quality gates
 - Security and accessibility hardened
@@ -45,12 +48,14 @@ This roadmap is designed for incremental execution by coding agents. Realistic e
 - ~10–14 weeks
 
 **Production-Grade (Phases 0-29):** 90–120 focused coding-agent runs
+
 - Comprehensive documentation
 - Advanced analytics and cost tracking
 - Optimized for scale
 - ~14–18 weeks
 
 These estimates assume:
+
 - Active human review between phases
 - Each coding-agent run focuses on one phase only
 - Validation and tests pass before advancing
@@ -147,6 +152,7 @@ All files and directories in `g:/Development/20_Staging/AI Projects/2026-06-13_O
 **Phase 0** produces an asset classification table documenting the fate of each asset (see Phase 0 Deliverables below).
 
 **Phases 1-29** may:
+
 - **Preserve as-is:** Keep in place; use directly from existing location
 - **Normalize and migrate:** Load from legacy location, transform, store in new location
 - **Refactor into backend service:** Rebuild as service code (e.g., agent loader from agents/)
@@ -244,7 +250,7 @@ Phase 0 must produce a table documenting every significant asset:
 
 | Asset | Current Location | Intended Future Location | Action | Rationale | Migration Phase |
 |-------|------------------|------------------------|--------|-----------|-----------------|
-| Agent Definitions | agents/*.yaml, *.json | data/agents/ (loaded at runtime) | Normalize and migrate | Core to orchestration engine | Phase 10 |
+| Agent Definitions | agents/*.yaml,*.json | data/agents/ (loaded at runtime) | Normalize and migrate | Core to orchestration engine | Phase 10 |
 | Contract Schemas | contracts/*.json | shared/contracts/ + data/contracts/ | Normalize and migrate | Required for validation layer | Phase 12 |
 | Prompt Templates | Prompts/*.json | data/prompts/ (loaded at runtime) | Normalize and migrate | Core to agent execution | Phase 11 |
 | Run Tracker Library | lib/run-tracker.js | backend/src/services/run-tracker.ts | Refactor into service | Rewrite in TypeScript; port logic | Phase 2 |
@@ -383,21 +389,21 @@ Before coding, update ROADMAP.md to break the large phase into smaller ones. Eac
 
 Examples:
 
-* Prompt Workspace may become:
+- Prompt Workspace may become:
   - Prompt CRUD API
   - Prompt Editor UI
   - Prompt Versioning
   - Prompt Testing Interface
   - Prompt Comparison View
 
-* GitHub Integration may become:
+- GitHub Integration may become:
   - GitHub OAuth Configuration
   - Repository/Branch Operations
   - Commit and PR Creation
   - CI Status Monitoring
   - Safety Confirmations and Audit
 
-* Execution Console may become:
+- Execution Console may become:
   - Run Detail Page
   - Live Status Polling/WebSocket
   - Log Viewer Component
@@ -463,13 +469,15 @@ When complete, update to:
 | 20 | Artifact Persistence & Run Outputs | Store and retrieve artifacts | Complete | 2026-06-14 |
 | 21 | Execution Summary & Completion | Run summary and closure | Complete | 2026-06-14 |
 | 22 | Execution Console & Live Monitoring | Real-time monitoring UI | Complete | 2026-06-14 |
-| 23 | Failure Taxonomy & Repair Workflow | Classify and repair failures | In Progress | 2026-06-15 (backend) |
+| 23 | Failure Taxonomy & Repair Workflow | Classify and repair failures | Complete | 2026-06-15 |
 | 24 | Advanced Cost Tracking & Analytics | Detailed cost dashboards | Complete | 2026-06-15 |
 | 25 | GitHub Integration | OAuth, branches, PRs, CI | Not Started | |
 | 26 | Testing, Quality Hardening, CI | Test suite and pipeline | Not Started | |
 | 27 | Security, Accessibility, Production Ready | Auth, WCAG, hardening | Not Started | |
 | 28 | Documentation & Examples | User and operator guides | Not Started | |
 | 29 | Final Acceptance & Release | UAT, audit, release | Not Started | |
+| 30 | Agent Prompt Language Constraints | Enforce target language/stack in all task prompts | Not Started | |
+| 31 | Run Artifact Materialization | Write generated files to disk on run completion | Not Started | |
 
 ---
 
@@ -546,10 +554,10 @@ All existing agents, contracts, and models.
 
 ### Testing Requirements
 
-* [x] Validate all JSON files in `contracts/` parse without errors
-* [x] Validate all YAML files in `agents/` parse without errors
-* [x] Confirm `lib/run-tracker.js` exports expected functions
-* [x] Confirm `lib/api-server.js` can start without errors
+- [x] Validate all JSON files in `contracts/` parse without errors
+- [x] Validate all YAML files in `agents/` parse without errors
+- [x] Confirm `lib/run-tracker.js` exports expected functions
+- [x] Confirm `lib/api-server.js` can start without errors
 
 ### Validation Commands
 
@@ -567,21 +575,22 @@ node -e "require('./lib/run-tracker.js'); console.log('OK')"
 
 ### Acceptance Criteria
 
-* [x] All agent YAML/JSON files parse without errors
-* [x] All contract JSON files parse without errors
-* [x] Node.js version is 18 or higher
-* [x] npm version is 8 or higher
-* [x] All existing lib files are readable and functional
-* [x] Baseline report is complete and accurate
-* [x] Decision made: preserve or refactor each major asset
-* [x] **NEW: Asset Classification Table is complete** (all assets documented)
-* [x] **NEW: All assets assigned an action** (Preserve, Migrate, Refactor, Archive, Deprecate)
-* [x] **NEW: Migration schedule is clear** (know which phases use which assets)
-* [x] **NEW: ASSET_MIGRATION_STATUS.md is accurate** and matches Existing Asset Migration Policy
+- [x] All agent YAML/JSON files parse without errors
+- [x] All contract JSON files parse without errors
+- [x] Node.js version is 18 or higher
+- [x] npm version is 8 or higher
+- [x] All existing lib files are readable and functional
+- [x] Baseline report is complete and accurate
+- [x] Decision made: preserve or refactor each major asset
+- [x] **NEW: Asset Classification Table is complete** (all assets documented)
+- [x] **NEW: All assets assigned an action** (Preserve, Migrate, Refactor, Archive, Deprecate)
+- [x] **NEW: Migration schedule is clear** (know which phases use which assets)
+- [x] **NEW: ASSET_MIGRATION_STATUS.md is accurate** and matches Existing Asset Migration Policy
 
 ### Human Review Gate
 
 A human should verify:
+
 - Baseline report is accurate
 - Decisions to preserve vs. refactor are justified
 - No critical files are missing
@@ -675,9 +684,9 @@ None; pure infrastructure.
 
 ### Testing Requirements
 
-* [ ] Unit test framework installed (Vitest for frontend, Jest for backend)
-* [ ] Sample test file created in each workspace
-* [ ] `npm test` runs tests in both workspaces
+- [ ] Unit test framework installed (Vitest for frontend, Jest for backend)
+- [ ] Sample test file created in each workspace
+- [ ] `npm test` runs tests in both workspaces
 
 ### Validation Commands
 
@@ -690,18 +699,19 @@ npm run dev
 
 ### Acceptance Criteria
 
-* [ ] Both workspaces have dependencies installed
-* [ ] TypeScript compiles without errors
-* [ ] ESLint and Prettier pass
-* [ ] `npm run dev` starts both servers
-* [ ] Frontend and backend ports are driven by environment variables, not hardcoded in source
-* [ ] `.env.example` contains every variable the app needs, with correct values including path suffixes (e.g., `VITE_API_BASE_URL` ends in `/api`)
-* [ ] API calls work out-of-the-box without a `.env` file (via Vite proxy fallback to relative `/api` path)
-* [ ] No source file contains a hardcoded `localhost:PORT` string that belongs in an env variable
+- [ ] Both workspaces have dependencies installed
+- [ ] TypeScript compiles without errors
+- [ ] ESLint and Prettier pass
+- [ ] `npm run dev` starts both servers
+- [ ] Frontend and backend ports are driven by environment variables, not hardcoded in source
+- [ ] `.env.example` contains every variable the app needs, with correct values including path suffixes (e.g., `VITE_API_BASE_URL` ends in `/api`)
+- [ ] API calls work out-of-the-box without a `.env` file (via Vite proxy fallback to relative `/api` path)
+- [ ] No source file contains a hardcoded `localhost:PORT` string that belongs in an env variable
 
 ### Human Review Gate
 
 A human should verify:
+
 - Tooling choices are appropriate
 - Project structure is clean
 - Dev server starts without warnings
@@ -793,10 +803,10 @@ data/runs/index.json
 
 ### Testing Requirements
 
-* [ ] Unit tests for CRUD operations
-* [ ] Tests for schema validation
-* [ ] Integration tests for full cycle
-* [ ] Test invalid data rejection
+- [ ] Unit tests for CRUD operations
+- [ ] Tests for schema validation
+- [ ] Integration tests for full cycle
+- [ ] Test invalid data rejection
 
 ### Validation Commands
 
@@ -807,16 +817,17 @@ npm test
 
 ### Acceptance Criteria
 
-* [ ] All TypeScript interfaces defined
-* [ ] All JSON schemas parse correctly
-* [ ] PersistenceService CRUD works
-* [ ] SchemaValidator validates/rejects appropriately
-* [ ] Indexes maintained correctly
-* [ ] All tests pass
+- [ ] All TypeScript interfaces defined
+- [ ] All JSON schemas parse correctly
+- [ ] PersistenceService CRUD works
+- [ ] SchemaValidator validates/rejects appropriately
+- [ ] Indexes maintained correctly
+- [ ] All tests pass
 
 ### Human Review Gate
 
 A human should verify:
+
 - Data model definitions match BUILD_SPECIFICATION.md
 - Validation is comprehensive
 - Persistence is robust
@@ -907,14 +918,14 @@ All models from Phase 2.
 
 ### Testing Requirements
 
-* [ ] Integration tests for POST (create)
-* [ ] Integration tests for GET (list)
-* [ ] Integration tests for GET :id (read)
-* [ ] Integration tests for PUT (update)
-* [ ] Integration tests for DELETE
-* [ ] Tests for 404 on invalid IDs
-* [ ] Tests for 400 on invalid input
-* [ ] Tests for validation error messages
+- [ ] Integration tests for POST (create)
+- [ ] Integration tests for GET (list)
+- [ ] Integration tests for GET :id (read)
+- [ ] Integration tests for PUT (update)
+- [ ] Integration tests for DELETE
+- [ ] Tests for 404 on invalid IDs
+- [ ] Tests for 400 on invalid input
+- [ ] Tests for validation error messages
 
 ### Validation Commands
 
@@ -939,19 +950,20 @@ Every endpoint must follow these method semantics — this becomes the binding c
 
 ### Acceptance Criteria
 
-* [ ] All 7 resource types have full CRUD API
-* [ ] All endpoints validate input
-* [ ] Response format is consistent
-* [ ] Error messages are helpful
-* [ ] HTTP status codes are correct (201 Create, 200 read/update, 204 delete, 400 validation, 404 not found)
-* [ ] All state-transition endpoints use `PATCH`, not `PUT`
-* [ ] Integration tests verify the correct HTTP method is accepted and the wrong method returns 405
-* [ ] All integration tests pass
-* [ ] No TypeScript errors
+- [ ] All 7 resource types have full CRUD API
+- [ ] All endpoints validate input
+- [ ] Response format is consistent
+- [ ] Error messages are helpful
+- [ ] HTTP status codes are correct (201 Create, 200 read/update, 204 delete, 400 validation, 404 not found)
+- [ ] All state-transition endpoints use `PATCH`, not `PUT`
+- [ ] Integration tests verify the correct HTTP method is accepted and the wrong method returns 405
+- [ ] All integration tests pass
+- [ ] No TypeScript errors
 
 ### Human Review Gate
 
 A human should verify:
+
 - API response formats are consistent
 - Error messages are helpful
 - Status codes follow REST conventions
@@ -1103,13 +1115,13 @@ The sidebar navigation array must only contain links to routes that are fully im
 
 ### Testing Requirements
 
-* [ ] Unit tests for page components
-* [ ] Unit tests for navigation routing
-* [ ] Unit tests for API client error handling
-* [ ] Dashboard stat fetch is tested with mocked API responses
-* [ ] EmptyState renders title, description, and action button
-* [ ] LoadingSpinner has correct ARIA attributes
-* [ ] Accessibility audit (no critical issues)
+- [ ] Unit tests for page components
+- [ ] Unit tests for navigation routing
+- [ ] Unit tests for API client error handling
+- [ ] Dashboard stat fetch is tested with mocked API responses
+- [ ] EmptyState renders title, description, and action button
+- [ ] LoadingSpinner has correct ARIA attributes
+- [ ] Accessibility audit (no critical issues)
 
 ### Validation Commands
 
@@ -1122,23 +1134,24 @@ npm run dev
 
 ### Acceptance Criteria
 
-* [ ] Frontend loads without errors
-* [ ] Navigation works
-* [ ] Layout is responsive
-* [ ] No TypeScript errors
-* [ ] Accessibility audit passes
-* [ ] Professional appearance
-* [ ] Dashboard stats are fetched from the API — no hardcoded values in any stat card
-* [ ] All "Back" buttons in detail pages use `navigate(-1)`
-* [ ] All stub pages render the `<EmptyState>` component — not an inline div or raw string — and the component is imported from the components library
-* [ ] `MainLayout` does not double-pad page content
-* [ ] `LoadingSpinner` renders `role="status"` accessible markup
-* [ ] No interactive navigation element (button, link, profile icon) is rendered without a working destination
-* [ ] No error-state retry handler calls `window.location.reload()` — all retry callbacks invoke the component's fetch function
+- [ ] Frontend loads without errors
+- [ ] Navigation works
+- [ ] Layout is responsive
+- [ ] No TypeScript errors
+- [ ] Accessibility audit passes
+- [ ] Professional appearance
+- [ ] Dashboard stats are fetched from the API — no hardcoded values in any stat card
+- [ ] All "Back" buttons in detail pages use `navigate(-1)`
+- [ ] All stub pages render the `<EmptyState>` component — not an inline div or raw string — and the component is imported from the components library
+- [ ] `MainLayout` does not double-pad page content
+- [ ] `LoadingSpinner` renders `role="status"` accessible markup
+- [ ] No interactive navigation element (button, link, profile icon) is rendered without a working destination
+- [ ] No error-state retry handler calls `window.location.reload()` — all retry callbacks invoke the component's fetch function
 
 ### Human Review Gate
 
 A human should verify:
+
 - UI appearance (colors, typography, spacing)
 - Navigation usability
 - Responsive design on multiple devices
@@ -1252,12 +1265,12 @@ This cross-linking requirement applies symmetrically: `DesignPlanDetail` must sh
 
 ### Testing Requirements
 
-* [ ] Unit tests for ApplicationIntakeForm
-* [ ] Unit tests for form validation
-* [ ] API integration tests
-* [ ] E2E test for complete workflow
-* [ ] ApplicationDetail renders the design plan list section with plans when they exist
-* [ ] ApplicationDetail renders EmptyState with CTA when no plans exist
+- [ ] Unit tests for ApplicationIntakeForm
+- [ ] Unit tests for form validation
+- [ ] API integration tests
+- [ ] E2E test for complete workflow
+- [ ] ApplicationDetail renders the design plan list section with plans when they exist
+- [ ] ApplicationDetail renders EmptyState with CTA when no plans exist
 
 ### Validation Commands
 
@@ -1270,22 +1283,23 @@ npm run dev
 
 ### Acceptance Criteria
 
-* [ ] User can fill and submit form
-* [ ] Form validates required fields
-* [ ] Application is created
-* [ ] After successful creation, the user is redirected to `/applications/:id` (the new application's detail page) — not to the list
-* [ ] Application appears in list
-* [ ] User can view details
-* [ ] User can edit application
-* [ ] User can delete application
-* [ ] ApplicationDetail shows all associated design plans in a dedicated section
-* [ ] After generating a design plan, it appears immediately in ApplicationDetail without manual navigation
-* [ ] DesignPlanDetail links back to its parent Application
-* [ ] All tests pass
+- [ ] User can fill and submit form
+- [ ] Form validates required fields
+- [ ] Application is created
+- [ ] After successful creation, the user is redirected to `/applications/:id` (the new application's detail page) — not to the list
+- [ ] Application appears in list
+- [ ] User can view details
+- [ ] User can edit application
+- [ ] User can delete application
+- [ ] ApplicationDetail shows all associated design plans in a dedicated section
+- [ ] After generating a design plan, it appears immediately in ApplicationDetail without manual navigation
+- [ ] DesignPlanDetail links back to its parent Application
+- [ ] All tests pass
 
 ### Human Review Gate
 
 A human should verify:
+
 - Form is intuitive
 - All required fields present
 - Validation appropriate
@@ -1376,9 +1390,9 @@ frontend/src/pages/ApplicationDetail.tsx (add button)
 
 ### Testing Requirements
 
-* [ ] Unit tests for DesignPlanGenerator
-* [ ] Integration tests for API
-* [ ] UI tests for DesignPlanView
+- [ ] Unit tests for DesignPlanGenerator
+- [ ] Integration tests for API
+- [ ] UI tests for DesignPlanView
 
 ### Validation Commands
 
@@ -1390,15 +1404,16 @@ npm run dev
 
 ### Acceptance Criteria
 
-* [ ] POST /api/design-plans generates plan
-* [ ] Generated plan saved
-* [ ] Plan can be retrieved
-* [ ] UI displays plan
-* [ ] All tests pass
+- [ ] POST /api/design-plans generates plan
+- [ ] Generated plan saved
+- [ ] Plan can be retrieved
+- [ ] UI displays plan
+- [ ] All tests pass
 
 ### Human Review Gate
 
 A human should verify:
+
 - Mock design plan content is realistic
 - Generation flow is smooth
 - Error handling works
@@ -1492,12 +1507,12 @@ frontend/src/components/DesignPlanApprovalHistory.tsx
 
 ### Testing Requirements
 
-* [ ] Tests for approval logic
-* [ ] Tests for gate enforcement
-* [ ] Tests for locked approved plans
-* [ ] Integration test: `PATCH /design-plans/:id/review` returns 200; `PUT /design-plans/:id/review` returns 405
-* [ ] Integration test: `PATCH /design-plans/:id/decision/approve` returns 200; `PUT` returns 405
-* [ ] Frontend unit test: "Move to Review" button calls `apiClient.patch()`, not `apiClient.put()`
+- [ ] Tests for approval logic
+- [ ] Tests for gate enforcement
+- [ ] Tests for locked approved plans
+- [ ] Integration test: `PATCH /design-plans/:id/review` returns 200; `PUT /design-plans/:id/review` returns 405
+- [ ] Integration test: `PATCH /design-plans/:id/decision/approve` returns 200; `PUT` returns 405
+- [ ] Frontend unit test: "Move to Review" button calls `apiClient.patch()`, not `apiClient.put()`
 
 ### Validation Commands
 
@@ -1509,17 +1524,18 @@ npm run dev
 
 ### Acceptance Criteria
 
-* [ ] Design plan can be moved to review, then approved or rejected
-* [ ] All three state transitions use `PATCH` — calling them with `PUT` returns 405
-* [ ] Approval recorded with timestamp
-* [ ] Approved plans locked
-* [ ] Approval history visible
-* [ ] Non-approved plans cannot generate roadmaps
-* [ ] All tests pass
+- [ ] Design plan can be moved to review, then approved or rejected
+- [ ] All three state transitions use `PATCH` — calling them with `PUT` returns 405
+- [ ] Approval recorded with timestamp
+- [ ] Approved plans locked
+- [ ] Approval history visible
+- [ ] Non-approved plans cannot generate roadmaps
+- [ ] All tests pass
 
 ### Human Review Gate
 
 A human should verify:
+
 - Approval workflow is intuitive
 - Gates enforced
 - Authorization correct
@@ -1618,9 +1634,9 @@ This rule applies to every list page in the application: `DesignPlansList`, `Roa
 
 ### Testing Requirements
 
-* [ ] Unit tests for RoadmapGenerator
-* [ ] Integration tests for API
-* [ ] UI tests for RoadmapView
+- [ ] Unit tests for RoadmapGenerator
+- [ ] Integration tests for API
+- [ ] UI tests for RoadmapView
 
 ### Validation Commands
 
@@ -1632,15 +1648,16 @@ npm run dev
 
 ### Acceptance Criteria
 
-* [ ] Roadmap can be generated from approved design plan
-* [ ] Roadmap saved to persistence
-* [ ] UI displays roadmap in readable format
-* [ ] Phases and tasks properly structured
-* [ ] All tests pass
+- [ ] Roadmap can be generated from approved design plan
+- [ ] Roadmap saved to persistence
+- [ ] UI displays roadmap in readable format
+- [ ] Phases and tasks properly structured
+- [ ] All tests pass
 
 ### Human Review Gate
 
 A human should verify:
+
 - Roadmap structure matches specification
 - Generated phases/tasks are realistic
 - Mock responses are comprehensive
@@ -1748,12 +1765,12 @@ frontend/src/components/RoadmapApprovalGate.tsx
 
 ### Testing Requirements
 
-* [ ] Tests for editing operations
-* [ ] Tests for approval workflow
-* [ ] UI tests for drag-and-drop
-* [ ] Integration test: `PATCH /roadmaps/:id/approve` returns 200; `PUT /roadmaps/:id/approve` returns 405
-* [ ] Frontend unit test: RoadmapDetail shows "Approve" and "Reject" buttons when `status === 'pending_review'`
-* [ ] Frontend unit test: "Create Execution Run" button is hidden when `status !== 'approved'`, visible when `status === 'approved'`
+- [ ] Tests for editing operations
+- [ ] Tests for approval workflow
+- [ ] UI tests for drag-and-drop
+- [ ] Integration test: `PATCH /roadmaps/:id/approve` returns 200; `PUT /roadmaps/:id/approve` returns 405
+- [ ] Frontend unit test: RoadmapDetail shows "Approve" and "Reject" buttons when `status === 'pending_review'`
+- [ ] Frontend unit test: "Create Execution Run" button is hidden when `status !== 'approved'`, visible when `status === 'approved'`
 
 ### Validation Commands
 
@@ -1764,17 +1781,18 @@ npm run dev
 
 ### Acceptance Criteria
 
-* [ ] Roadmap can be edited (phases and tasks)
-* [ ] Roadmap can be approved or rejected from `RoadmapDetail` — no separate page navigation required
-* [ ] Approve and reject endpoints use `PATCH`; calling them with `PUT` returns 405
-* [ ] "Create Execution Run" button appears on `RoadmapDetail` only after approval
-* [ ] Approved roadmaps locked from further editing
-* [ ] `RoadmapDetail` displays the parent Design Plan as a human-readable name with a clickable link — not a raw UUID
-* [ ] All tests pass
+- [ ] Roadmap can be edited (phases and tasks)
+- [ ] Roadmap can be approved or rejected from `RoadmapDetail` — no separate page navigation required
+- [ ] Approve and reject endpoints use `PATCH`; calling them with `PUT` returns 405
+- [ ] "Create Execution Run" button appears on `RoadmapDetail` only after approval
+- [ ] Approved roadmaps locked from further editing
+- [ ] `RoadmapDetail` displays the parent Design Plan as a human-readable name with a clickable link — not a raw UUID
+- [ ] All tests pass
 
 ### Human Review Gate
 
 A human should verify:
+
 - Editing UI intuitive
 - Approval gates enforced
 - "Approve" and "Reject" buttons appear on the RoadmapDetail page when the roadmap is pending review
@@ -1875,10 +1893,10 @@ frontend/src/hooks/useAgents.ts
 
 ### Testing Requirements
 
-* [ ] Tests for agent-loader
-* [ ] Tests for agent registry
-* [ ] API integration tests
-* [ ] UI tests
+- [ ] Tests for agent-loader
+- [ ] Tests for agent registry
+- [ ] API integration tests
+- [ ] UI tests
 
 ### Validation Commands
 
@@ -1889,18 +1907,19 @@ npm run dev
 
 ### Acceptance Criteria
 
-* [ ] Existing agents load from agents/
-* [ ] Agents can be viewed and listed
-* [ ] New agents can be created
-* [ ] Agents can be edited
-* [ ] Agents can be disabled
-* [ ] Agent test interface works
-* [ ] AgentsList page fetches all independent data (agents list, types, stats) in parallel via `Promise.all` — not sequentially
-* [ ] All tests pass
+- [ ] Existing agents load from agents/
+- [ ] Agents can be viewed and listed
+- [ ] New agents can be created
+- [ ] Agents can be edited
+- [ ] Agents can be disabled
+- [ ] Agent test interface works
+- [ ] AgentsList page fetches all independent data (agents list, types, stats) in parallel via `Promise.all` — not sequentially
+- [ ] All tests pass
 
 ### Human Review Gate
 
 A human should verify:
+
 - Existing agents load correctly
 - Agent UI comprehensive
 - Test interface works
@@ -1999,10 +2018,10 @@ frontend/src/components/PromptComparison.tsx
 
 ### Testing Requirements
 
-* [ ] Tests for prompt CRUD
-* [ ] Tests for versioning
-* [ ] Tests for rendering (variable substitution)
-* [ ] UI tests
+- [ ] Tests for prompt CRUD
+- [ ] Tests for versioning
+- [ ] Tests for rendering (variable substitution)
+- [ ] UI tests
 
 ### Validation Commands
 
@@ -2013,16 +2032,17 @@ npm run dev
 
 ### Acceptance Criteria
 
-* [ ] Prompts can be created, edited, viewed
-* [ ] Versions tracked
-* [ ] Test interface works
-* [ ] Comparison shows differences
-* [ ] PromptsList page fetches all independent data (prompts, categories, tags, stats) in parallel via `Promise.all` — not sequentially
-* [ ] All tests pass
+- [ ] Prompts can be created, edited, viewed
+- [ ] Versions tracked
+- [ ] Test interface works
+- [ ] Comparison shows differences
+- [ ] PromptsList page fetches all independent data (prompts, categories, tags, stats) in parallel via `Promise.all` — not sequentially
+- [ ] All tests pass
 
 ### Human Review Gate
 
 A human should verify:
+
 - Prompt editor UI usable
 - Test interface intuitive
 - Version history clear
@@ -2127,10 +2147,10 @@ frontend/src/components/ContractComplianceDashboard.tsx
 
 ### Testing Requirements
 
-* [ ] Tests for contract-loader
-* [ ] Tests for contract-validator
-* [ ] Tests for API endpoints
-* [ ] Tests for validation middleware
+- [ ] Tests for contract-loader
+- [ ] Tests for contract-validator
+- [ ] Tests for API endpoints
+- [ ] Tests for validation middleware
 
 ### Validation Commands
 
@@ -2141,16 +2161,17 @@ npm run dev
 
 ### Acceptance Criteria
 
-* [ ] Existing contracts load from contracts/
-* [ ] Contracts can be viewed and listed
-* [ ] New contracts can be created
-* [ ] Contract validation middleware works
-* [ ] Compliance dashboard shows violations
-* [ ] All tests pass
+- [ ] Existing contracts load from contracts/
+- [ ] Contracts can be viewed and listed
+- [ ] New contracts can be created
+- [ ] Contract validation middleware works
+- [ ] Compliance dashboard shows violations
+- [ ] All tests pass
 
 ### Human Review Gate
 
 A human should verify:
+
 - Contracts load correctly
 - Validation logic sound
 - Compliance dashboard useful
@@ -2248,13 +2269,13 @@ data/spike-runs/ (new directory for persistence)
 
 ### Testing Requirements
 
-* [ ] Test contract validation before task execution
-* [ ] Test contract validation after task execution
-* [ ] Test artifact persistence
-* [ ] Test audit event logging
-* [ ] Test cost tracking
-* [ ] Test spike run can be re-executed without errors
-* [ ] Test spike results displayed in UI
+- [ ] Test contract validation before task execution
+- [ ] Test contract validation after task execution
+- [ ] Test artifact persistence
+- [ ] Test audit event logging
+- [ ] Test cost tracking
+- [ ] Test spike run can be re-executed without errors
+- [ ] Test spike results displayed in UI
 
 ### Validation Commands
 
@@ -2267,20 +2288,21 @@ npm run dev
 
 ### Acceptance Criteria
 
-* [ ] One mock task executes end-to-end
-* [ ] One input contract validated before task
-* [ ] One output contract validated after task
-* [ ] One spike run record persisted
-* [ ] One artifact persisted
-* [ ] One audit event logged
-* [ ] Costs tracked (placeholder)
-* [ ] UI displays spike run results
-* [ ] Spike can run repeatedly without state corruption
-* [ ] All tests pass
+- [ ] One mock task executes end-to-end
+- [ ] One input contract validated before task
+- [ ] One output contract validated after task
+- [ ] One spike run record persisted
+- [ ] One artifact persisted
+- [ ] One audit event logged
+- [ ] Costs tracked (placeholder)
+- [ ] UI displays spike run results
+- [ ] Spike can run repeatedly without state corruption
+- [ ] All tests pass
 
 ### Human Review Gate
 
 A human should verify:
+
 - Spike demonstrates all key orchestration concepts
 - Contract validation is enforced
 - Spike results are accurate
@@ -2330,6 +2352,7 @@ The orchestration engine must not be tightly coupled to one execution model. Thi
 ### Implementation Tasks
 
 - [ ] Create `backend/src/types/agent-executor.ts` with AgentExecutor interface:
+
   ```typescript
   interface AgentExecutionInput {
     agentId: string;
@@ -2356,6 +2379,7 @@ The orchestration engine must not be tightly coupled to one execution model. Thi
     execute(input: AgentExecutionInput): Promise<AgentExecutionResult>;
   }
   ```
+
 - [ ] Create `backend/src/services/executors/mock-executor.ts`
 - [ ] Create `backend/src/services/executors/dry-run-executor.ts`
 - [ ] Create `backend/src/services/executors/executor-registry.ts`
@@ -2386,10 +2410,10 @@ docs/
 
 ### Testing Requirements
 
-* [ ] Tests for MockAgentExecutor (returns mock results)
-* [ ] Tests for DryRunAgentExecutor (returns dry-run placeholder)
-* [ ] Tests for executor selection logic
-* [ ] Tests that executor result matches AgentExecutionResult contract
+- [ ] Tests for MockAgentExecutor (returns mock results)
+- [ ] Tests for DryRunAgentExecutor (returns dry-run placeholder)
+- [ ] Tests for executor selection logic
+- [ ] Tests that executor result matches AgentExecutionResult contract
 
 ### Validation Commands
 
@@ -2400,17 +2424,18 @@ npm run typecheck
 
 ### Acceptance Criteria
 
-* [ ] AgentExecutor interface defined clearly
-* [ ] MockAgentExecutor works
-* [ ] DryRunAgentExecutor works
-* [ ] Executor registry selects correctly
-* [ ] ExecutionResult contract adhered to
-* [ ] All tests pass
-* [ ] Executor contract documented
+- [ ] AgentExecutor interface defined clearly
+- [ ] MockAgentExecutor works
+- [ ] DryRunAgentExecutor works
+- [ ] Executor registry selects correctly
+- [ ] ExecutionResult contract adhered to
+- [ ] All tests pass
+- [ ] Executor contract documented
 
 ### Human Review Gate
 
 A human should verify:
+
 - AgentExecutor interface is sound
 - Executor abstraction is flexible
 - Contract is well-documented
@@ -2509,12 +2534,12 @@ If the backend doesn't yet support a filter parameter, the filter must not be ex
 
 ### Testing Requirements
 
-* [ ] Tests for audit event logging
-* [ ] Tests for cost tracking
-* [ ] Tests that approval events are logged
-* [ ] Tests that execution events are logged
-* [ ] Tests for persistence and retrieval
-* [ ] Integration test: applying each filter parameter to `GET /api/audit-logs` returns results filtered server-side, not all records
+- [ ] Tests for audit event logging
+- [ ] Tests for cost tracking
+- [ ] Tests that approval events are logged
+- [ ] Tests that execution events are logged
+- [ ] Tests for persistence and retrieval
+- [ ] Integration test: applying each filter parameter to `GET /api/audit-logs` returns results filtered server-side, not all records
 
 ### Validation Commands
 
@@ -2526,19 +2551,20 @@ npm run dev
 
 ### Acceptance Criteria
 
-* [ ] AuditEvent model defined and persisted
-* [ ] Cost tracking working
-* [ ] Approval events logged
-* [ ] Task execution events logged
-* [ ] Failure/repair events logged
-* [ ] Audit log displayable
-* [ ] Cost summary displayable
-* [ ] All filter parameters (date, userId, action, status, severity) are applied server-side via query params — no client-side filtering of paginated results
-* [ ] All tests pass
+- [ ] AuditEvent model defined and persisted
+- [ ] Cost tracking working
+- [ ] Approval events logged
+- [ ] Task execution events logged
+- [ ] Failure/repair events logged
+- [ ] Audit log displayable
+- [ ] Cost summary displayable
+- [ ] All filter parameters (date, userId, action, status, severity) are applied server-side via query params — no client-side filtering of paginated results
+- [ ] All tests pass
 
 ### Human Review Gate
 
 A human should verify:
+
 - Audit events are comprehensive
 - Cost tracking is accurate
 - Audit log is readable
@@ -2609,10 +2635,10 @@ backend/tests/services/run-state-machine.test.ts
 
 ### Testing Requirements
 
-* [x] Tests for valid state transitions
-* [x] Tests for invalid transition rejection
-* [x] Tests for state persistence
-* [x] Tests for audit logging of transitions
+- [x] Tests for valid state transitions
+- [x] Tests for invalid transition rejection
+- [x] Tests for state persistence
+- [x] Tests for audit logging of transitions
 
 ### Validation Commands
 
@@ -2623,15 +2649,16 @@ npm run typecheck
 
 ### Acceptance Criteria
 
-* [x] State machine enforces valid transitions
-* [x] Invalid transitions rejected
-* [x] State persists correctly
-* [x] Transitions logged to audit
-* [x] All tests pass
+- [x] State machine enforces valid transitions
+- [x] Invalid transitions rejected
+- [x] State persists correctly
+- [x] Transitions logged to audit
+- [x] All tests pass
 
 ### Human Review Gate
 
 A human should verify:
+
 - State transitions are correct
 - Invalid transitions are caught
 - State persistence is accurate
@@ -2699,11 +2726,11 @@ backend/tests/services/task-queue.test.ts
 
 ### Testing Requirements
 
-* [x] Tests for dependency resolution
-* [x] Tests for parallel task identification
-* [x] Tests for queue progression
-* [x] Tests for task failure handling
-* [x] Tests with circular dependencies (should reject)
+- [x] Tests for dependency resolution
+- [x] Tests for parallel task identification
+- [x] Tests for queue progression
+- [x] Tests for task failure handling
+- [x] Tests with circular dependencies (should reject)
 
 ### Validation Commands
 
@@ -2714,16 +2741,17 @@ npm run typecheck
 
 ### Acceptance Criteria
 
-* [x] Dependencies resolved correctly
-* [x] Parallel tasks identified
-* [x] Sequential execution enforced where needed
-* [x] Queue progresses correctly
-* [x] Failures handled appropriately
-* [x] All tests pass
+- [x] Dependencies resolved correctly
+- [x] Parallel tasks identified
+- [x] Sequential execution enforced where needed
+- [x] Queue progresses correctly
+- [x] Failures handled appropriately
+- [x] All tests pass
 
 ### Human Review Gate
 
 A human should verify:
+
 - Dependency logic is sound
 - Parallel/sequential decisions are correct
 - Failure handling is safe
@@ -2795,12 +2823,12 @@ backend/tests/services/agent-executor-adapter.test.ts
 
 ### Testing Requirements
 
-* [x] Tests for input preparation
-* [x] Tests for input contract validation
-* [x] Tests for output contract validation
-* [x] Tests for error mapping
-* [x] Tests for cost extraction
-* [x] Tests for edge cases (null output, missing fields, etc.)
+- [x] Tests for input preparation
+- [x] Tests for input contract validation
+- [x] Tests for output contract validation
+- [x] Tests for error mapping
+- [x] Tests for cost extraction
+- [x] Tests for edge cases (null output, missing fields, etc.)
 
 ### Validation Commands
 
@@ -2811,16 +2839,17 @@ npm run typecheck
 
 ### Acceptance Criteria
 
-* [x] Input preparation works
-* [x] Input contract validation enforced
-* [x] Output contract validation enforced
-* [x] Errors mapped correctly
-* [x] Costs extracted correctly
-* [x] All tests pass
+- [x] Input preparation works
+- [x] Input contract validation enforced
+- [x] Output contract validation enforced
+- [x] Errors mapped correctly
+- [x] Costs extracted correctly
+- [x] All tests pass
 
 ### Human Review Gate
 
 A human should verify:
+
 - Contract validation is enforced
 - Error mapping is comprehensive
 - Cost extraction is accurate
@@ -2892,11 +2921,11 @@ shared/types/index.ts (add HandoffContract if needed)
 
 ### Testing Requirements
 
-* [x] Tests for contract matching
-* [x] Tests for valid handoffs
-* [x] Tests for invalid handoff rejection
-* [x] Tests for repair suggestion
-* [x] Tests for escalation routing
+- [x] Tests for contract matching
+- [x] Tests for valid handoffs
+- [x] Tests for invalid handoff rejection
+- [x] Tests for repair suggestion
+- [x] Tests for escalation routing
 
 ### Validation Commands
 
@@ -2907,15 +2936,16 @@ npm run typecheck
 
 ### Acceptance Criteria
 
-* [x] Handoff contracts loaded and matched
-* [x] Valid handoffs pass
-* [x] Invalid handoffs rejected
-* [x] Failure routing logic works
-* [x] All tests pass
+- [x] Handoff contracts loaded and matched
+- [x] Valid handoffs pass
+- [x] Invalid handoffs rejected
+- [x] Failure routing logic works
+- [x] All tests pass
 
 ### Human Review Gate
 
 A human should verify:
+
 - Contract matching logic is sound
 - Handoff validation is enforced
 - Failure routing is appropriate
@@ -2993,11 +3023,11 @@ data/artifacts/index.json
 
 ### Testing Requirements
 
-* [x] Tests for artifact save/retrieve
-* [x] Tests for checksum verification
-* [x] Tests for artifact linking
-* [x] Tests for download endpoint
-* [x] Tests for artifact cleanup
+- [x] Tests for artifact save/retrieve
+- [x] Tests for checksum verification
+- [x] Tests for artifact linking
+- [x] Tests for download endpoint
+- [x] Tests for artifact cleanup
 
 ### Validation Commands
 
@@ -3009,16 +3039,17 @@ npm run dev
 
 ### Acceptance Criteria
 
-* [x] Artifacts persisted reliably
-* [x] Artifacts checksummed and verified
-* [x] Artifacts linked to runs/tasks
-* [x] Download endpoint works
-* [x] Artifact viewer displays artifacts
-* [x] All tests pass
+- [x] Artifacts persisted reliably
+- [x] Artifacts checksummed and verified
+- [x] Artifacts linked to runs/tasks
+- [x] Download endpoint works
+- [x] Artifact viewer displays artifacts
+- [x] All tests pass
 
 ### Human Review Gate
 
 A human should verify:
+
 - Artifact storage is reliable
 - Artifacts linked correctly
 - Viewer works for common artifact types
@@ -3096,10 +3127,10 @@ frontend/src/pages/ExecutionConsole.tsx (show completion)
 
 ### Testing Requirements
 
-* [x] Tests for summary generation
-* [x] Tests for cost calculation
-* [x] Tests for failure aggregation
-* [x] Tests for lessons extraction
+- [x] Tests for summary generation
+- [x] Tests for cost calculation
+- [x] Tests for failure aggregation
+- [x] Tests for lessons extraction
 
 ### Validation Commands
 
@@ -3111,16 +3142,17 @@ npm run dev
 
 ### Acceptance Criteria
 
-* [x] Run summary generated correctly
-* [x] Final costs calculated
-* [x] Failures summarized
-* [x] Lessons captured
-* [ ] Completion detail page displays all information
-* [x] All tests pass
+- [x] Run summary generated correctly
+- [x] Final costs calculated
+- [x] Failures summarized
+- [x] Lessons captured
+- [ ] Completion detail page displays all information
+- [x] All tests pass
 
 ### Human Review Gate
 
 A human should verify:
+
 - Summary is comprehensive
 - Costs are accurate
 - Lessons are valuable
@@ -3273,17 +3305,17 @@ Implement a `FailureReasonModal` component (or reuse any existing modal) that re
 
 ### Testing Requirements
 
-* [x] Tests for real-time update hooks
-* [x] Tests for log filtering
-* [x] Tests for pause/resume
-* [ ] Tests for repair approval UI
-* [ ] `useExecutionUpdates` fetches from `GET /api/runs/:id/logs` — no module-level mock Map
-* [ ] Logs tab in ExecutionConsole renders log entries returned by the API
-* [ ] All run/task state transition buttons call `apiClient.patch()` (not `put()` or `post()`)
-* [ ] Task failure modal is a React component — test that it renders an input field and "Confirm Failure" button
-* [ ] Unit test: "Resume Run" button calls `apiClient.patch('/runs/:id/resume')` — not `/start`
-* [ ] Unit test: `ExecutionConsole` root element does not have `h-screen` class when rendered inside `MainLayout`
-* [ ] Unit test: progress bar width is 0 (not `NaN`) when tasks array is empty
+- [x] Tests for real-time update hooks
+- [x] Tests for log filtering
+- [x] Tests for pause/resume
+- [ ] Tests for repair approval UI
+- [ ] `useExecutionUpdates` fetches from `GET /api/runs/:id/logs` — no module-level mock Map
+- [ ] Logs tab in ExecutionConsole renders log entries returned by the API
+- [ ] All run/task state transition buttons call `apiClient.patch()` (not `put()` or `post()`)
+- [ ] Task failure modal is a React component — test that it renders an input field and "Confirm Failure" button
+- [ ] Unit test: "Resume Run" button calls `apiClient.patch('/runs/:id/resume')` — not `/start`
+- [ ] Unit test: `ExecutionConsole` root element does not have `h-screen` class when rendered inside `MainLayout`
+- [ ] Unit test: progress bar width is 0 (not `NaN`) when tasks array is empty
 
 ### Validation Commands
 
@@ -3294,25 +3326,26 @@ npm run dev
 
 ### Acceptance Criteria
 
-* [x] Live updates show progress
-* [x] Cost tracking accurate
-* [x] Pause/resume works
-* [ ] Repair approval UI works
-* [x] All tests pass
-* [ ] Logs tab shows real log entries fetched from `GET /api/runs/:id/logs` — not always empty
-* [ ] All run and task state transitions call `PATCH`; `PUT` on these endpoints returns 405
-* [ ] "Resume Run" button calls `PATCH /api/runs/:id/resume` — not `/api/runs/:id/start`
-* [ ] `ExecutionConsole` root element uses `flex-1 overflow-auto` — not `h-screen` — to avoid conflicting with `MainLayout`'s height container
-* [ ] All back navigation buttons in `ExecutionConsole` use `navigate(-1)`, not hardcoded paths
-* [ ] Progress percentage calculations guard against `totalTasks === 0` to prevent `NaN` width values
-* [ ] State transition handlers either use the API response to update local state, or omit the assignment — no unused `const updated = ...` bindings
-* [ ] Phase cost entries in `CostTracker` are labeled by phase name or number from the data model — not by array index
-* [ ] `RunDetail` has an "Open Execution Console" link to `/runs/:id/console`
-* [ ] Task failure reason is collected via a modal component, not `window.prompt()`
+- [x] Live updates show progress
+- [x] Cost tracking accurate
+- [x] Pause/resume works
+- [ ] Repair approval UI works
+- [x] All tests pass
+- [ ] Logs tab shows real log entries fetched from `GET /api/runs/:id/logs` — not always empty
+- [ ] All run and task state transitions call `PATCH`; `PUT` on these endpoints returns 405
+- [ ] "Resume Run" button calls `PATCH /api/runs/:id/resume` — not `/api/runs/:id/start`
+- [ ] `ExecutionConsole` root element uses `flex-1 overflow-auto` — not `h-screen` — to avoid conflicting with `MainLayout`'s height container
+- [ ] All back navigation buttons in `ExecutionConsole` use `navigate(-1)`, not hardcoded paths
+- [ ] Progress percentage calculations guard against `totalTasks === 0` to prevent `NaN` width values
+- [ ] State transition handlers either use the API response to update local state, or omit the assignment — no unused `const updated = ...` bindings
+- [ ] Phase cost entries in `CostTracker` are labeled by phase name or number from the data model — not by array index
+- [ ] `RunDetail` has an "Open Execution Console" link to `/runs/:id/console`
+- [ ] Task failure reason is collected via a modal component, not `window.prompt()`
 
 ### Human Review Gate
 
 A human should verify:
+
 - Updates feel responsive
 - Logs readable and actually populated (not blank)
 - Cost tracking accurate
@@ -3334,10 +3367,10 @@ feat(phase-22): execution console and live monitoring
 
 ## Phase 23 — Failure Taxonomy and Repair Workflow
 
-**Status:** In Progress (Backend Complete)
-**Completed:** 2026-06-15 00:15 UTC (Backend Services)
-**Completed By:** Claude Haiku 4.5
-**Completion Notes:** Backend services (FailureClassifier, RepairStrategist) fully implemented with 63 passing tests. Frontend components (FailureDetail, RepairOptions) pending. All type definitions and service logic complete.
+**Status:** Complete
+**Completed:** 2026-06-15 13:17 UTC
+**Completed By:** GitHub Copilot (GPT-5.3-Codex)
+**Completion Notes:** Completed frontend failure workflow integration with `FailureDetail` and `RepairOptions`, wired into `ExecutionConsole` with real backend actions (`PATCH /runs/:id/resume`, `PATCH /runs/:id/skip-phase`) and inline loading/error handling. Added frontend tests for failure detail rendering, repair actions, and execution-console repair modal actions. Validation run: `npm run typecheck` (pass), `npm run lint` (warnings only, no errors), `npm test` (backend 278/278 pass, frontend 62/62 pass), `npm run dev` (both servers started on 3007/5176 after freeing occupied ports).
 
 ### Goal
 
@@ -3360,7 +3393,7 @@ Failures are inevitable. Handling them gracefully, transparently, and with clear
 - [x] Repair strategy selection logic
 - [x] Repair attempt tracking and limits
 - [x] Escalation to human with evidence
-- [ ] FailureDetail and RepairOptions UI
+- [x] FailureDetail and RepairOptions UI
 - [x] Tests for failure classification, recovery routing, and repair handling
 
 ### Implementation Tasks
@@ -3368,9 +3401,9 @@ Failures are inevitable. Handling them gracefully, transparently, and with clear
 - [x] Create `backend/src/services/failure-classifier.ts` with taxonomy
 - [x] Create `backend/src/services/repair-strategist.ts`
 - [x] Implement repair attempt limits
-- [ ] Create `frontend/src/components/FailureDetail.tsx`
-- [ ] Create `frontend/src/components/RepairOptions.tsx`
-- [ ] Add failure display to execution console
+- [x] Create `frontend/src/components/FailureDetail.tsx`
+- [x] Create `frontend/src/components/RepairOptions.tsx`
+- [x] Add failure display to execution console
 - [x] Write tests
 
 ### Files Expected to Be Created or Modified
@@ -3409,10 +3442,10 @@ A repair modal that only calls `setShowModal(false)` provides no value: the run 
 
 ### Testing Requirements
 
-* [x] Tests for failure classification
-* [x] Tests for repair strategy selection
-* [x] Tests for repair attempt limits
-* [x] Tests for escalation
+- [x] Tests for failure classification
+- [x] Tests for repair strategy selection
+- [x] Tests for repair attempt limits
+- [x] Tests for escalation
 
 ### Validation Commands
 
@@ -3423,18 +3456,19 @@ npm run dev
 
 ### Acceptance Criteria
 
-* [x] Failures classified correctly
-* [x] Repair strategies appropriate
-* [x] Repair attempts tracked
-* [x] Escalation works
-* [ ] UI shows failures and options
-* [ ] Repair/error modal's action buttons call backend endpoints — not just `setShowModal(false)`
-* [ ] Modal shows loading state while action is in flight and inline error if the API call fails
-* [ ] All tests pass
+- [x] Failures classified correctly
+- [x] Repair strategies appropriate
+- [x] Repair attempts tracked
+- [x] Escalation works
+- [x] UI shows failures and options
+- [x] Repair/error modal's action buttons call backend endpoints — not just `setShowModal(false)`
+- [x] Modal shows loading state while action is in flight and inline error if the API call fails
+- [x] All tests pass
 
 ### Human Review Gate
 
 A human should verify:
+
 - Failure classification accurate
 - Repair strategies sound
 - Escalation logic safe
@@ -3515,9 +3549,9 @@ backend/tests/services/cost-analytics.test.ts
 
 ### Testing Requirements
 
-* [x] Tests for cost aggregation
-* [x] Tests for budget alert logic
-* [x] Tests for cost trend calculation
+- [x] Tests for cost aggregation
+- [x] Tests for budget alert logic
+- [x] Tests for cost trend calculation
 
 ### Validation Commands
 
@@ -3528,16 +3562,17 @@ npm run dev
 
 ### Acceptance Criteria
 
-* [x] Cost breakdown by agent accurate
-* [x] Budget alerts trigger correctly
-* [x] Cost trends tracked
-* [x] Dashboard displays clearly
-* [x] Reports generated correctly
-* [x] All tests pass
+- [x] Cost breakdown by agent accurate
+- [x] Budget alerts trigger correctly
+- [x] Cost trends tracked
+- [x] Dashboard displays clearly
+- [x] Reports generated correctly
+- [x] All tests pass
 
 ### Human Review Gate
 
 A human should verify:
+
 - Cost calculations accurate
 - Dashboard useful
 - Alerts appropriate
@@ -3626,10 +3661,10 @@ frontend/src/pages/ExecutionConsole.tsx (GitHub status)
 
 ### Testing Requirements
 
-* [ ] Tests for GitHub operations (mocked)
-* [ ] Integration tests for full workflow
-* [ ] Tests for error handling
-* [ ] UI tests for push modal
+- [ ] Tests for GitHub operations (mocked)
+- [ ] Integration tests for full workflow
+- [ ] Tests for error handling
+- [ ] UI tests for push modal
 
 ### Validation Commands
 
@@ -3640,16 +3675,17 @@ npm run dev
 
 ### Acceptance Criteria
 
-* [ ] GitHub OAuth works
-* [ ] Branches can be created
-* [ ] Commits can be created
-* [ ] PRs can be created
-* [ ] CI status monitored
-* [ ] All tests pass (with mocks)
+- [ ] GitHub OAuth works
+- [ ] Branches can be created
+- [ ] Commits can be created
+- [ ] PRs can be created
+- [ ] CI status monitored
+- [ ] All tests pass (with mocks)
 
 ### Human Review Gate
 
 A human should verify:
+
 - OAuth scopes minimal
 - Operations safe (no force-push)
 - Error handling robust
@@ -3724,10 +3760,10 @@ None; testing infrastructure.
 
 ### Testing Requirements
 
-* [ ] >= 80% coverage for backend services
-* [ ] >= 80% coverage for critical frontend components
-* [ ] All API endpoints tested
-* [ ] All major workflows tested
+- [ ] >= 80% coverage for backend services
+- [ ] >= 80% coverage for critical frontend components
+- [ ] All API endpoints tested
+- [ ] All major workflows tested
 
 ### Validation Commands
 
@@ -3740,16 +3776,17 @@ npm run build
 
 ### Acceptance Criteria
 
-* [ ] All tests pass
-* [ ] Coverage >= 80%
-* [ ] Lint passes
-* [ ] Type check passes
-* [ ] Build succeeds
-* [ ] CI pipeline configured
+- [ ] All tests pass
+- [ ] Coverage >= 80%
+- [ ] Lint passes
+- [ ] Type check passes
+- [ ] Build succeeds
+- [ ] CI pipeline configured
 
 ### Human Review Gate
 
 A human should verify:
+
 - Coverage adequate
 - Critical paths tested
 - CI pipeline appropriate
@@ -3826,10 +3863,10 @@ docs/ACCESSIBILITY.md
 
 ### Testing Requirements
 
-* [ ] Tests for authentication
-* [ ] Tests for authorization
-* [ ] Tests for input validation
-* [ ] Accessibility tests
+- [ ] Tests for authentication
+- [ ] Tests for authorization
+- [ ] Tests for input validation
+- [ ] Accessibility tests
 
 ### Validation Commands
 
@@ -3842,16 +3879,17 @@ npm run build
 
 ### Acceptance Criteria
 
-* [ ] Authentication works
-* [ ] Authorization enforced
-* [ ] Secrets not committed
-* [ ] Security headers set
-* [ ] WCAG 2.1 AA compliant
-* [ ] All tests pass
+- [ ] Authentication works
+- [ ] Authorization enforced
+- [ ] Secrets not committed
+- [ ] Security headers set
+- [ ] WCAG 2.1 AA compliant
+- [ ] All tests pass
 
 ### Human Review Gate
 
 A human (security expert) should verify:
+
 - Auth logic sound
 - Auth enforced
 - Secrets managed
@@ -3937,17 +3975,18 @@ None; but should be reviewed by humans.
 
 ### Acceptance Criteria
 
-* [ ] README complete
-* [ ] API docs comprehensive
-* [ ] User guide step-by-step
-* [ ] Operator guide complete
-* [ ] Architecture documented
-* [ ] Examples working
-* [ ] Troubleshooting helpful
+- [ ] README complete
+- [ ] API docs comprehensive
+- [ ] User guide step-by-step
+- [ ] Operator guide complete
+- [ ] Architecture documented
+- [ ] Examples working
+- [ ] Troubleshooting helpful
 
 ### Human Review Gate
 
 A human should verify:
+
 - Documentation accurate
 - All features documented
 - Examples work
@@ -4016,8 +4055,8 @@ None.
 
 ### Testing Requirements
 
-* [ ] Full UAT
-* [ ] Smoke tests on deployed system
+- [ ] Full UAT
+- [ ] Smoke tests on deployed system
 
 ### Validation Commands
 
@@ -4030,16 +4069,17 @@ npm run build
 
 ### Acceptance Criteria
 
-* [ ] All UAT tests pass
-* [ ] Security audit passes
-* [ ] Performance acceptable
-* [ ] All requirements met
-* [ ] Release notes complete
-* [ ] System deployable and operational
+- [ ] All UAT tests pass
+- [ ] Security audit passes
+- [ ] Performance acceptable
+- [ ] All requirements met
+- [ ] Release notes complete
+- [ ] System deployable and operational
 
 ### Human Review Gate
 
 A human (product owner, ops, security) should verify:
+
 - All requirements met
 - System production-ready
 - Performance acceptable
@@ -4052,6 +4092,218 @@ Revert to last stable deployment.
 
 ```text
 chore(phase-29): final acceptance and release
+```
+
+---
+
+## Phase 30 — Agent Prompt Language Constraints
+
+**Status:** Not Started
+**Completed:**
+**Completed By:**
+**Completion Notes:**
+
+### Goal
+
+Enforce a consistent target language and technology stack in every agent system prompt and task prompt, preventing agents from generating Python when TypeScript/Node.js is required (and similar language drift).
+
+### Why This Phase Exists
+
+During execution of run `90f372fb`, agents assigned to Node.js/TypeScript tasks generated Python code (`app/main.py`, `app/utils/filesystem.py`) and used ORMs not in the project's package.json (TypeORM instead of file-based storage). Different agents also chose inconsistent patterns — one used file repositories, another raw TypeORM entities, another Express middleware with different naming conventions. This made the generated output non-compilable without significant repair.
+
+### Root Causes
+
+1. **No stack context in system prompts** — Agent system prompts describe the agent's role but not the project's language, framework, or dependencies.
+2. **No dependency manifest passed to tasks** — Tasks receive a description and estimated hours, but not the `package.json` or existing file tree.
+3. **No output contract** — The LLM is free to choose any language/library that seems appropriate for the task description.
+
+### Inputs
+
+- Phase 18 complete (Agent Executor Adapter)
+- `backend/src/services/task-executor.ts` — system prompt construction
+- `backend/src/services/agent-loader.ts` — agent definitions
+- `backend/src/routes/runs.ts` — run execution API
+
+### Deliverables
+
+- [ ] Stack context injected into every task's system prompt (language, framework, key dependencies)
+- [ ] Per-run `stackConstraints` field on the Run model (set at run creation from roadmap metadata)
+- [ ] Task prompt template updated to include "Target Stack" section
+- [ ] Validation step after task execution: if output contains code, detect language and flag mismatch
+- [ ] Unit tests covering prompt injection and mismatch detection
+
+### Implementation Tasks
+
+- [ ] Add `stackConstraints: StackConstraints` field to the `Run` and `Roadmap` shared types
+- [ ] Extend `RunService.createRunFromRoadmap()` to accept and store stack constraints
+- [ ] Update `TaskExecutor.runWithLLM()` to prepend a stack-context block to the user message
+- [ ] Create `StackConstraintBuilder` service that formats the constraint block from a `StackConstraints` object
+- [ ] Add `detectOutputLanguage(output: string): string[]` utility (detect Python, TypeScript, Java, etc. from code fences)
+- [ ] Add post-execution mismatch check in `TaskExecutor`: log a warning if detected language doesn't match constraints
+- [ ] Update the default `FALLBACK_SYSTEM_PROMPT` in `task-executor.ts` to include a "language: unspecified" placeholder
+- [ ] Add `stackConstraints` to the run creation UI form (Phase 5 follow-up)
+
+### Stack Constraint Block Format
+
+Injected at the top of every task user message:
+
+```text
+## Project Stack (REQUIRED — do not deviate)
+- Language: TypeScript (strict mode)
+- Runtime: Node.js >= 18
+- Framework: Express.js 4.x
+- Dependencies available: express, joi, winston (see package.json below)
+- File structure: src/ for source, tests/ for tests
+- Do NOT use: Python, Java, TypeORM, Prisma, or any library not listed above
+
+{package_json_contents}
+```
+
+### Files Expected to Be Created or Modified
+
+```text
+backend/src/services/task-executor.ts        — inject stack context
+backend/src/services/stack-constraint-builder.ts   — NEW: formats constraint block
+backend/src/services/run-service.ts          — accept stackConstraints
+shared/src/types/run.ts                      — add stackConstraints field
+shared/src/types/roadmap.ts                  — add stackConstraints field
+backend/src/services/task-executor.test.ts   — NEW: unit tests
+```
+
+### Testing Requirements
+
+- [ ] Test that stack constraint block appears in the LLM user message
+- [ ] Test language detection correctly identifies TypeScript, Python, JavaScript from code samples
+- [ ] Test mismatch warning is logged when Python code appears in a TypeScript-constrained run
+- [ ] Test `StackConstraintBuilder` formats the block correctly from a constraints object
+
+### Validation Commands
+
+```bash
+cd backend && npm run typecheck
+cd backend && npm test -- --testPathPattern=stack-constraint
+```
+
+### Acceptance Criteria
+
+- [ ] All tasks in a TypeScript-constrained run receive a system prompt that includes "Language: TypeScript"
+- [ ] A run where an agent produces Python outputs a warning in the error log
+- [ ] `StackConstraintBuilder` unit tests pass
+- [ ] No TypeScript compilation errors in modified files
+
+### Commit Guidance
+
+```text
+feat(phase-30): enforce language/stack constraints in agent task prompts
+```
+
+---
+
+## Phase 31 — Run Artifact Materialization
+
+**Status:** Not Started
+**Completed:**
+**Completed By:**
+**Completion Notes:**
+
+### Goal
+
+Write generated file content from completed run tasks to disk as real files, wiring `ArtifactStore` into the execution pipeline and exposing a retroactive materialization endpoint for already-completed runs.
+
+### Why This Phase Exists
+
+The `ArtifactStore` service (Phase 20) can write files to disk but is never called during execution. Task outputs — which contain generated code in `detailed_deliverables`, `code_artifacts`, or `filename`+`content` patterns — are stored only as inline JSON inside the run record (up to 573KB per run). Users cannot access the generated files without parsing the run JSON manually.
+
+Observed in run `90f372fb-af2c-4958-ad57-ed0405b45bce`: 36 files totalling ~100KB of generated code were buried in the run record with no path to disk.
+
+### Inputs
+
+- Phase 20 complete (`ArtifactStore`, `artifact-store.ts`)
+- Phase 21 complete (Run completion pipeline)
+- `backend/src/services/phase-executor.ts` — `onTaskComplete` callback
+- `backend/src/services/task-executor.ts` — task output structure
+- `backend/src/routes/runs.ts` — run API
+
+### Deliverables
+
+- [ ] `OutputParser` service: extracts `{ filePath, content }` pairs from raw LLM output strings
+- [ ] `ArtifactStore.saveArtifact()` called from `PhaseExecutor.onTaskComplete` for every successful task
+- [ ] Files written to `data/artifacts/<runId>/` during execution, preserving directory structure
+- [ ] `POST /api/runs/:id/materialize` endpoint: retroactively extracts files from any completed run
+- [ ] Run summary updated to report `artifacts.totalCount` and `artifacts.totalSize`
+- [ ] Unit and integration tests
+
+### LLM Output Patterns to Handle
+
+The `OutputParser` must handle all three patterns observed in production:
+
+```
+Pattern 1 — numbered key container (most common):
+  "detailed_deliverables": { "1_package_json": { "content": "..." }, ... }
+  "deliverables":           { "1_src_index_ts": { "content": "..." }, ... }
+
+Pattern 2 — code_artifacts array:
+  "code_artifacts": [ { "filename": "src/index.ts", "language": "typescript", "content": "..." } ]
+
+Pattern 3 — filename+content object pairs:
+  { "filename": "src/utils/logger.ts", "content": "..." }
+```
+
+### Key-to-Path Derivation Rules (Pattern 1)
+
+Keys like `9_src_index_ts` encode the file path: strip the numeric prefix, split by `_`, derive extension from the last segment (`_ts` → `.ts`, `_json` → `.json`), and join path components with `/`. Root-level config files (`package_json`, `tsconfig_json`, etc.) go at the project root; source files default to `src/` if no known top-level directory is detected.
+
+### Implementation Tasks
+
+- [ ] Create `backend/src/services/output-parser.ts`: `parseTaskOutput(raw: string): FileArtifact[]` returning `{ filePath: string, content: string, language?: string }[]`
+- [ ] Handle all three patterns above; skip entries with `content.trim().length < 50`
+- [ ] Add `keyToFilePath(key: string): string` helper with extension map and root-file detection set
+- [ ] Update `PhaseExecutor.executePhase()`: after each successful task, call `OutputParser.parseTaskOutput()` then `ArtifactStore.saveArtifact()` for each result
+- [ ] Add `materializeRun(runId: string, outputDir: string): Promise<MaterializationResult>` to `ArtifactStore`
+- [ ] Add `POST /api/runs/:id/materialize` route to `backend/src/routes/runs.ts`
+- [ ] Update `RunCompletion.generateSummary()` to query `ArtifactStore.getArtifactsForRun()` and populate `artifacts`
+- [ ] Add unit tests for `OutputParser` covering all three patterns and the key-to-path converter
+
+### Files Expected to Be Created or Modified
+
+```text
+backend/src/services/output-parser.ts          — NEW: LLM output → file artifacts
+backend/src/services/artifact-store.ts         — add materializeRun()
+backend/src/services/phase-executor.ts         — call OutputParser + ArtifactStore on task complete
+backend/src/services/run-completion.ts         — populate artifacts from ArtifactStore
+backend/src/routes/runs.ts                     — add /materialize endpoint
+backend/src/services/output-parser.test.ts     — NEW: unit tests
+```
+
+### Testing Requirements
+
+- [ ] `parseTaskOutput` returns correct `{ filePath, content }` for all three patterns
+- [ ] `keyToFilePath("9_src_index_ts")` returns `"src/index.ts"`
+- [ ] `keyToFilePath("1_package_json")` returns `"package.json"`
+- [ ] Files are written to `data/artifacts/<runId>/` after phase execution
+- [ ] `POST /api/runs/:id/materialize` returns file list and counts for completed run
+- [ ] `RunSummary.artifacts.totalCount` reflects actual saved files
+
+### Validation Commands
+
+```bash
+cd backend && npm run typecheck
+cd backend && npm test -- --testPathPattern=output-parser
+curl -X POST http://localhost:3000/api/runs/90f372fb-af2c-4958-ad57-ed0405b45bce/materialize
+```
+
+### Acceptance Criteria
+
+- [ ] A new run that generates code has its files written to `data/artifacts/<runId>/` automatically
+- [ ] The `/materialize` endpoint successfully extracts files from the existing test run `90f372fb`
+- [ ] `RunSummary.artifacts.totalCount` is non-zero after a code-generating run
+- [ ] `OutputParser` unit tests pass with ≥ 90% coverage
+- [ ] No TypeScript compilation errors in modified files
+
+### Commit Guidance
+
+```text
+feat(phase-31): materialize run artifacts to disk via OutputParser and ArtifactStore
 ```
 
 ---
@@ -4101,4 +4353,3 @@ This revised roadmap is **engineering-friendly and coding-agent-ready**.
 ✅ All existing roadmap strengths preserved
 
 Each phase is now small enough to execute in one focused coding-agent run (2–4 hours estimated).
-

@@ -36,12 +36,21 @@ export class AgentLoader {
           const content = await fs.readFile(filePath, 'utf-8');
           const data = JSON.parse(content);
 
-          // Handle both single agent and array of agents
-          const agentList = Array.isArray(data) ? data : [data];
+          // Handle single agent, root array, or nested { "Agents": [...] } structure
+          let agentList: unknown[];
+          if (Array.isArray(data)) {
+            agentList = data;
+          } else {
+            const record = this.asRecord(data);
+            const nestedKey = Object.keys(record).find(
+              k => Array.isArray(record[k]) && k !== 'ids'
+            );
+            agentList = nestedKey ? (record[nestedKey] as unknown[]) : [data];
+          }
 
           for (const rawAgentData of agentList) {
             const agentData = this.asRecord(rawAgentData);
-            if (agentData.name && agentData.type) {
+            if (agentData.name) {
               const agent = this.normalizeAgent(agentData, file);
               agents.push(agent);
               this.loadedAgents.set(agent.id, agent);
@@ -122,7 +131,7 @@ export class AgentLoader {
     return {
       id: typeof data.id === 'string' ? data.id : `agent-${uuidv4()}`,
       name: typeof data.name === 'string' ? data.name : 'Unknown Agent',
-      type: typeof data.type === 'string' ? data.type : 'generic',
+      type: typeof data.type === 'string' ? data.type : typeof data.role === 'string' ? data.role : 'generic',
       description: typeof data.description === 'string'
         ? data.description
         : typeof data.prompt === 'string'

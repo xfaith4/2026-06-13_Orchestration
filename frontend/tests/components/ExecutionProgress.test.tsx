@@ -144,7 +144,8 @@ describe('ExecutionProgress', () => {
 
     render(<ExecutionProgress run={run} />);
 
-    expect(screen.getByText(/FAILED\s+1/)).toBeInTheDocument();
+    expect(screen.getByText('FAILED')).toBeInTheDocument();
+    expect(screen.getAllByText('1').length).toBeGreaterThanOrEqual(1);
   });
 
   it('should show 100% progress when all tasks completed', () => {

@@ -1,0 +1,85 @@
+- generic [ref=e3]:
+  - navigation [ref=e6]:
+    - link "📊 Dashboard" [ref=e7] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e8]: 📊
+      - text: Dashboard
+    - link "📱 Applications" [ref=e9] [cursor=pointer]:
+      - /url: /applications
+      - generic [ref=e10]: 📱
+      - text: Applications
+    - link "📐 Design Plans" [ref=e11] [cursor=pointer]:
+      - /url: /design-plans
+      - generic [ref=e12]: 📐
+      - text: Design Plans
+    - link "🗺️ Roadmaps" [ref=e13] [cursor=pointer]:
+      - /url: /roadmaps
+      - generic [ref=e14]: 🗺️
+      - text: Roadmaps
+    - link "▶️ Runs" [ref=e15] [cursor=pointer]:
+      - /url: /runs
+      - generic [ref=e16]: ▶️
+      - text: Runs
+    - link "💰 Cost Analytics" [ref=e17] [cursor=pointer]:
+      - /url: /cost-analytics
+      - generic [ref=e18]: 💰
+      - text: Cost Analytics
+    - link "📜 Audit Logs" [ref=e19] [cursor=pointer]:
+      - /url: /audit-logs
+      - generic [ref=e20]: 📜
+      - text: Audit Logs
+    - link "🤖 Agents" [ref=e21] [cursor=pointer]:
+      - /url: /agents
+      - generic [ref=e22]: 🤖
+      - text: Agents
+    - link "💬 Prompts" [ref=e23] [cursor=pointer]:
+      - /url: /prompts
+      - generic [ref=e24]: 💬
+      - text: Prompts
+    - link "📋 Contracts" [ref=e25] [cursor=pointer]:
+      - /url: /contracts
+      - generic [ref=e26]: 📋
+      - text: Contracts
+  - generic [ref=e27]:
+    - navigation [ref=e28]:
+      - link "UnifiedAIToolbox" [ref=e32] [cursor=pointer]:
+        - /url: /
+    - main [ref=e33]:
+      - generic [ref=e143]:
+        - button "← Back" [ref=e144] [cursor=pointer]
+        - generic [ref=e145]:
+          - generic [ref=e147]:
+            - heading "E2E Flow 2026-06-15 1029" [level=1] [ref=e148]
+            - generic [ref=e149]: draft
+          - generic [ref=e150]:
+            - generic [ref=e151]:
+              - heading "Description" [level=3] [ref=e152]
+              - paragraph [ref=e153]: Browser-driven end-to-end validation app for the UnifiedAIToolbox flow.
+            - generic [ref=e154]:
+              - heading "Primary Goal" [level=3] [ref=e155]
+              - paragraph [ref=e156]: Verify the full create-plan-roadmap-run lifecycle from the UI and persist the resulting state correctly.
+            - generic [ref=e157]:
+              - heading "Requirements" [level=3] [ref=e158]
+              - list [ref=e159]:
+                - listitem [ref=e160]: Create application from UI
+                - listitem [ref=e161]: Generate design plan
+                - listitem [ref=e162]: Approve roadmap and create run
+            - generic [ref=e163]:
+              - heading "Target Audience" [level=3] [ref=e164]
+              - paragraph [ref=e165]: QA and product owners
+            - generic [ref=e166]:
+              - heading "Constraints" [level=3] [ref=e167]
+              - list [ref=e168]:
+                - listitem [ref=e169]: No external credentials
+                - listitem [ref=e170]: Must complete entirely in local dev mode
+            - paragraph [ref=e172]:
+              - text: "Created: 15/06/2026, 06:29:15"
+              - text: "Updated: 15/06/2026, 06:29:15"
+            - generic [ref=e173]:
+              - heading "Design Plans" [level=2] [ref=e174]
+              - generic [ref=e175]:
+                - link "Design Plan — 15/06/2026 draft" [ref=e178] [cursor=pointer]:
+                  - /url: /design-plans/d601f4d8-a5d3-4332-9850-5fc3a955f5a9
+                  - generic [ref=e179]: Design Plan — 15/06/2026
+                  - generic [ref=e180]: draft
+                - button "+ Generate new Design Plan" [ref=e182] [cursor=pointer]

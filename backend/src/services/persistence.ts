@@ -13,6 +13,10 @@ export class PersistenceService {
     this.dataDir = config.dataDir;
   }
 
+  getDataDir(): string {
+    return this.dataDir;
+  }
+
   private getCollectionPath(collection: string): string {
     return path.join(this.dataDir, collection);
   }

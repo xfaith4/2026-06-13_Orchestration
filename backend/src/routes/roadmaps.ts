@@ -35,8 +35,8 @@ export const createRoadmapRoutes = (
         return res.json(createResponse(existing));
       }
 
-      // Generate roadmap
-      const roadmapData = generator.generateFromDesignPlan(designPlan, designPlan.applicationId);
+      // Generate roadmap (async — may call LLM)
+      const roadmapData = await generator.generateFromDesignPlan(designPlan, designPlan.applicationId);
       const roadmap = await persistence.create<Roadmap>('roadmaps', roadmapData);
 
       res.status(201).json(createResponse(roadmap));

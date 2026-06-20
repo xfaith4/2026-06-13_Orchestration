@@ -112,6 +112,19 @@ describe('ArtifactStore', () => {
         })
       ).rejects.toThrow('File size exceeds maximum');
     });
+
+    it('should preserve nested storage paths when requested', async () => {
+      const artifact = await artifactStore.saveArtifact('export const ok = true;\n', {
+        runId: 'run-1',
+        taskId: 'task-1',
+        name: 'src/index.ts',
+        storageSubpath: 'src/index.ts',
+        type: 'code',
+      });
+
+      expect(artifact.contentPath).toBe(path.join(tempDir, 'run-1', 'src', 'index.ts'));
+      await expect(fs.readFile(artifact.contentPath, 'utf-8')).resolves.toContain('ok = true');
+    });
   });
 
   describe('Artifact retrieval', () => {
@@ -260,6 +273,29 @@ describe('ArtifactStore', () => {
 
       const artifacts = await artifactStore.getArtifactsForTask('run-1', 'task-1');
       expect(artifacts).toHaveLength(2);
+    });
+
+    it('should summarize artifacts for a run', async () => {
+      await artifactStore.saveArtifact('content1', {
+        runId: 'run-1',
+        taskId: 'task-1',
+        name: 'file1.txt',
+        type: 'log',
+      });
+
+      await artifactStore.saveArtifact('content2', {
+        runId: 'run-1',
+        taskId: 'task-2',
+        name: 'file2.ts',
+        type: 'code',
+      });
+
+      const summary = await artifactStore.getRunArtifactSummary('run-1');
+
+      expect(summary.totalCount).toBe(2);
+      expect(summary.byType.log).toBe(1);
+      expect(summary.byType.code).toBe(1);
+      expect(summary.totalSize).toBeGreaterThan(0);
     });
 
     it('should search artifacts by type', async () => {

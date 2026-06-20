@@ -1,0 +1,84 @@
+- generic [ref=e3]:
+  - navigation [ref=e6]:
+    - link "📊 Dashboard" [ref=e7] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e8]: 📊
+      - text: Dashboard
+    - link "📱 Applications" [ref=e9] [cursor=pointer]:
+      - /url: /applications
+      - generic [ref=e10]: 📱
+      - text: Applications
+    - link "📐 Design Plans" [ref=e11] [cursor=pointer]:
+      - /url: /design-plans
+      - generic [ref=e12]: 📐
+      - text: Design Plans
+    - link "🗺️ Roadmaps" [ref=e13] [cursor=pointer]:
+      - /url: /roadmaps
+      - generic [ref=e14]: 🗺️
+      - text: Roadmaps
+    - link "▶️ Runs" [ref=e15] [cursor=pointer]:
+      - /url: /runs
+      - generic [ref=e16]: ▶️
+      - text: Runs
+    - link "💰 Cost Analytics" [ref=e17] [cursor=pointer]:
+      - /url: /cost-analytics
+      - generic [ref=e18]: 💰
+      - text: Cost Analytics
+    - link "📜 Audit Logs" [ref=e19] [cursor=pointer]:
+      - /url: /audit-logs
+      - generic [ref=e20]: 📜
+      - text: Audit Logs
+    - link "🤖 Agents" [ref=e21] [cursor=pointer]:
+      - /url: /agents
+      - generic [ref=e22]: 🤖
+      - text: Agents
+    - link "💬 Prompts" [ref=e23] [cursor=pointer]:
+      - /url: /prompts
+      - generic [ref=e24]: 💬
+      - text: Prompts
+    - link "📋 Contracts" [ref=e25] [cursor=pointer]:
+      - /url: /contracts
+      - generic [ref=e26]: 📋
+      - text: Contracts
+  - generic [ref=e27]:
+    - navigation [ref=e28]:
+      - link "UnifiedAIToolbox" [ref=e32] [cursor=pointer]:
+        - /url: /
+    - main [ref=e33]:
+      - generic [ref=e35]:
+        - generic [ref=e36]:
+          - heading "Dashboard" [level=1] [ref=e37]
+          - paragraph [ref=e38]: Welcome to UnifiedAIToolbox
+        - generic [ref=e39]:
+          - link "Total Applications" [ref=e40] [cursor=pointer]:
+            - /url: /applications
+            - paragraph [ref=e41]: Total Applications
+          - link "Active Roadmaps" [ref=e43] [cursor=pointer]:
+            - /url: /roadmaps
+            - paragraph [ref=e44]: Active Roadmaps
+          - link "Completed Runs" [ref=e46] [cursor=pointer]:
+            - /url: /runs
+            - paragraph [ref=e47]: Completed Runs
+        - generic [ref=e49]:
+          - heading "Quick Start" [level=2] [ref=e50]
+          - generic [ref=e51]:
+            - generic [ref=e52]:
+              - generic [ref=e54]: "1"
+              - generic [ref=e55]:
+                - heading "Create an Application" [level=3] [ref=e56]:
+                  - link "Create an Application" [ref=e57] [cursor=pointer]:
+                    - /url: /applications
+                - paragraph [ref=e58]: Describe your application idea and requirements
+            - generic [ref=e59]:
+              - generic [ref=e61]: "2"
+              - generic [ref=e62]:
+                - heading "Generate Design Plan" [level=3] [ref=e63]
+                - paragraph [ref=e64]: AI agents create an architectural design plan
+            - generic [ref=e65]:
+              - generic [ref=e67]: "3"
+              - generic [ref=e68]:
+                - heading "Execute Roadmap" [level=3] [ref=e69]
+                - paragraph [ref=e70]: Watch as agents build and test your application
+        - generic [ref=e71]:
+          - heading "Cost Analysis" [level=2] [ref=e72]
+          - generic [ref=e74]: Loading cost summary...

@@ -33,8 +33,8 @@ export const createDesignPlanRoutes = (
         return res.json(createResponse(existing));
       }
 
-      // Generate design plan
-      const designPlanData = generator.generateFromApplication(application);
+      // Generate design plan (async — may call LLM)
+      const designPlanData = await generator.generateFromApplication(application);
       const designPlan = await persistence.create<DesignPlan>('design-plans', designPlanData);
 
       res.status(201).json(createResponse(designPlan));

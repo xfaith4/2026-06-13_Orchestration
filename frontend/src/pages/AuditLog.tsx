@@ -213,7 +213,7 @@ export function AuditLog() {
                         <div className="space-y-1">
                           {log.changes.slice(0, 2).map((change, idx) => (
                             <div key={idx} className="text-xs">
-                              <span className="font-medium">{change.field}:</span> {JSON.stringify(change.newValue).substring(0, 20)}
+                              <span className="font-medium">{change.field}:</span> {(JSON.stringify(change.newValue) ?? '').substring(0, 20)}
                             </div>
                           ))}
                           {log.changes.length > 2 && (

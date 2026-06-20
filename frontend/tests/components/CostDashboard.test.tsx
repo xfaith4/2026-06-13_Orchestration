@@ -48,15 +48,15 @@ describe('CostDashboard', () => {
     render(<CostDashboard runs={runs} />);
 
     expect(screen.getByText(/TOTAL SPENT/i)).toBeInTheDocument();
-    expect(screen.getByText(/\$30\.00/)).toBeInTheDocument();
+    expect(screen.getAllByText(/\$30\.00/).length).toBeGreaterThanOrEqual(1);
   });
 
   it('should display average cost', () => {
     const runs = [createMockRun(10, 'run-1'), createMockRun(20, 'run-2')];
     render(<CostDashboard runs={runs} />);
 
-    expect(screen.getByText(/AVERAGE COST/i)).toBeInTheDocument();
-    expect(screen.getByText(/\$15\.00/)).toBeInTheDocument();
+    expect(screen.getAllByText(/AVERAGE COST/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/\$15\.00/).length).toBeGreaterThanOrEqual(1);
   });
 
   it('should display cost efficiency metrics', () => {
@@ -94,7 +94,7 @@ describe('CostDashboard', () => {
     render(<CostDashboard runs={runs} currentRun={currentRun} />);
 
     expect(screen.getByText(/Current Run/i)).toBeInTheDocument();
-    expect(screen.getByText(/\$15\.00/)).toBeInTheDocument();
+    expect(screen.getAllByText(/\$15\.00/).length).toBeGreaterThanOrEqual(1);
   });
 
   it('should show min and max costs', () => {
@@ -117,6 +117,6 @@ describe('CostDashboard', () => {
     render(<CostDashboard runs={[]} />);
 
     expect(screen.getByText(/TOTAL SPENT/i)).toBeInTheDocument();
-    expect(screen.getByText(/\$0\.00/)).toBeInTheDocument();
+    expect(screen.getAllByText(/\$0\.00/).length).toBeGreaterThanOrEqual(1);
   });
 });

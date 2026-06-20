@@ -151,7 +151,7 @@ export function RunList() {
 
                     <div className="flex gap-2 mt-4">
                       <span className={`px-3 py-1 rounded text-sm font-medium ${getStatusColor(run.status)}`}>
-                        {run.status.charAt(0).toUpperCase() + run.status.slice(1)}
+                        {run.status ? run.status.charAt(0).toUpperCase() + run.status.slice(1) : 'Draft'}
                       </span>
                       <span className="text-xs text-gray-600 py-1">
                         {new Date(run.createdAt).toLocaleDateString()}

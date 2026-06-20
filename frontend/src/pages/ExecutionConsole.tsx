@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Run } from '../types';
 import { apiClient } from '../services/api';
 import { useExecutionUpdates } from '../hooks/useExecutionUpdates';
@@ -7,8 +7,43 @@ import { ExecutionProgress } from '../components/ExecutionProgress';
 import { RealTimeLogs } from '../components/RealTimeLogs';
 import { CostTracker } from '../components/CostTracker';
 import { ErrorDisplay } from '../components/ErrorDisplay';
+import { FailureDetail } from '../components/FailureDetail';
+import { RepairOptions } from '../components/RepairOptions';
 
 type ViewMode = 'overview' | 'logs' | 'costs';
+
+interface FailureAnalysis {
+  runError: string | null;
+  overallClassification: {
+    failureType: string;
+    severity: string;
+    errorType: string;
+    confidence: number;
+    evidence: string[];
+  } | null;
+  failedTasks: Array<{
+    taskId: string;
+    taskName: string;
+    phaseId: string;
+    error: string;
+    classification: {
+      failureType: string;
+      severity: string;
+      errorType: string;
+      confidence: number;
+      evidence: string[];
+    };
+    repairOptions: Array<{
+      strategy: string;
+      priority: number;
+      description: string;
+      riskLevel: 'low' | 'medium' | 'high';
+      estimatedDuration?: number;
+      instructions?: string[];
+      prerequisites?: string[];
+    }>;
+  }>;
+}
 
 export function ExecutionConsole() {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +54,7 @@ export function ExecutionConsole() {
   const [showRepairModal, setShowRepairModal] = useState(false);
   const [repairLoading, setRepairLoading] = useState(false);
   const [repairError, setRepairError] = useState<string | null>(null);
+  const [failureAnalysis, setFailureAnalysis] = useState<FailureAnalysis | null>(null);
 
   const { data, loading, error } = useExecutionUpdates({
     runId: id || '',
@@ -28,11 +64,21 @@ export function ExecutionConsole() {
 
   const run = data?.run;
 
-  useEffect(() => {
-    if (run && (run.status === 'completed' || run.status === 'failed')) {
-      // polling continues; no action needed here
+  const loadFailureAnalysis = useCallback(async () => {
+    if (!id) return;
+    try {
+      const result = await apiClient.get<FailureAnalysis>(`/runs/${id}/failure-analysis`);
+      setFailureAnalysis(result);
+    } catch {
+      // Non-critical — don't surface
     }
-  }, [run?.status]);
+  }, [id]);
+
+  useEffect(() => {
+    if (run?.status === 'failed') {
+      loadFailureAnalysis();
+    }
+  }, [run?.status, loadFailureAnalysis]);
 
   const handleStartRun = async () => {
     if (!id) return;
@@ -85,6 +131,26 @@ export function ExecutionConsole() {
     } finally {
       setRepairLoading(false);
     }
+  };
+
+  const handleSkipPhase = async () => {
+    if (!id) return;
+    try {
+      setRepairLoading(true);
+      setRepairError(null);
+      await apiClient.patch<Run>(`/runs/${id}/skip-phase`, {});
+      setShowRepairModal(false);
+    } catch (err) {
+      setRepairError(err instanceof Error ? err.message : 'Failed to skip phase');
+    } finally {
+      setRepairLoading(false);
+    }
+  };
+
+  const handleEscalate = () => {
+    // Close repair modal and show run detail for manual inspection
+    setShowRepairModal(false);
+    navigate(`/runs/${id}`);
   };
 
   if (loading) {
@@ -142,7 +208,7 @@ export function ExecutionConsole() {
                   : 'bg-orange-100 text-orange-800'
               }`}
             >
-              {run.status.charAt(0).toUpperCase() + run.status.slice(1)}
+              {run.status ? run.status.charAt(0).toUpperCase() + run.status.slice(1) : 'Draft'}
             </span>
           </div>
 
@@ -248,50 +314,41 @@ export function ExecutionConsole() {
       {/* Repair Modal */}
       {showRepairModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">Error Details</h2>
-            </div>
-
-            <div className="px-6 py-4 space-y-4">
-              {run.errorMessage && (
-                <div className="bg-red-50 border border-red-200 rounded p-4">
-                  <p className="text-sm font-semibold text-red-800">Error Message</p>
-                  <p className="text-sm text-red-700 mt-2">{run.errorMessage}</p>
-                </div>
-              )}
-
-              {repairError && (
-                <div className="bg-red-50 border border-red-200 rounded p-3">
-                  <p className="text-sm text-red-800">{repairError}</p>
-                </div>
-              )}
-
-              <div className="bg-blue-50 border border-blue-200 rounded p-4">
-                <p className="text-sm font-semibold text-blue-800">Suggested Actions</p>
-                <ul className="text-sm text-blue-700 mt-2 space-y-1 list-disc list-inside">
-                  <li>Review the error message above</li>
-                  <li>Check the Logs tab for more details</li>
-                  <li>Use Retry to attempt to resume the run</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="px-6 py-4 border-t border-gray-200 flex gap-3">
+          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[85vh] flex flex-col">
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-900">Run Failed — Recovery Options</h2>
               <button
                 onClick={() => { setShowRepairModal(false); setRepairError(null); }}
-                disabled={repairLoading}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 text-sm font-medium disabled:opacity-50"
+                className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+                aria-label="Close"
               >
-                Close
+                ×
               </button>
-              <button
-                onClick={handleRetryFromError}
-                disabled={repairLoading}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {repairLoading ? 'Retrying...' : 'Retry Run'}
-              </button>
+            </div>
+
+            <div className="px-6 py-4 overflow-y-auto flex-1 space-y-6">
+              {/* Failure analysis */}
+              <div>
+                <p className="text-sm font-semibold text-gray-700 mb-3">Failure Analysis</p>
+                <FailureDetail
+                  runError={failureAnalysis?.runError ?? run.errorMessage ?? null}
+                  overallClassification={failureAnalysis?.overallClassification ?? null}
+                  failedTasks={failureAnalysis?.failedTasks ?? []}
+                />
+              </div>
+
+              {/* Repair options */}
+              <div>
+                <p className="text-sm font-semibold text-gray-700 mb-3">Recovery Actions</p>
+                <RepairOptions
+                  options={failureAnalysis?.failedTasks.flatMap(t => t.repairOptions) ?? []}
+                  loading={repairLoading}
+                  error={repairError}
+                  onRetry={handleRetryFromError}
+                  onSkipPhase={handleSkipPhase}
+                  onEscalate={handleEscalate}
+                />
+              </div>
             </div>
           </div>
         </div>
