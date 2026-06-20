@@ -1,0 +1,19 @@
+{
+  "id": "artifact-1781594431001-ldj14xphn",
+  "createdAt": "2026-06-16T07:20:31.001Z",
+  "updatedAt": "2026-06-16T07:20:31.001Z",
+  "runId": "90f372fb-af2c-4958-ad57-ed0405b45bce",
+  "phaseId": "phase-1",
+  "taskId": "task-1-6",
+  "name": "task-1-6-output.md",
+  "type": "code",
+  "mimeType": "text/markdown",
+  "size": 13776,
+  "checksum": "4dc38839e172ba47922b882629205c2bf7ed56f6c6c2923987cf8d8abde9e843",
+  "contentPath": "G:\\Development\\20_Staging\\AI Projects\\2026-06-13_Orchestration\\data\\artifacts\\90f372fb-af2c-4958-ad57-ed0405b45bce\\1781594431001\\task-1-6-output.md",
+  "downloadUrl": "/api/artifacts/90f372fb-af2c-4958-ad57-ed0405b45bce/task-1-6-output.md/download",
+  "tags": [
+    "task-output",
+    "Validation Service Implementation"
+  ]
+}

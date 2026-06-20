@@ -1,0 +1,19 @@
+{
+  "id": "artifact-1781595017578-flu3obybw",
+  "createdAt": "2026-06-16T07:30:17.578Z",
+  "updatedAt": "2026-06-16T07:30:17.578Z",
+  "runId": "90f372fb-af2c-4958-ad57-ed0405b45bce",
+  "phaseId": "phase-5",
+  "taskId": "task-5-3",
+  "name": "task-5-3-output.md",
+  "type": "code",
+  "mimeType": "text/markdown",
+  "size": 14473,
+  "checksum": "c4ffefb4377ee981df0672d5a850a2436b98120380f1841ec1944c853b0bd404",
+  "contentPath": "G:\\Development\\20_Staging\\AI Projects\\2026-06-13_Orchestration\\data\\artifacts\\90f372fb-af2c-4958-ad57-ed0405b45bce\\1781595017577\\task-5-3-output.md",
+  "downloadUrl": "/api/artifacts/90f372fb-af2c-4958-ad57-ed0405b45bce/task-5-3-output.md/download",
+  "tags": [
+    "task-output",
+    "UI Integration, Documentation & Deployment"
+  ]
+}

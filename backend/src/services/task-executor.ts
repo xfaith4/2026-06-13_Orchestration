@@ -3,7 +3,8 @@ import { AgentRegistry } from './agent-registry.js';
 import { PromptRegistry } from './prompt-registry.js';
 import { CostCalculator } from './cost-calculator.js';
 import { ErrorHandler } from './error-handler.js';
-import { RecoveryService, RetryResult } from './recovery-service.js';
+import { RecoveryService } from './recovery-service.js';
+import { LLMClient } from './llm-client.js';
 
 export interface TaskExecutionInput {
   task: ExecutionTask;
@@ -11,6 +12,9 @@ export interface TaskExecutionInput {
   promptId?: string;
   variables?: Record<string, string>;
   timeout?: number;
+  // Context passed through to artifact saving in the caller
+  runId?: string;
+  phaseId?: string;
 }
 
 export interface TaskExecutionOutput {
@@ -28,6 +32,11 @@ export interface TaskExecutionOutput {
   retries?: number;
 }
 
+const FALLBACK_SYSTEM_PROMPT =
+  'You are a software engineer. Execute the assigned task and produce detailed, ' +
+  'production-ready output. For code tasks, write complete, runnable code. ' +
+  'For design tasks, produce clear specifications. For analysis tasks, provide thorough analysis.';
+
 export class TaskExecutor {
   private errorHandler: ErrorHandler;
   private recoveryService: RecoveryService;
@@ -42,7 +51,6 @@ export class TaskExecutor {
     this.costCalculator = new CostCalculator();
   }
 
-  // Execute a single task
   async executeTask(input: TaskExecutionInput): Promise<TaskExecutionOutput> {
     const startTime = Date.now();
     const taskId = input.task.id;
@@ -62,12 +70,9 @@ export class TaskExecutor {
           throw new Error(`Prompt not found: ${input.promptId}`);
         }
         promptContent = prompt.content;
-
-        // Record prompt usage
         await this.promptRegistry.recordUsage(input.promptId);
       } else {
-        // Use agent's default prompt or description
-        promptContent = agent.description || 'Execute the following task';
+        promptContent = agent.description || FALLBACK_SYSTEM_PROMPT;
       }
 
       // Substitute variables in prompt
@@ -92,20 +97,24 @@ export class TaskExecutor {
         };
       }
 
-      // Calculate cost (mock implementation)
-      const tokensUsed = {
-        input: Math.floor(finalPrompt.length / 4), // Rough estimation
-        output: 100, // Mock output tokens
+      const taskResult = result.data as {
+        status: string;
+        result?: {
+          output: string;
+          tokensIn?: number;
+          tokensOut?: number;
+        };
       };
 
-      const cost = {
+      const tokensIn = taskResult?.result?.tokensIn ?? Math.floor(finalPrompt.length / 4);
+      const tokensOut = taskResult?.result?.tokensOut ?? 0;
+
+      const tokensUsed = { input: tokensIn, output: tokensOut };
+      const cost: CostMetrics = {
         tokenInputs: tokensUsed.input,
         tokenOutputs: tokensUsed.output,
-        estimatedCost: this.costCalculator.calculateTokenCost(
-          tokensUsed.input,
-          tokensUsed.output
-        ),
-        currency: 'USD' as const,
+        estimatedCost: this.costCalculator.calculateTokenCost(tokensUsed.input, tokensUsed.output),
+        currency: 'USD',
       };
 
       return {
@@ -129,59 +138,101 @@ export class TaskExecutor {
     }
   }
 
-  // Mock task execution (in real implementation, would call actual agent)
   private async runTaskExecution(
     taskId: string,
     agentName: string,
-    prompt: string,
+    systemPrompt: string,
     task: ExecutionTask
   ): Promise<{ status: string; result?: unknown }> {
-    // Simulate execution with slight delay
-    await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 400));
-
-    // Simulate success/failure ratio (90% success)
-    if (Math.random() < 0.9) {
-      return {
-        status: 'completed',
-        result: {
-          taskId,
-          agentName,
-          taskName: task.name,
-          output: `Executed by ${agentName}: ${task.description}`,
-          timestamp: new Date().toISOString(),
-        },
-      };
-    } else {
-      throw new Error(`Task execution failed: ${task.name}`);
+    if (LLMClient.isAvailable()) {
+      return this.runWithLLM(taskId, agentName, systemPrompt, task);
     }
+    return this.runMock(taskId, agentName, task);
   }
 
-  // Substitute variables in prompt content
-  private substituteVariables(
-    content: string,
-    variables: Record<string, string>
-  ): string {
-    let result = content;
+  private async runWithLLM(
+    taskId: string,
+    agentName: string,
+    systemPrompt: string,
+    task: ExecutionTask
+  ): Promise<{ status: string; result?: unknown }> {
+    const client = new LLMClient();
 
+    const userMessage =
+      `Task: ${task.name}\n\n` +
+      `Description: ${task.description}\n\n` +
+      (task.estimatedHours
+        ? `Estimated effort: ${task.estimatedHours} hours\n\n`
+        : '') +
+      `Produce complete, detailed output for this task. If this is a code task, ` +
+      `write production-ready code with appropriate comments. If this is a design ` +
+      `or documentation task, write thorough, actionable content.`;
+
+    const result = await client.call({
+      systemPrompt,
+      messages: [{ role: 'user', content: userMessage }],
+      maxTokens: 4096,
+    });
+
+    console.log(
+      `[TaskExecutor] Task ${taskId} (${agentName}): ` +
+        `${result.inputTokens}→${result.outputTokens} tokens, stop=${result.stopReason}`
+    );
+
+    return {
+      status: 'completed',
+      result: {
+        taskId,
+        agentName,
+        taskName: task.name,
+        output: result.text,
+        tokensIn: result.inputTokens,
+        tokensOut: result.outputTokens,
+        model: result.model,
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  private async runMock(
+    taskId: string,
+    agentName: string,
+    task: ExecutionTask
+  ): Promise<{ status: string; result?: unknown }> {
+    // Simulate brief processing delay
+    await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 400));
+
+    return {
+      status: 'completed',
+      result: {
+        taskId,
+        agentName,
+        taskName: task.name,
+        output: `[MOCK — set ANTHROPIC_API_KEY for real output]\n\nExecuted by ${agentName}: ${task.description}`,
+        tokensIn: Math.floor(task.description.length / 4),
+        tokensOut: 50,
+        model: 'mock',
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  private substituteVariables(content: string, variables: Record<string, string>): string {
+    let result = content;
     for (const [key, value] of Object.entries(variables)) {
       const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
       result = result.replace(regex, value);
     }
-
-    // Replace any unsubstituted variables with placeholder
     result = result.replace(/\{\{(\w+)\}\}/g, '[UNKNOWN: $1]');
-
     return result;
   }
 
-  // Get execution recommendations
   async getExecutionPlan(task: ExecutionTask): Promise<{
     agentSuggestions: Array<{ id: string; name: string; score: number }>;
     promptSuggestions: Array<{ id: string; name: string; relevance: number }>;
     estimatedDuration: number;
     estimatedCost: number;
   }> {
-    // Mock implementation
     const agents = this.agentRegistry.getAllAgents();
     const prompts = this.promptRegistry.getAllPrompts();
 

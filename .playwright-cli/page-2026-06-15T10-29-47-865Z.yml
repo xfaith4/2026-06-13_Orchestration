@@ -1,0 +1,126 @@
+- generic [ref=e3]:
+  - navigation [ref=e6]:
+    - link "📊 Dashboard" [ref=e7] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e8]: 📊
+      - text: Dashboard
+    - link "📱 Applications" [ref=e9] [cursor=pointer]:
+      - /url: /applications
+      - generic [ref=e10]: 📱
+      - text: Applications
+    - link "📐 Design Plans" [ref=e11] [cursor=pointer]:
+      - /url: /design-plans
+      - generic [ref=e12]: 📐
+      - text: Design Plans
+    - link "🗺️ Roadmaps" [ref=e13] [cursor=pointer]:
+      - /url: /roadmaps
+      - generic [ref=e14]: 🗺️
+      - text: Roadmaps
+    - link "▶️ Runs" [ref=e15] [cursor=pointer]:
+      - /url: /runs
+      - generic [ref=e16]: ▶️
+      - text: Runs
+    - link "💰 Cost Analytics" [ref=e17] [cursor=pointer]:
+      - /url: /cost-analytics
+      - generic [ref=e18]: 💰
+      - text: Cost Analytics
+    - link "📜 Audit Logs" [ref=e19] [cursor=pointer]:
+      - /url: /audit-logs
+      - generic [ref=e20]: 📜
+      - text: Audit Logs
+    - link "🤖 Agents" [ref=e21] [cursor=pointer]:
+      - /url: /agents
+      - generic [ref=e22]: 🤖
+      - text: Agents
+    - link "💬 Prompts" [ref=e23] [cursor=pointer]:
+      - /url: /prompts
+      - generic [ref=e24]: 💬
+      - text: Prompts
+    - link "📋 Contracts" [ref=e25] [cursor=pointer]:
+      - /url: /contracts
+      - generic [ref=e26]: 📋
+      - text: Contracts
+  - generic [ref=e27]:
+    - navigation [ref=e28]:
+      - link "UnifiedAIToolbox" [ref=e32] [cursor=pointer]:
+        - /url: /
+    - main [ref=e33]:
+      - generic [ref=e183]:
+        - button "← Back to Design Plans" [ref=e185] [cursor=pointer]
+        - generic [ref=e186]:
+          - generic [ref=e187]:
+            - generic [ref=e188]:
+              - heading "Design Plan" [level=1] [ref=e189]
+              - paragraph [ref=e190]:
+                - text: "Application ID:"
+                - code [ref=e191]: b3a7e799-27c9-4561-b429-b591e648ab76
+            - generic [ref=e192]: Draft
+          - generic [ref=e193]:
+            - generic [ref=e194]: "Created: 15/06/2026"
+            - generic [ref=e195]: "Updated: 15/06/2026"
+          - generic [ref=e196]:
+            - generic [ref=e197]:
+              - heading "Overview" [level=2] [ref=e198]
+              - paragraph [ref=e199]: Design plan for "E2E Flow 2026-06-15 1029". This application aims to Verify the full create-plan-roadmap-run lifecycle from the UI and persist the resulting state correctly.. It must satisfy 3 key requirements and serve QA and product owners. The design breaks down the application into modular components with clear responsibilities and communication patterns.
+            - generic [ref=e200]:
+              - heading "Architecture" [level=2] [ref=e201]
+              - paragraph [ref=e202]: "Layered architecture with 3 primary components: API Gateway, Persistence Layer, Validation Service. Component communication via well-defined interfaces. Persistence abstracted through repository pattern. Cross-cutting concerns (logging, validation, error handling) centralized. Constraints: No external credentials, Must complete entirely in local dev mode."
+            - generic [ref=e203]:
+              - heading "Components" [level=2] [ref=e204]
+              - generic [ref=e205]:
+                - generic [ref=e206]:
+                  - heading "API Gateway" [level=3] [ref=e207]
+                  - paragraph [ref=e208]: HTTP API entry point with request validation and routing
+                  - paragraph [ref=e209]: "Responsibility: Accept and route HTTP requests, validate schemas, return responses"
+                  - generic [ref=e210]:
+                    - text: "Interfaces:"
+                    - generic [ref=e212]: HTTP REST
+                - generic [ref=e213]:
+                  - heading "Persistence Layer" [level=3] [ref=e214]
+                  - paragraph [ref=e215]: Data storage and retrieval abstraction
+                  - paragraph [ref=e216]: "Responsibility: Create, read, update, delete operations with transactional consistency"
+                  - generic [ref=e217]:
+                    - text: "Interfaces:"
+                    - generic [ref=e218]:
+                      - generic [ref=e219]: File I/O
+                      - generic [ref=e220]: Index Management
+                - generic [ref=e221]:
+                  - heading "Validation Service" [level=3] [ref=e222]
+                  - paragraph [ref=e223]: JSON Schema validation and type checking
+                  - paragraph [ref=e224]: "Responsibility: Ensure all data matches defined schemas before persistence"
+                  - generic [ref=e225]:
+                    - text: "Interfaces:"
+                    - generic [ref=e227]: Schema Registry
+            - generic [ref=e228]:
+              - heading "Tradeoffs" [level=2] [ref=e229]
+              - list [ref=e230]:
+                - listitem [ref=e231]:
+                  - generic [ref=e232]: ⚠
+                  - generic [ref=e233]: Monolithic architecture prioritizes simplicity and startup speed over horizontal scalability. Recommend microservices if request volume exceeds 10K/min.
+                - listitem [ref=e234]:
+                  - generic [ref=e235]: ⚠
+                  - generic [ref=e236]: File-based persistence chosen for initial phases for simplicity. Plan migration to database (PostgreSQL/MongoDB) before production at scale.
+                - listitem [ref=e237]:
+                  - generic [ref=e238]: ⚠
+                  - generic [ref=e239]: Synchronous request handling keeps code simple but may impact latency under high concurrency. Consider async job queues (Bull/RabbitMQ) for long-running ops.
+                - listitem [ref=e240]:
+                  - generic [ref=e241]: ⚠
+                  - generic [ref=e242]: Single-threaded event loop suitable for I/O-bound operations. Consider clustering for CPU-bound workloads.
+            - generic [ref=e243]:
+              - heading "Recommendations" [level=2] [ref=e244]
+              - list [ref=e245]:
+                - listitem [ref=e246]:
+                  - generic [ref=e247]: ✓
+                  - generic [ref=e248]: Implement structured logging from the start (Winston/Pino) with correlation IDs for tracing.
+                - listitem [ref=e249]:
+                  - generic [ref=e250]: ✓
+                  - generic [ref=e251]: Set up health checks and graceful shutdown handlers before deploying to production.
+                - listitem [ref=e252]:
+                  - generic [ref=e253]: ✓
+                  - generic [ref=e254]: Create API documentation (OpenAPI/Swagger) alongside implementation.
+                - listitem [ref=e255]:
+                  - generic [ref=e256]: ✓
+                  - generic [ref=e257]: Establish error handling standards and failure recovery patterns early.
+          - generic [ref=e259]:
+            - paragraph [ref=e260]: Ready for review?
+            - button "Move to Review" [ref=e261] [cursor=pointer]

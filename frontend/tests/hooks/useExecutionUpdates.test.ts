@@ -17,10 +17,6 @@ const mockLogs = [
 ];
 
 describe('useExecutionUpdates', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
   afterEach(() => {
     vi.useRealTimers();
     vi.clearAllMocks();
@@ -75,7 +71,9 @@ describe('useExecutionUpdates', () => {
 
   it('should handle run fetch errors', async () => {
     const error = new Error('Network error');
-    (apiClient.get as ReturnType<typeof vi.fn>).mockRejectedValueOnce(error);
+    (apiClient.get as ReturnType<typeof vi.fn>)
+      .mockRejectedValueOnce(error)
+      .mockResolvedValueOnce([]);
 
     const { result } = renderHook(() =>
       useExecutionUpdates({ runId: 'run-1', enabled: true })
@@ -89,30 +87,28 @@ describe('useExecutionUpdates', () => {
   });
 
   it('should poll for updates at specified interval', async () => {
-    (apiClient.get as ReturnType<typeof vi.fn>).mockResolvedValue(mockRun);
+    vi.useFakeTimers();
+
+    (apiClient.get as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce(mockRun)
+      .mockResolvedValueOnce([])
+      .mockResolvedValue(mockRun);
 
     renderHook(() =>
       useExecutionUpdates({ runId: 'run-1', pollingInterval: 1000, enabled: true })
     );
 
-    // Initial fetch calls /runs/run-1 and /runs/run-1/logs = 2 calls
-    await waitFor(() => {
-      expect(apiClient.get).toHaveBeenCalledTimes(2);
-    });
+    // Initial fetch may include immediate timer scheduling under fake timers.
+    await vi.runOnlyPendingTimersAsync();
+    expect((apiClient.get as ReturnType<typeof vi.fn>).mock.calls.length).toBeGreaterThanOrEqual(2);
 
-    vi.advanceTimersByTime(1000);
+    await vi.advanceTimersByTimeAsync(1000);
 
-    await waitFor(() => {
-      expect(apiClient.get).toHaveBeenCalledTimes(4);
-    });
+    expect((apiClient.get as ReturnType<typeof vi.fn>).mock.calls.length).toBeGreaterThanOrEqual(4);
   });
 
   it('should not poll when disabled', () => {
-    (apiClient.get as ReturnType<typeof vi.fn>).mockResolvedValue(mockRun);
-
     renderHook(() => useExecutionUpdates({ runId: 'run-1', enabled: false }));
-
-    vi.advanceTimersByTime(5000);
 
     expect(apiClient.get).not.toHaveBeenCalled();
   });

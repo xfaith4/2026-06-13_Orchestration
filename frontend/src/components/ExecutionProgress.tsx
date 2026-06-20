@@ -125,7 +125,7 @@ export function ExecutionProgress({ run }: ExecutionProgressProps) {
                   <p className="text-sm text-gray-600 mt-1">{phase.goal}</p>
                 </div>
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${getPhaseColor(phase.status)}`}>
-                  {phase.status.charAt(0).toUpperCase() + phase.status.slice(1)}
+                  {phase.status ? phase.status.charAt(0).toUpperCase() + phase.status.slice(1) : 'Pending'}
                 </span>
               </div>
 

@@ -1,0 +1,21 @@
+{
+  "designPlanId": "0a0cdd9d-6768-442d-a792-709c0441899b",
+  "title": "E2E Lifecycle Roadmap",
+  "description": "Auto roadmap from API test",
+  "phases": [
+    {
+      "id": "p1",
+      "name": "Foundation",
+      "description": "Setup",
+      "order": 1,
+      "tasks": [],
+      "estimatedDuration": "1 day",
+      "dependencies": [],
+      "status": "pending"
+    }
+  ],
+  "estimatedDuration": "3 days",
+  "id": "bafd5cba-55ff-4f51-9780-2c01ea9c0501",
+  "createdAt": "2026-06-15T10:49:41.197Z",
+  "updatedAt": "2026-06-15T10:49:41.197Z"
+}

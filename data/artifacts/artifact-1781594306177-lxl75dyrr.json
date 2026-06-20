@@ -1,0 +1,19 @@
+{
+  "id": "artifact-1781594306177-lxl75dyrr",
+  "createdAt": "2026-06-16T07:18:26.177Z",
+  "updatedAt": "2026-06-16T07:18:26.177Z",
+  "runId": "90f372fb-af2c-4958-ad57-ed0405b45bce",
+  "phaseId": "phase-0",
+  "taskId": "task-0-2",
+  "name": "task-0-2-output.md",
+  "type": "code",
+  "mimeType": "text/markdown",
+  "size": 14739,
+  "checksum": "8b22514cb00b69c0e314d501299f153865e5353a1259fd31b4f2169566ef26f1",
+  "contentPath": "G:\\Development\\20_Staging\\AI Projects\\2026-06-13_Orchestration\\data\\artifacts\\90f372fb-af2c-4958-ad57-ed0405b45bce\\1781594306176\\task-0-2-output.md",
+  "downloadUrl": "/api/artifacts/90f372fb-af2c-4958-ad57-ed0405b45bce/task-0-2-output.md/download",
+  "tags": [
+    "task-output",
+    "Project Foundation & Infrastructure Setup"
+  ]
+}

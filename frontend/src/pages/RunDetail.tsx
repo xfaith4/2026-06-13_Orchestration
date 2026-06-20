@@ -256,7 +256,7 @@ export function RunDetail() {
             run.status === 'failed' ? 'bg-red-100 text-red-800' :
             'bg-orange-100 text-orange-800'
           }`}>
-            {run.status.charAt(0).toUpperCase() + run.status.slice(1)}
+            {run.status ? run.status.charAt(0).toUpperCase() + run.status.slice(1) : 'Draft'}
           </span>
         </div>
 
@@ -339,7 +339,7 @@ export function RunDetail() {
                   <p className="text-sm text-gray-600 mt-1">{phase.goal}</p>
                 </div>
                 <span className={`px-2 py-1 rounded text-sm font-medium ${getStatusColor(phase.status)}`}>
-                  {phase.status.charAt(0).toUpperCase() + phase.status.slice(1)}
+                  {phase.status ? phase.status.charAt(0).toUpperCase() + phase.status.slice(1) : 'Pending'}
                 </span>
               </div>
 

@@ -1,0 +1,370 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://api.schema/plan.schema.json",
+  "title": "Plan Schema",
+  "description": "Defines the structure for strategic plans with milestones, objectives, and timelines",
+  "type": "object",
+  "required": ["id", "name", "description", "status", "createdAt", "owner"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^plan_[a-z0-9]{16}$",
+      "description": "Unique identifier for the plan"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 255,
+      "description": "Plan name or title"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 2000,
+      "description": "Detailed description of the plan"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "paused", "completed", "archived"],
+      "description": "Current status of the plan"
+    },
+    "owner": {
+      "type": "object",
+      "required": ["id", "email"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^user_[a-z0-9]{16}$",
+          "description": "Owner user ID"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Owner email address"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "description": "Owner display name"
+        }
+      }
+    },
+    "startDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Plan start date in ISO 8601 format"
+    },
+    "endDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Plan end date in ISO 8601 format"
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total", "currency"],
+      "properties": {
+        "total": {
+          "type": "number",
+          "minimum": 0,
+          "multipleOf": 0.01,
+          "description": "Total budget allocation"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "description": "ISO 4217 currency code"
+        },
+        "spent": {
+          "type": "number",
+          "minimum": 0,
+          "multipleOf": 0.01,
+          "description": "Amount spent to date"
+        },
+        "allocated": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["category", "amount"],
+            "additionalProperties": false,
+            "properties": {
+              "category": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "description": "Budget category name"
+              },
+              "amount": {
+                "type": "number",
+                "minimum": 0,
+                "multipleOf": 0.01,
+                "description": "Allocated amount for category"
+              }
+            }
+          },
+          "minItems": 0,
+          "description": "Breakdown of budget allocation by category"
+        }
+      }
+    },
+    "objectives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "priority"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^obj_[a-z0-9]{16}$",
+            "description": "Unique objective identifier"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 500,
+            "description": "Objective title"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 1500,
+            "description": "Detailed objective description"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["critical", "high", "medium", "low"],
+            "description": "Objective priority level"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["not_started", "in_progress", "completed", "blocked"],
+            "description": "Current status of objective"
+          },
+          "completionPercentage": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Completion percentage (0-100)"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Target completion date"
+          },
+          "owner": {
+            "type": "string",
+            "pattern": "^user_[a-z0-9]{16}$",
+            "description": "User ID of objective owner"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "target"],
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200,
+                  "description": "Metric name"
+                },
+                "target": {
+                  "type": "number",
+                  "description": "Target value for metric"
+                },
+                "current": {
+                  "type": "number",
+                  "description": "Current value of metric"
+                },
+                "unit": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 50,
+                  "description": "Unit of measurement"
+                }
+              }
+            },
+            "minItems": 0,
+            "description": "Key metrics for objective"
+          },
+          "dependencies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^obj_[a-z0-9]{16}$"
+            },
+            "minItems": 0,
+            "description": "IDs of dependent objectives"
+          }
+        }
+      },
+      "minItems": 1,
+      "description": "Array of plan objectives"
+    },
+    "milestones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "date"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^ms_[a-z0-9]{16}$",
+            "description": "Unique milestone identifier"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 300,
+            "description": "Milestone name"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 1000,
+            "description": "Milestone description"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Target milestone date"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "on_track", "at_risk", "completed"],
+            "description": "Current status of milestone"
+          },
+          "linkedObjectives": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^obj_[a-z0-9]{16}$"
+            },
+            "minItems": 0,
+            "description": "IDs of linked objectives"
+          },
+          "deliverables": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "minItems": 0,
+            "description": "List of deliverables for milestone"
+          }
+        }
+      },
+      "minItems": 0,
+      "description": "Array of plan milestones"
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "probability", "impact"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^risk_[a-z0-9]{16}$",
+            "description": "Unique risk identifier"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 500,
+            "description": "Risk title"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 1500,
+            "description": "Detailed risk description"
+          },
+          "probability": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"],
+            "description": "Probability of risk occurrence"
+          },
+          "impact": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"],
+            "description": "Impact if risk occurs"
+          },
+          "mitigation": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 2000,
+            "description": "Mitigation strategy"
+          },
+          "owner": {
+            "type": "string",
+            "pattern": "^user_[a-z0-9]{16}$",
+            "description": "User ID of risk owner"
+          }
+        }
+      },
+      "minItems": 0,
+      "description": "Array of identified risks"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 50,
+        "pattern": "^[a-z0-9_-]+$"
+      },
+      "minItems": 0,
+      "maxItems": 20,
+      "uniqueItems": true,
+      "description": "Tags for categorization and filtering"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "category": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Plan category"
+        },
+        "department": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Department or team responsible"
+        },
+        "visibility": {
+          "type": "string",
+          "enum": ["private", "internal", "public"],
+          "description": "Plan visibility level"
+        }
+      },
+      "description": "Additional metadata and custom fields"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when plan was created"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when plan was last updated"
+    },
+    "deletedAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Soft delete timestamp"
+    }
+  }
+}

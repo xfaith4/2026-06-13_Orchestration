@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "successEnvelope": {
+      "type": "object",
+      "required": ["status", "data"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["success"],
+          "description": "Fixed value indicating successful response"
+        },
+        "data": {
+          "type": ["object", "array", "null"],
+          "description": "Primary response payload"
+        },
+        "meta": {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "version": {
+              "type": "string",
+              "pattern": "^\\d+\\.\\d+\\.\\d+$"
+            },
+            "requestId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "pagination": {
+              "type": "object",
+              "properties": {
+                "page": { "type": "integer", "minimum": 1 },
+                "pageSize": { "type": "integer", "minimum": 1 },
+                "total": { "type": "integer", "minimum": 0 },
+                "hasMore": { "type": "boolean" }
+              }
+            }
+          }
+        },
+        "errors": {
+          "type": "null",
+          "description": "Must be null on success"
+        }
+      },
+      "additionalProperties": false
+    },
+    "errorEnvelope": {
+      "type": "object",
+      "required": ["status", "errors"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["error"],
+          "description": "Fixed value indicating error response"
+        },
+        "data": {
+          "type": "null",
+          "description": "Must be null on error"
+        },
+        "meta": {
+          "type": "object",
+          "properties": {
+            "timestamp": { "type": "string", "format": "date-time" },
+            "requestId": { "type": "string", "format": "uuid" },
+            "version": { "type": "string" }
+          }
+        },
+        "errors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["code", "message"],
+            "properties": {
+              "code": {
+                "type": "string",
+                "pattern": "^[A-Z_]+$",
+                "examples": ["VALIDATION_ERROR", "NOT_FOUND", "UNAUTHORIZED"]
+              },
+              "message": {
+                "type": "string",
+                "description": "Human-readable error message"
+              },
+              "field": {
+                "type": "string",
+                "description": "For validation errors, the field name"
+              },
+              "details": {
+                "type": "object",
+                "description": "Additional error context"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

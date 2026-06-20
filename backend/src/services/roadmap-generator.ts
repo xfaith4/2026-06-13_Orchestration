@@ -1,11 +1,137 @@
 import { DesignPlan, Roadmap, Phase, Task } from '@unifiedaitoolbox/shared';
+import { LLMClient } from './llm-client.js';
+
+const SYSTEM_PROMPT = `You are an expert software project manager and technical lead. Given an
+approved design plan, generate a detailed implementation roadmap.
+
+The roadmap must be a single JSON object matching this exact schema:
+{
+  "title": "string",
+  "description": "string",
+  "estimatedDuration": "string — e.g. '240 hours (~6 weeks)'",
+  "phases": [
+    {
+      "id": "string — e.g. 'phase-0'",
+      "number": 0,
+      "name": "string",
+      "goal": "string",
+      "estimatedHours": 40,
+      "dependencies": [],
+      "tasks": [
+        {
+          "id": "string — e.g. 'task-0-1'",
+          "name": "string",
+          "description": "string — specific implementation detail",
+          "status": "pending",
+          "estimatedHours": 8,
+          "dependencies": []
+        }
+      ]
+    }
+  ]
+}
+
+Rules:
+- Produce 3-6 sequential phases that fully cover implementation from setup to deployment
+- Each phase must have 3-6 concrete, specific tasks
+- Task IDs must be unique across all phases (use 'task-{phaseNumber}-{taskNumber}' format)
+- Phase dependencies reference phase IDs of prerequisite phases
+- Task dependencies reference task IDs within the same or earlier phases
+- estimatedHours should be realistic for a professional engineer
+- Respond with ONLY the JSON object, no preamble or trailing text`;
 
 export class RoadmapGenerator {
-  generateFromDesignPlan(designPlan: DesignPlan, applicationId: string): Omit<Roadmap, 'id' | 'createdAt' | 'updatedAt'> {
+  async generateFromDesignPlan(
+    designPlan: DesignPlan,
+    applicationId: string
+  ): Promise<Omit<Roadmap, 'id' | 'createdAt' | 'updatedAt'>> {
     if (designPlan.status !== 'approved') {
       throw new Error('Design plan must be approved before generating roadmap');
     }
 
+    if (LLMClient.isAvailable()) {
+      try {
+        return await this.generateWithLLM(designPlan, applicationId);
+      } catch (err) {
+        console.warn('[RoadmapGenerator] LLM call failed, falling back to template:', err);
+      }
+    }
+    return this.generateFromTemplate(designPlan, applicationId);
+  }
+
+  private async generateWithLLM(
+    designPlan: DesignPlan,
+    applicationId: string
+  ): Promise<Omit<Roadmap, 'id' | 'createdAt' | 'updatedAt'>> {
+    const client = new LLMClient();
+
+    const userMessage = `Generate an implementation roadmap for this approved design plan:
+
+Overview: ${designPlan.overview}
+
+Architecture: ${designPlan.architecture}
+
+Components to implement:
+${designPlan.components
+  .map(
+    (c, i) =>
+      `  ${i + 1}. ${c.name}: ${c.description}\n     Responsibility: ${c.responsibility}\n     Interfaces: ${c.interfaces.join(', ')}`
+  )
+  .join('\n')}
+
+Key tradeoffs already decided:
+${designPlan.tradeoffs.map((t, i) => `  ${i + 1}. ${t}`).join('\n')}`;
+
+    const result = await client.call({
+      systemPrompt: SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: userMessage }],
+      maxTokens: 6000,
+    });
+
+    const jsonText = LLMClient.extractJSON(result.text);
+    const parsed = JSON.parse(jsonText) as {
+      title: string;
+      description: string;
+      estimatedDuration: string;
+      phases: Phase[];
+    };
+
+    if (!parsed.title || !Array.isArray(parsed.phases) || parsed.phases.length === 0) {
+      throw new Error('LLM response missing required roadmap fields');
+    }
+
+    // Ensure all task IDs are unique and status is 'pending'
+    const normalizedPhases = parsed.phases.map(phase => ({
+      ...phase,
+      tasks: (phase.tasks || []).map(task => ({
+        ...task,
+        status: 'pending' as const,
+        dependencies: task.dependencies || [],
+      })),
+      dependencies: phase.dependencies || [],
+    }));
+
+    console.log(
+      `[RoadmapGenerator] LLM generated roadmap: ${normalizedPhases.length} phases, ` +
+        `${normalizedPhases.reduce((s, p) => s + p.tasks.length, 0)} tasks, ` +
+        `${result.inputTokens}→${result.outputTokens} tokens`
+    );
+
+    return {
+      applicationId,
+      designPlanId: designPlan.id,
+      title: parsed.title,
+      description: parsed.description,
+      phases: normalizedPhases,
+      estimatedDuration: parsed.estimatedDuration || this.estimateDuration(normalizedPhases),
+      status: 'draft',
+    };
+  }
+
+  private generateFromTemplate(
+    designPlan: DesignPlan,
+    applicationId: string
+  ): Omit<Roadmap, 'id' | 'createdAt' | 'updatedAt'> {
     const phases = this.generatePhases(designPlan);
     const title = `Implementation Roadmap: ${designPlan.applicationId}`;
     const description = this.generateDescription(designPlan);
@@ -25,9 +151,8 @@ export class RoadmapGenerator {
   private generatePhases(designPlan: DesignPlan): Phase[] {
     const phases: Phase[] = [];
 
-    // Phase 0: Foundation Setup
     phases.push({
-      id: `phase-0`,
+      id: 'phase-0',
       number: 0,
       name: 'Foundation & Infrastructure Setup',
       goal: 'Establish core infrastructure, database, and deployment pipeline',
@@ -38,9 +163,8 @@ export class RoadmapGenerator {
       dependencies: [],
     });
 
-    // Phase 1: Core Components
     phases.push({
-      id: `phase-1`,
+      id: 'phase-1',
       number: 1,
       name: 'Core Component Implementation',
       goal: 'Implement API Gateway, Persistence Layer, and Validation Service',
@@ -51,14 +175,13 @@ export class RoadmapGenerator {
       dependencies: ['phase-0'],
     });
 
-    // Phase 2: Feature Components
     const featureComponents = designPlan.components.filter(
       c => !['API Gateway', 'Persistence Layer', 'Validation Service'].includes(c.name)
     );
 
     if (featureComponents.length > 0) {
       phases.push({
-        id: `phase-2`,
+        id: 'phase-2',
         number: 2,
         name: 'Feature Components',
         goal: `Implement ${featureComponents.map(c => c.name).join(', ')}`,
@@ -70,30 +193,30 @@ export class RoadmapGenerator {
       });
     }
 
-    // Phase 3: Integration & Testing
     phases.push({
-      id: `phase-3`,
-      number: 3,
+      id: `phase-${featureComponents.length > 0 ? 3 : 2}`,
+      number: featureComponents.length > 0 ? 3 : 2,
       name: 'Integration & Testing',
       goal: 'End-to-end testing, performance optimization, and integration validation',
       tasks: this.generateIntegrationTasks(),
       startDate: undefined,
       endDate: undefined,
       estimatedHours: 60,
-      dependencies: featureComponents.length > 0 ? ['phase-2'] : ['phase-1'],
+      dependencies: [featureComponents.length > 0 ? 'phase-2' : 'phase-1'],
     });
 
-    // Phase 4: Deployment & Documentation
+    const lastPhaseNum = featureComponents.length > 0 ? 4 : 3;
+    const prevPhaseId = `phase-${lastPhaseNum - 1}`;
     phases.push({
-      id: `phase-4`,
-      number: 4,
+      id: `phase-${lastPhaseNum}`,
+      number: lastPhaseNum,
       name: 'Deployment & Documentation',
       goal: 'Production deployment, monitoring setup, and documentation',
       tasks: this.generateDeploymentTasks(),
       startDate: undefined,
       endDate: undefined,
       estimatedHours: 40,
-      dependencies: ['phase-3'],
+      dependencies: [prevPhaseId],
     });
 
     return phases;
@@ -174,21 +297,14 @@ export class RoadmapGenerator {
   }
 
   private generateFeatureTasks(components: DesignPlan['components']): Task[] {
-    const tasks: Task[] = [];
-
-    components.forEach((component, idx) => {
-      const taskId = `task-2-${idx + 1}`;
-      tasks.push({
-        id: taskId,
-        name: `Implement ${component.name}`,
-        description: `${component.description}. Responsibility: ${component.responsibility}`,
-        status: 'pending',
-        estimatedHours: 40,
-        dependencies: ['task-1-4'], // Depends on core components
-      });
-    });
-
-    return tasks;
+    return components.map((component, idx) => ({
+      id: `task-2-${idx + 1}`,
+      name: `Implement ${component.name}`,
+      description: `${component.description}. Responsibility: ${component.responsibility}`,
+      status: 'pending' as const,
+      estimatedHours: 40,
+      dependencies: ['task-1-4'],
+    }));
   }
 
   private generateIntegrationTasks(): Task[] {
@@ -228,7 +344,7 @@ export class RoadmapGenerator {
         description: 'Metrics, dashboards, alerting, and on-call procedures',
         status: 'pending',
         estimatedHours: 16,
-        dependencies: ['task-3-2', 'task-3-3'],
+        dependencies: [],
       },
       {
         id: 'task-4-2',
@@ -251,18 +367,17 @@ export class RoadmapGenerator {
 
   private generateDescription(designPlan: DesignPlan): string {
     const componentCount = designPlan.components.length;
-    return `This roadmap breaks down the implementation of the design plan into ${5} phases. ` +
-           `It covers foundation setup, implementation of ${componentCount} components, ` +
-           `integration testing, performance optimization, and production deployment. ` +
-           `The roadmap should be executed sequentially, with each phase depending on successful ` +
-           `completion of previous phases.`;
+    return (
+      `This roadmap breaks down the implementation of the design plan into 5 phases. ` +
+      `It covers foundation setup, implementation of ${componentCount} components, ` +
+      `integration testing, performance optimization, and production deployment.`
+    );
   }
 
   private estimateDuration(phases: Phase[]): string {
     const totalHours = phases.reduce((sum, p) => sum + (p.estimatedHours || 0), 0);
-    const weeks = Math.ceil(totalHours / 40); // Assuming 40 hrs/week
+    const weeks = Math.ceil(totalHours / 40);
     const months = Math.ceil(weeks / 4);
-
     return `${totalHours} hours (~${weeks} weeks, ~${months} months)`;
   }
 }

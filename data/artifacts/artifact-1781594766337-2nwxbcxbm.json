@@ -1,0 +1,19 @@
+{
+  "id": "artifact-1781594766337-2nwxbcxbm",
+  "createdAt": "2026-06-16T07:26:06.337Z",
+  "updatedAt": "2026-06-16T07:26:06.337Z",
+  "runId": "90f372fb-af2c-4958-ad57-ed0405b45bce",
+  "phaseId": "phase-3",
+  "taskId": "task-3-8",
+  "name": "task-3-8-output.md",
+  "type": "code",
+  "mimeType": "text/markdown",
+  "size": 12828,
+  "checksum": "1ab31e47a3e0d925fb3bc1113d224fcfb81b9d729a424c01c327ca1a204a58dd",
+  "contentPath": "G:\\Development\\20_Staging\\AI Projects\\2026-06-13_Orchestration\\data\\artifacts\\90f372fb-af2c-4958-ad57-ed0405b45bce\\1781594766337\\task-3-8-output.md",
+  "downloadUrl": "/api/artifacts/90f372fb-af2c-4958-ad57-ed0405b45bce/task-3-8-output.md/download",
+  "tags": [
+    "task-output",
+    "API Gateway Implementation"
+  ]
+}

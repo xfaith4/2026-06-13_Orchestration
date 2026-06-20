@@ -1,0 +1,63 @@
+- generic [ref=e3]:
+  - navigation [ref=e6]:
+    - link "📊 Dashboard" [ref=e7] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e8]: 📊
+      - text: Dashboard
+    - link "📱 Applications" [active] [ref=e9] [cursor=pointer]:
+      - /url: /applications
+      - generic [ref=e10]: 📱
+      - text: Applications
+    - link "📐 Design Plans" [ref=e11] [cursor=pointer]:
+      - /url: /design-plans
+      - generic [ref=e12]: 📐
+      - text: Design Plans
+    - link "🗺️ Roadmaps" [ref=e13] [cursor=pointer]:
+      - /url: /roadmaps
+      - generic [ref=e14]: 🗺️
+      - text: Roadmaps
+    - link "▶️ Runs" [ref=e15] [cursor=pointer]:
+      - /url: /runs
+      - generic [ref=e16]: ▶️
+      - text: Runs
+    - link "💰 Cost Analytics" [ref=e17] [cursor=pointer]:
+      - /url: /cost-analytics
+      - generic [ref=e18]: 💰
+      - text: Cost Analytics
+    - link "📜 Audit Logs" [ref=e19] [cursor=pointer]:
+      - /url: /audit-logs
+      - generic [ref=e20]: 📜
+      - text: Audit Logs
+    - link "🤖 Agents" [ref=e21] [cursor=pointer]:
+      - /url: /agents
+      - generic [ref=e22]: 🤖
+      - text: Agents
+    - link "💬 Prompts" [ref=e23] [cursor=pointer]:
+      - /url: /prompts
+      - generic [ref=e24]: 💬
+      - text: Prompts
+    - link "📋 Contracts" [ref=e25] [cursor=pointer]:
+      - /url: /contracts
+      - generic [ref=e26]: 📋
+      - text: Contracts
+  - generic [ref=e27]:
+    - navigation [ref=e28]:
+      - link "UnifiedAIToolbox" [ref=e32] [cursor=pointer]:
+        - /url: /
+    - main [ref=e33]:
+      - generic [ref=e99]:
+        - generic [ref=e100]:
+          - generic [ref=e101]:
+            - heading "Applications" [level=1] [ref=e102]
+            - paragraph [ref=e103]: Manage your application projects
+          - link "+ New Application" [ref=e104] [cursor=pointer]:
+            - /url: /applications/new
+        - 'link "Test App A test application Goal: Validate the system draft Created 15/06/2026" [ref=e106] [cursor=pointer]':
+          - /url: /applications/795d6988-f830-458a-b4a5-0adff84ca973
+          - generic [ref=e107]:
+            - generic [ref=e108]:
+              - heading "Test App" [level=3] [ref=e109]
+              - paragraph [ref=e110]: A test application
+              - paragraph [ref=e111]: "Goal: Validate the system"
+            - generic [ref=e112]: draft
+          - paragraph [ref=e113]: Created 15/06/2026

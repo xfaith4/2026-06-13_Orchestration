@@ -1,0 +1,19 @@
+{
+  "id": "artifact-1781594885452-uydkltauf",
+  "createdAt": "2026-06-16T07:28:05.452Z",
+  "updatedAt": "2026-06-16T07:28:05.452Z",
+  "runId": "90f372fb-af2c-4958-ad57-ed0405b45bce",
+  "phaseId": "phase-4",
+  "taskId": "task-4-4",
+  "name": "task-4-4-output.md",
+  "type": "code",
+  "mimeType": "text/markdown",
+  "size": 17750,
+  "checksum": "8e8e828d9c53a9e6952392c89742633efd2e3f09af88f7bdd095d9737f3d1060",
+  "contentPath": "G:\\Development\\20_Staging\\AI Projects\\2026-06-13_Orchestration\\data\\artifacts\\90f372fb-af2c-4958-ad57-ed0405b45bce\\1781594885451\\task-4-4-output.md",
+  "downloadUrl": "/api/artifacts/90f372fb-af2c-4958-ad57-ed0405b45bce/task-4-4-output.md/download",
+  "tags": [
+    "task-output",
+    "Integration Testing & State Verification"
+  ]
+}

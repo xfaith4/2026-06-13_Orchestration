@@ -1,0 +1,23 @@
+{
+  "overview": "Lifecycle test plan overview",
+  "architecture": "Microservices",
+  "components": [
+    {
+      "name": "API",
+      "description": "REST layer",
+      "responsibility": "Routing",
+      "interfaces": [
+        "HTTP"
+      ]
+    }
+  ],
+  "tradeoffs": [
+    "Speed over safety"
+  ],
+  "recommendations": [
+    "Add tests"
+  ],
+  "id": "0a0cdd9d-6768-442d-a792-709c0441899b",
+  "createdAt": "2026-06-15T10:49:41.192Z",
+  "updatedAt": "2026-06-15T10:49:41.192Z"
+}

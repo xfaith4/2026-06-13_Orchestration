@@ -16,6 +16,7 @@ export interface SaveArtifactOptions {
   phaseId?: string;
   taskId?: string;
   name: string;
+  storageSubpath?: string;
   type: string;
   mimeType?: string;
   uploadedBy?: string;
@@ -59,7 +60,11 @@ export class ArtifactStore {
     const checksum = this.calculateChecksum(buffer);
 
     // Generate storage path
-    const storagePath = this.generateStoragePath(options.runId, options.name);
+    const storagePath = this.generateStoragePath(
+      options.runId,
+      options.name,
+      options.storageSubpath
+    );
 
     // Create directory if needed
     await this.ensureDirectory(path.dirname(storagePath));
@@ -130,6 +135,27 @@ export class ArtifactStore {
   async getArtifactsForTask(runId: string, taskId: string): Promise<Artifact[]> {
     const artifacts = await this.getArtifactsForRun(runId);
     return artifacts.filter(a => a.taskId === taskId);
+  }
+
+  async getRunArtifactSummary(runId: string): Promise<{
+    totalCount: number;
+    totalSize: number;
+    byType: Record<string, number>;
+  }> {
+    const artifacts = await this.getArtifactsForRun(runId);
+    const byType: Record<string, number> = {};
+    let totalSize = 0;
+
+    for (const artifact of artifacts) {
+      totalSize += artifact.size;
+      byType[artifact.type] = (byType[artifact.type] || 0) + 1;
+    }
+
+    return {
+      totalCount: artifacts.length,
+      totalSize,
+      byType,
+    };
   }
 
   // Delete artifact
@@ -268,10 +294,28 @@ export class ArtifactStore {
     return hash.digest('hex');
   }
 
-  private generateStoragePath(runId: string, filename: string): string {
+  private generateStoragePath(
+    runId: string,
+    filename: string,
+    storageSubpath?: string
+  ): string {
+    if (storageSubpath) {
+      const safeSegments = storageSubpath
+        .replace(/\\/g, '/')
+        .split('/')
+        .filter(Boolean)
+        .map(segment => this.sanitizePathSegment(segment));
+
+      return path.join(this.config.storagePath, runId, ...safeSegments);
+    }
+
     const timestamp = Date.now();
-    const sanitized = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const sanitized = this.sanitizePathSegment(filename);
     return path.join(this.config.storagePath, runId, timestamp.toString(), sanitized);
+  }
+
+  private sanitizePathSegment(segment: string): string {
+    return segment.replace(/[^a-zA-Z0-9._-]/g, '_');
   }
 
   private async ensureDirectory(dirPath: string): Promise<void> {

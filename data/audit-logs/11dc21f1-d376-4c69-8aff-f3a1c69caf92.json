@@ -1,0 +1,40 @@
+{
+  "timestamp": "2026-06-15T10:49:33.444Z",
+  "userId": "anonymous",
+  "action": "CREATE",
+  "resourceType": "unknown",
+  "resourceId": "e7358832-c1b8-4719-ba95-fb89d3c8ed81",
+  "resourceName": "E2E Test 1781520573",
+  "changes": [
+    {
+      "field": "data",
+      "newValue": {
+        "name": "E2E Test 1781520573",
+        "description": "Automated end-to-end test application",
+        "goal": "Validate the full application lifecycle",
+        "requirements": [
+          "Can create",
+          "Can list",
+          "Can navigate"
+        ],
+        "status": "draft",
+        "id": "e7358832-c1b8-4719-ba95-fb89d3c8ed81",
+        "createdAt": "2026-06-15T10:49:33.443Z",
+        "updatedAt": "2026-06-15T10:49:33.443Z"
+      }
+    },
+    {
+      "field": "error"
+    },
+    {
+      "field": "timestamp",
+      "newValue": "2026-06-15T10:49:33.444Z"
+    }
+  ],
+  "ipAddress": "::1",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+  "status": "success",
+  "id": "11dc21f1-d376-4c69-8aff-f3a1c69caf92",
+  "createdAt": "2026-06-15T10:49:33.445Z",
+  "updatedAt": "2026-06-15T10:49:33.445Z"
+}

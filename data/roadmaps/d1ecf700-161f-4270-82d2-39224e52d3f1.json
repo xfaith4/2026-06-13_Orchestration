@@ -1,0 +1,437 @@
+{
+  "applicationId": "b3a7e799-27c9-4561-b429-b591e648ab76",
+  "designPlanId": "d601f4d8-a5d3-4332-9850-5fc3a955f5a9",
+  "title": "E2E Flow 2026-06-15 1029 - Implementation Roadmap",
+  "description": "Complete implementation roadmap for verifying the full create-plan-roadmap-run lifecycle from UI to persisted state. Covers API Gateway, Persistence Layer, and Validation Service with modular architecture, local-only deployment, and comprehensive testing.",
+  "phases": [
+    {
+      "id": "phase-0",
+      "number": 0,
+      "name": "Project Foundation & Infrastructure Setup",
+      "goal": "Establish development environment, project structure, and core infrastructure for all subsequent phases",
+      "estimatedHours": 40,
+      "dependencies": [],
+      "tasks": [
+        {
+          "id": "task-0-1",
+          "name": "Initialize Node.js project and dependencies",
+          "description": "Set up package.json with Express.js, Joi for validation, Winston for logging, and Jest for testing. Configure TypeScript compilation, ESLint, and Prettier for code quality.",
+          "status": "pending",
+          "estimatedHours": 6,
+          "dependencies": []
+        },
+        {
+          "id": "task-0-2",
+          "name": "Create project directory structure",
+          "description": "Establish modular folder hierarchy: /src/api, /src/persistence, /src/validation, /src/schemas, /src/middleware, /tests, /config. Define clear separation of concerns.",
+          "status": "pending",
+          "estimatedHours": 4,
+          "dependencies": []
+        },
+        {
+          "id": "task-0-3",
+          "name": "Implement centralized logging infrastructure",
+          "description": "Configure Winston logger with console and file transports. Create wrapper functions for info, error, warn, debug levels. Set up request ID tracking for request-response correlation.",
+          "status": "pending",
+          "estimatedHours": 6,
+          "dependencies": []
+        },
+        {
+          "id": "task-0-4",
+          "name": "Set up error handling and exception management",
+          "description": "Create custom error classes (ValidationError, PersistenceError, NotFoundError). Implement global error handler middleware. Define error response standardization.",
+          "status": "pending",
+          "estimatedHours": 6,
+          "dependencies": []
+        },
+        {
+          "id": "task-0-5",
+          "name": "Configure local file system initialization",
+          "description": "Create file system directory structure for data storage (/data/plans, /data/roadmaps, /data/runs, /data/index). Implement directory initialization on app startup with idempotency.",
+          "status": "pending",
+          "estimatedHours": 6,
+          "dependencies": []
+        },
+        {
+          "id": "task-0-6",
+          "name": "Set up development server and hot reload",
+          "description": "Configure Express server on port 3000. Implement nodemon for hot reload during development. Create startup script that initializes all services and logs readiness status.",
+          "status": "pending",
+          "estimatedHours": 6,
+          "dependencies": []
+        }
+      ]
+    },
+    {
+      "id": "phase-1",
+      "number": 1,
+      "name": "Validation Service Implementation",
+      "goal": "Build comprehensive JSON Schema validation service with schema registry that validates all data before persistence",
+      "estimatedHours": 50,
+      "dependencies": [
+        "phase-0"
+      ],
+      "tasks": [
+        {
+          "id": "task-1-1",
+          "name": "Define core data schemas",
+          "description": "Create JSON Schema definitions for Plan, Roadmap, and Run entities. Include all required fields, type definitions, constraints (min/max length, patterns), and nested object schemas. Store in /src/schemas/.",
+          "status": "pending",
+          "estimatedHours": 8,
+          "dependencies": []
+        },
+        {
+          "id": "task-1-2",
+          "name": "Implement Schema Registry",
+          "description": "Create SchemaRegistry class that loads all schemas at startup, provides get/register/validate methods. Implement caching mechanism for frequently accessed schemas. Handle missing schema errors gracefully.",
+          "status": "pending",
+          "estimatedHours": 8,
+          "dependencies": [
+            "task-1-1"
+          ]
+        },
+        {
+          "id": "task-1-3",
+          "name": "Build validation service with Joi",
+          "description": "Create ValidationService that uses Joi for schema validation. Implement methods: validatePlan(), validateRoadmap(), validateRun(). Return detailed validation errors with field-level specificity.",
+          "status": "pending",
+          "estimatedHours": 8,
+          "dependencies": [
+            "task-1-2"
+          ]
+        },
+        {
+          "id": "task-1-4",
+          "name": "Create validation middleware for Express",
+          "description": "Implement middleware factory that validates request body against specified schema. Attach to routes for automatic schema validation. Log validation failures with request context.",
+          "status": "pending",
+          "estimatedHours": 6,
+          "dependencies": [
+            "task-1-3"
+          ]
+        },
+        {
+          "id": "task-1-5",
+          "name": "Implement request/response envelope validation",
+          "description": "Create standard envelope schemas for HTTP requests/responses. Validate that all API responses conform to standard structure (status, data, meta, errors). Enforce consistency across API.",
+          "status": "pending",
+          "estimatedHours": 6,
+          "dependencies": [
+            "task-1-3"
+          ]
+        },
+        {
+          "id": "task-1-6",
+          "name": "Write comprehensive validation service tests",
+          "description": "Create test suites for all validation scenarios: valid data, invalid types, missing required fields, constraint violations, edge cases. Achieve >90% code coverage for validation service.",
+          "status": "pending",
+          "estimatedHours": 8,
+          "dependencies": [
+            "task-1-3",
+            "task-1-4",
+            "task-1-5"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase-2",
+      "number": 2,
+      "name": "Persistence Layer Implementation",
+      "goal": "Build file-based persistence layer using repository pattern with CRUD operations, transactional consistency, and index management",
+      "estimatedHours": 60,
+      "dependencies": [
+        "phase-0"
+      ],
+      "tasks": [
+        {
+          "id": "task-2-1",
+          "name": "Design repository pattern interfaces",
+          "description": "Define base Repository interface with create(), read(), update(), delete(), list() methods. Create specialized PlanRepository, RoadmapRepository, RunRepository interfaces. Include transaction and atomic operation patterns.",
+          "status": "pending",
+          "estimatedHours": 6,
+          "dependencies": []
+        },
+        {
+          "id": "task-2-2",
+          "name": "Implement file-based storage abstraction",
+          "description": "Create FileStorage class that handles JSON file I/O with atomic writes using temporary files. Implement read-write locking to prevent concurrent write corruption. Add error handling for disk I/O failures.",
+          "status": "pending",
+          "estimatedHours": 10,
+          "dependencies": [
+            "task-2-1"
+          ]
+        },
+        {
+          "id": "task-2-3",
+          "name": "Implement Plan repository",
+          "description": "Build PlanRepository with methods: createPlan(), getPlan(id), updatePlan(id, data), deletePlan(id), listPlans(filters). Persist plans to /data/plans/ as individual JSON files. Implement soft-delete option.",
+          "status": "pending",
+          "estimatedHours": 8,
+          "dependencies": [
+            "task-2-2"
+          ]
+        },
+        {
+          "id": "task-2-4",
+          "name": "Implement Roadmap and Run repositories",
+          "description": "Build RoadmapRepository and RunRepository following same patterns as PlanRepository. Store in /data/roadmaps/ and /data/runs/. Implement parent-child relationships and cascading operations.",
+          "status": "pending",
+          "estimatedHours": 10,
+          "dependencies": [
+            "task-2-2"
+          ]
+        },
+        {
+          "id": "task-2-5",
+          "name": "Implement index management system",
+          "description": "Create IndexManager that maintains in-memory indexes of all entities (by ID, by timestamp, by status). Rebuild indexes on startup. Auto-sync indexes on create/update/delete operations for O(1) lookups.",
+          "status": "pending",
+          "estimatedHours": 10,
+          "dependencies": [
+            "task-2-3",
+            "task-2-4"
+          ]
+        },
+        {
+          "id": "task-2-6",
+          "name": "Implement transaction support and rollback",
+          "description": "Create Transaction class that batches multiple operations and applies atomically. Implement rollback on failure. Add transaction log for recovery and audit trails.",
+          "status": "pending",
+          "estimatedHours": 8,
+          "dependencies": [
+            "task-2-2"
+          ]
+        },
+        {
+          "id": "task-2-7",
+          "name": "Write persistence layer tests",
+          "description": "Create comprehensive test suites for all CRUD operations, concurrent access, transaction rollback, index consistency, and failure scenarios. Mock file system failures. Achieve >85% code coverage.",
+          "status": "pending",
+          "estimatedHours": 8,
+          "dependencies": [
+            "task-2-3",
+            "task-2-4",
+            "task-2-5",
+            "task-2-6"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase-3",
+      "number": 3,
+      "name": "API Gateway Implementation",
+      "goal": "Build HTTP API endpoints that orchestrate the create-plan-roadmap-run lifecycle with proper request routing, validation, and response formatting",
+      "estimatedHours": 70,
+      "dependencies": [
+        "phase-1",
+        "phase-2"
+      ],
+      "tasks": [
+        {
+          "id": "task-3-1",
+          "name": "Create base API controller structure",
+          "description": "Implement Controller base class with common methods (sendSuccess, sendError, getRequestContext). Create PlanController, RoadmapController, RunController classes. Implement dependency injection for repositories and validation service.",
+          "status": "pending",
+          "estimatedHours": 8,
+          "dependencies": []
+        },
+        {
+          "id": "task-3-2",
+          "name": "Implement Plan endpoints (CRUD)",
+          "description": "Build endpoints: POST /api/plans (create), GET /api/plans (list), GET /api/plans/:id, PUT /api/plans/:id, DELETE /api/plans/:id. Include proper HTTP status codes and error handling.",
+          "status": "pending",
+          "estimatedHours": 10,
+          "dependencies": [
+            "task-3-1"
+          ]
+        },
+        {
+          "id": "task-3-3",
+          "name": "Implement Roadmap endpoints with Plan integration",
+          "description": "Build endpoints: POST /api/plans/:planId/roadmaps, GET /api/plans/:planId/roadmaps, GET /api/plans/:planId/roadmaps/:roadmapId, PUT, DELETE. Validate planId exists before operations.",
+          "status": "pending",
+          "estimatedHours": 10,
+          "dependencies": [
+            "task-3-1",
+            "task-3-2"
+          ]
+        },
+        {
+          "id": "task-3-4",
+          "name": "Implement Run endpoints with Roadmap integration",
+          "description": "Build endpoints: POST /api/plans/:planId/roadmaps/:roadmapId/runs, GET endpoints, PUT, DELETE. Validate parent resources exist. Implement Run status tracking (pending, executing, completed, failed).",
+          "status": "pending",
+          "estimatedHours": 10,
+          "dependencies": [
+            "task-3-1",
+            "task-3-3"
+          ]
+        },
+        {
+          "id": "task-3-5",
+          "name": "Implement orchestration endpoints for lifecycle",
+          "description": "Build composite endpoint: POST /api/flows/create-plan-roadmap-run that creates all three entities in transaction. Include rollback on partial failure. Return complete object graph in response.",
+          "status": "pending",
+          "estimatedHours": 8,
+          "dependencies": [
+            "task-3-2",
+            "task-3-3",
+            "task-3-4"
+          ]
+        },
+        {
+          "id": "task-3-6",
+          "name": "Implement request logging and correlation middleware",
+          "description": "Create middleware that logs all requests with method, path, status, duration, request ID. Correlate requests with responses and errors. Include request body/response body sampling for debugging.",
+          "status": "pending",
+          "estimatedHours": 6,
+          "dependencies": []
+        },
+        {
+          "id": "task-3-7",
+          "name": "Write API integration tests",
+          "description": "Create end-to-end tests for complete lifecycle flows. Test error scenarios (missing parent, validation failure, persistence errors). Mock external dependencies. Achieve >80% API code coverage.",
+          "status": "pending",
+          "estimatedHours": 8,
+          "dependencies": [
+            "task-3-2",
+            "task-3-3",
+            "task-3-4",
+            "task-3-5"
+          ]
+        },
+        {
+          "id": "task-3-8",
+          "name": "Implement health check and status endpoints",
+          "description": "Build GET /health endpoint that checks all dependencies (file system, validation service). Return component statuses. Implement GET /api/status for detailed service status.",
+          "status": "pending",
+          "estimatedHours": 6,
+          "dependencies": []
+        }
+      ]
+    },
+    {
+      "id": "phase-4",
+      "number": 4,
+      "name": "Integration Testing & State Verification",
+      "goal": "Verify complete E2E lifecycle correctness, state persistence, and data consistency through comprehensive integration tests",
+      "estimatedHours": 40,
+      "dependencies": [
+        "phase-3"
+      ],
+      "tasks": [
+        {
+          "id": "task-4-1",
+          "name": "Create E2E test suite for create-plan-roadmap-run flow",
+          "description": "Write comprehensive test that exercises complete lifecycle: create plan, create roadmap under plan, create run under roadmap. Verify all operations succeed and return correct data structures.",
+          "status": "pending",
+          "estimatedHours": 8,
+          "dependencies": []
+        },
+        {
+          "id": "task-4-2",
+          "name": "Implement state persistence verification tests",
+          "description": "Create tests that verify persisted state: restart application, query entities, confirm all data intact. Test file system state on disk. Verify index rebuilt correctly on restart.",
+          "status": "pending",
+          "estimatedHours": 8,
+          "dependencies": [
+            "task-4-1"
+          ]
+        },
+        {
+          "id": "task-4-3",
+          "name": "Write concurrent operation tests",
+          "description": "Create tests simulating concurrent requests: multiple parallel creates, updates, deletes. Verify no data corruption, race conditions, or lost updates. Test transaction isolation.",
+          "status": "pending",
+          "estimatedHours": 8,
+          "dependencies": [
+            "task-4-1"
+          ]
+        },
+        {
+          "id": "task-4-4",
+          "name": "Implement failure scenario tests",
+          "description": "Test error paths: invalid input validation, missing parent resources, disk full, file permission errors, malformed JSON. Verify proper error responses and state recovery.",
+          "status": "pending",
+          "estimatedHours": 8,
+          "dependencies": [
+            "task-4-1"
+          ]
+        },
+        {
+          "id": "task-4-5",
+          "name": "Create data integrity validation suite",
+          "description": "Implement tests that verify referential integrity (child can't exist without parent), schema compliance of persisted data, index consistency with file system state, timestamp correctness.",
+          "status": "pending",
+          "estimatedHours": 8,
+          "dependencies": [
+            "task-4-2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase-5",
+      "number": 5,
+      "name": "UI Integration, Documentation & Deployment",
+      "goal": "Build simple verification UI, complete documentation, and prepare application for QA testing and local deployment",
+      "estimatedHours": 20,
+      "dependencies": [
+        "phase-4"
+      ],
+      "tasks": [
+        {
+          "id": "task-5-1",
+          "name": "Create simple HTML/JS verification UI",
+          "description": "Build single-page HTML interface with forms to execute create-plan-roadmap-run flow. Display responses and current state. Include buttons to test each endpoint independently. Host on /public from Express.",
+          "status": "pending",
+          "estimatedHours": 6,
+          "dependencies": []
+        },
+        {
+          "id": "task-5-2",
+          "name": "Write comprehensive API documentation",
+          "description": "Document all endpoints with request/response examples. Include error codes and status meanings. Create postman collection for manual testing. Document deployment and configuration.",
+          "status": "pending",
+          "estimatedHours": 4,
+          "dependencies": []
+        },
+        {
+          "id": "task-5-3",
+          "name": "Write architecture and design documentation",
+          "description": "Document component responsibilities, data flow, persistence strategy, validation approach. Include deployment diagram, component interaction diagram, and sequence diagrams for key flows.",
+          "status": "pending",
+          "estimatedHours": 4,
+          "dependencies": []
+        },
+        {
+          "id": "task-5-4",
+          "name": "Create deployment guide and startup instructions",
+          "description": "Write step-by-step guide: clone repo, install dependencies, configure environment, start server, verify health check. Include troubleshooting section for common issues.",
+          "status": "pending",
+          "estimatedHours": 3,
+          "dependencies": []
+        },
+        {
+          "id": "task-5-5",
+          "name": "Final QA verification and bug fixes",
+          "description": "Execute full test suite, verify all endpoints work as documented, test UI end-to-end, confirm logging is complete, check error messages are helpful. Fix any issues found.",
+          "status": "pending",
+          "estimatedHours": 3,
+          "dependencies": [
+            "task-5-1"
+          ]
+        }
+      ]
+    }
+  ],
+  "estimatedDuration": "280 hours (~7 weeks)",
+  "status": "approved",
+  "id": "d1ecf700-161f-4270-82d2-39224e52d3f1",
+  "createdAt": "2026-06-16T07:15:33.151Z",
+  "updatedAt": "2026-06-16T07:16:05.192Z",
+  "approvedBy": "current-user",
+  "approvedAt": "2026-06-16T07:16:05.191Z"
+}

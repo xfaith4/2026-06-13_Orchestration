@@ -149,7 +149,7 @@ export function DesignPlanDetail() {
             designPlan.status === 'rejected' ? 'bg-red-100 text-red-800' :
             'bg-blue-100 text-blue-800'
           }`}>
-            {designPlan.status.charAt(0).toUpperCase() + designPlan.status.slice(1)}
+            {designPlan.status ? designPlan.status.charAt(0).toUpperCase() + designPlan.status.slice(1) : 'Draft'}
           </span>
         </div>
 

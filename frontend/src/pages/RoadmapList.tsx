@@ -112,7 +112,7 @@ export function RoadmapList() {
                       roadmap.status === 'rejected' ? 'bg-red-100 text-red-800' :
                       'bg-blue-100 text-blue-800'
                     }`}>
-                      {roadmap.status.charAt(0).toUpperCase() + roadmap.status.slice(1)}
+                      {roadmap.status ? roadmap.status.charAt(0).toUpperCase() + roadmap.status.slice(1) : 'Draft'}
                     </span>
                     <span className="text-xs text-gray-600 py-1">
                       {new Date(roadmap.createdAt).toLocaleDateString()}

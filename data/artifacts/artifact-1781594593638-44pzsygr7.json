@@ -1,0 +1,19 @@
+{
+  "id": "artifact-1781594593638-44pzsygr7",
+  "createdAt": "2026-06-16T07:23:13.638Z",
+  "updatedAt": "2026-06-16T07:23:13.638Z",
+  "runId": "90f372fb-af2c-4958-ad57-ed0405b45bce",
+  "phaseId": "phase-2",
+  "taskId": "task-2-4",
+  "name": "task-2-4-output.md",
+  "type": "code",
+  "mimeType": "text/markdown",
+  "size": 12203,
+  "checksum": "01a5b35c7952be7f34ecbeb9beb40f86a84a60ffc26ab41004d50d05d3f839f1",
+  "contentPath": "G:\\Development\\20_Staging\\AI Projects\\2026-06-13_Orchestration\\data\\artifacts\\90f372fb-af2c-4958-ad57-ed0405b45bce\\1781594593638\\task-2-4-output.md",
+  "downloadUrl": "/api/artifacts/90f372fb-af2c-4958-ad57-ed0405b45bce/task-2-4-output.md/download",
+  "tags": [
+    "task-output",
+    "Persistence Layer Implementation"
+  ]
+}

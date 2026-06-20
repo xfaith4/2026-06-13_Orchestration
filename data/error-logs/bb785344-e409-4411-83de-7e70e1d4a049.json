@@ -1,0 +1,20 @@
+{
+  "id": "bb785344-e409-4411-83de-7e70e1d4a049",
+  "createdAt": "2026-06-15T11:29:32.960Z",
+  "updatedAt": "2026-06-15T11:29:32.960Z",
+  "timestamp": "2026-06-15T11:29:32.960Z",
+  "errorMessage": "Task execution failed: Set up project repository and CI/CD pipeline",
+  "errorCode": "Error",
+  "errorType": "permanent",
+  "severity": "low",
+  "context": {
+    "runId": "",
+    "phaseId": "phase-0",
+    "taskId": "task-0-1",
+    "service": "phase-executor",
+    "operation": "executeTask"
+  },
+  "stack": "Error: Task execution failed: Set up project repository and CI/CD pipeline\n    at PhaseExecutor.executePhase (file:///G:/Development/20_Staging/AI%20Projects/2026-06-13_Orchestration/backend/src/services/phase-executor.ts:1:1031)\n    at executeRunAsync (file:///G:/Development/20_Staging/AI%20Projects/2026-06-13_Orchestration/backend/src/routes/runs.ts:1:2126)",
+  "retryCount": 0,
+  "maxRetries": 3
+}

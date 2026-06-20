@@ -1,0 +1,14 @@
+{
+  "name": "E2E Test 1781520573",
+  "description": "Automated end-to-end test application",
+  "goal": "Validate the full application lifecycle",
+  "requirements": [
+    "Can create",
+    "Can list",
+    "Can navigate"
+  ],
+  "status": "draft",
+  "id": "e7358832-c1b8-4719-ba95-fb89d3c8ed81",
+  "createdAt": "2026-06-15T10:49:33.443Z",
+  "updatedAt": "2026-06-15T10:49:33.443Z"
+}

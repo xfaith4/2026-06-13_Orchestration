@@ -1,0 +1,19 @@
+{
+  "name": "E2E Flow 2026-06-15 1029",
+  "description": "Browser-driven end-to-end validation app for the UnifiedAIToolbox flow.",
+  "goal": "Verify the full create-plan-roadmap-run lifecycle from the UI and persist the resulting state correctly.",
+  "requirements": [
+    "Create application from UI",
+    "Generate design plan",
+    "Approve roadmap and create run"
+  ],
+  "targetAudience": "QA and product owners",
+  "constraints": [
+    "No external credentials",
+    "Must complete entirely in local dev mode"
+  ],
+  "status": "draft",
+  "id": "b3a7e799-27c9-4561-b429-b591e648ab76",
+  "createdAt": "2026-06-15T10:29:15.520Z",
+  "updatedAt": "2026-06-15T10:29:15.520Z"
+}

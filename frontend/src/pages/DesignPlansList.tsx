@@ -112,7 +112,7 @@ export function DesignPlansList() {
                       plan.status === 'rejected' ? 'bg-red-100 text-red-800' :
                       'bg-blue-100 text-blue-800'
                     }`}>
-                      {plan.status.charAt(0).toUpperCase() + plan.status.slice(1)}
+                      {plan.status ? plan.status.charAt(0).toUpperCase() + plan.status.slice(1) : 'Draft'}
                     </span>
                     <span className="text-xs text-gray-600 py-1">
                       {new Date(plan.createdAt).toLocaleDateString()}

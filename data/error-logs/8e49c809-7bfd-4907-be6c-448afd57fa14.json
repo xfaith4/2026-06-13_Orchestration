@@ -1,0 +1,20 @@
+{
+  "id": "8e49c809-7bfd-4907-be6c-448afd57fa14",
+  "createdAt": "2026-06-15T11:31:50.001Z",
+  "updatedAt": "2026-06-15T11:31:50.001Z",
+  "timestamp": "2026-06-15T11:31:50.001Z",
+  "errorMessage": "Task execution failed: Establish logging and monitoring",
+  "errorCode": "Error",
+  "errorType": "permanent",
+  "severity": "low",
+  "context": {
+    "runId": "",
+    "phaseId": "phase-0",
+    "taskId": "task-0-3",
+    "service": "phase-executor",
+    "operation": "executeTask"
+  },
+  "stack": "Error: Task execution failed: Establish logging and monitoring\n    at PhaseExecutor.executePhase (file:///G:/Development/20_Staging/AI%20Projects/2026-06-13_Orchestration/backend/src/services/phase-executor.ts:1:1031)\n    at executeRunAsync (file:///G:/Development/20_Staging/AI%20Projects/2026-06-13_Orchestration/backend/src/routes/runs.ts:1:2126)",
+  "retryCount": 0,
+  "maxRetries": 3
+}

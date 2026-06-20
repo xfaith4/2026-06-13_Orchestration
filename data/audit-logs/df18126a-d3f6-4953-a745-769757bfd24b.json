@@ -1,0 +1,48 @@
+{
+  "timestamp": "2026-06-15T10:49:41.194Z",
+  "userId": "anonymous",
+  "action": "CREATE",
+  "resourceType": "unknown",
+  "resourceId": "unknown",
+  "changes": [
+    {
+      "field": "data",
+      "newValue": {
+        "overview": "Lifecycle test plan overview",
+        "architecture": "Microservices",
+        "components": [
+          {
+            "name": "API",
+            "description": "REST layer",
+            "responsibility": "Routing",
+            "interfaces": [
+              "HTTP"
+            ]
+          }
+        ],
+        "tradeoffs": [
+          "Speed over safety"
+        ],
+        "recommendations": [
+          "Add tests"
+        ],
+        "id": "0a0cdd9d-6768-442d-a792-709c0441899b",
+        "createdAt": "2026-06-15T10:49:41.192Z",
+        "updatedAt": "2026-06-15T10:49:41.192Z"
+      }
+    },
+    {
+      "field": "error"
+    },
+    {
+      "field": "timestamp",
+      "newValue": "2026-06-15T10:49:41.194Z"
+    }
+  ],
+  "ipAddress": "::1",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+  "status": "success",
+  "id": "df18126a-d3f6-4953-a745-769757bfd24b",
+  "createdAt": "2026-06-15T10:49:41.195Z",
+  "updatedAt": "2026-06-15T10:49:41.195Z"
+}

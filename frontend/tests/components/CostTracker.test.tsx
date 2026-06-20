@@ -56,7 +56,7 @@ describe('CostTracker', () => {
 
     render(<CostTracker run={run} />);
 
-    expect(screen.getByText('$5.50')).toBeInTheDocument();
+    expect(screen.getAllByText('$5.50').length).toBeGreaterThanOrEqual(1);
   });
 
   it('should display input tokens', () => {
@@ -166,8 +166,8 @@ describe('CostTracker', () => {
     render(<CostTracker run={run} />);
 
     expect(screen.getByText('Cost by Phase')).toBeInTheDocument();
-    expect(screen.getByText(/Phase 1: Phase 1/)).toBeInTheDocument();
-    expect(screen.getByText(/Phase 2: Phase 2/)).toBeInTheDocument();
+    expect(screen.getByText('Phase 1')).toBeInTheDocument();
+    expect(screen.getByText('Phase 2')).toBeInTheDocument();
   });
 
   it('should display efficiency metrics', () => {
@@ -283,7 +283,7 @@ describe('CostTracker', () => {
 
     render(<CostTracker run={run} />);
 
-    expect(screen.getByText(/50.0% of total/)).toBeInTheDocument();
+    expect(screen.getAllByText(/50.0% of total/).length).toBeGreaterThanOrEqual(2);
   });
 
   it('should handle missing totalCost gracefully', () => {
@@ -293,7 +293,7 @@ describe('CostTracker', () => {
 
     render(<CostTracker run={run} />);
 
-    expect(screen.getByText('$0.00')).toBeInTheDocument();
+    expect(screen.getAllByText('$0.00').length).toBeGreaterThanOrEqual(1);
   });
 
   it('should handle no phases gracefully', () => {

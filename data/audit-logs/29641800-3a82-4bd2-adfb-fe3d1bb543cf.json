@@ -1,0 +1,223 @@
+{
+  "timestamp": "2026-06-15T11:29:28.484Z",
+  "userId": "anonymous",
+  "action": "UPDATE",
+  "resourceType": "f",
+  "resourceId": "f7e39cfb-05ae-4ac4-b791-4a68608e48ae",
+  "resourceName": "Implementation Roadmap: b3a7e799-27c9-4561-b429-b591e648ab76",
+  "changes": [
+    {
+      "field": "approver",
+      "oldValue": "current-user"
+    },
+    {
+      "field": "data",
+      "newValue": {
+        "applicationId": "b3a7e799-27c9-4561-b429-b591e648ab76",
+        "designPlanId": "d601f4d8-a5d3-4332-9850-5fc3a955f5a9",
+        "title": "Implementation Roadmap: b3a7e799-27c9-4561-b429-b591e648ab76",
+        "description": "This roadmap breaks down the implementation of the design plan into 5 phases. It covers foundation setup, implementation of 3 components, integration testing, performance optimization, and production deployment. The roadmap should be executed sequentially, with each phase depending on successful completion of previous phases.",
+        "phases": [
+          {
+            "id": "phase-0",
+            "number": 0,
+            "name": "Foundation & Infrastructure Setup",
+            "goal": "Establish core infrastructure, database, and deployment pipeline",
+            "tasks": [
+              {
+                "id": "task-0-1",
+                "name": "Set up project repository and CI/CD pipeline",
+                "description": "Initialize Git, configure GitHub Actions or similar",
+                "status": "pending",
+                "estimatedHours": 8,
+                "dependencies": []
+              },
+              {
+                "id": "task-0-2",
+                "name": "Configure database and schema",
+                "description": "Set up primary data store, migrations, and indices",
+                "status": "pending",
+                "estimatedHours": 16,
+                "dependencies": []
+              },
+              {
+                "id": "task-0-3",
+                "name": "Establish logging and monitoring",
+                "description": "Configure structured logging, tracing, and alerting",
+                "status": "pending",
+                "estimatedHours": 8,
+                "dependencies": []
+              },
+              {
+                "id": "task-0-4",
+                "name": "Create deployment infrastructure",
+                "description": "Docker, Kubernetes, or cloud platform setup",
+                "status": "pending",
+                "estimatedHours": 8,
+                "dependencies": [
+                  "task-0-1"
+                ]
+              }
+            ],
+            "estimatedHours": 40,
+            "dependencies": []
+          },
+          {
+            "id": "phase-1",
+            "number": 1,
+            "name": "Core Component Implementation",
+            "goal": "Implement API Gateway, Persistence Layer, and Validation Service",
+            "tasks": [
+              {
+                "id": "task-1-1",
+                "name": "Implement API Gateway",
+                "description": "HTTP request handling, routing, and middleware",
+                "status": "pending",
+                "estimatedHours": 20,
+                "dependencies": [
+                  "task-0-1"
+                ]
+              },
+              {
+                "id": "task-1-2",
+                "name": "Implement Persistence Layer",
+                "description": "CRUD operations, transactions, and query builder",
+                "status": "pending",
+                "estimatedHours": 24,
+                "dependencies": [
+                  "task-0-2"
+                ]
+              },
+              {
+                "id": "task-1-3",
+                "name": "Implement Validation Service",
+                "description": "JSON schema validation, type checking, error reporting",
+                "status": "pending",
+                "estimatedHours": 16,
+                "dependencies": [
+                  "task-0-1"
+                ]
+              },
+              {
+                "id": "task-1-4",
+                "name": "Implement error handling and recovery",
+                "description": "Circuit breakers, retries, graceful degradation",
+                "status": "pending",
+                "estimatedHours": 20,
+                "dependencies": [
+                  "task-1-1",
+                  "task-1-2",
+                  "task-1-3"
+                ]
+              }
+            ],
+            "estimatedHours": 80,
+            "dependencies": [
+              "phase-0"
+            ]
+          },
+          {
+            "id": "phase-3",
+            "number": 3,
+            "name": "Integration & Testing",
+            "goal": "End-to-end testing, performance optimization, and integration validation",
+            "tasks": [
+              {
+                "id": "task-3-1",
+                "name": "End-to-end integration testing",
+                "description": "Test complete workflows across all components",
+                "status": "pending",
+                "estimatedHours": 20,
+                "dependencies": []
+              },
+              {
+                "id": "task-3-2",
+                "name": "Performance testing and optimization",
+                "description": "Load testing, bottleneck identification, optimization",
+                "status": "pending",
+                "estimatedHours": 24,
+                "dependencies": [
+                  "task-3-1"
+                ]
+              },
+              {
+                "id": "task-3-3",
+                "name": "Security review and hardening",
+                "description": "Vulnerability scanning, dependency audit, secure defaults",
+                "status": "pending",
+                "estimatedHours": 16,
+                "dependencies": [
+                  "task-3-1"
+                ]
+              }
+            ],
+            "estimatedHours": 60,
+            "dependencies": [
+              "phase-1"
+            ]
+          },
+          {
+            "id": "phase-4",
+            "number": 4,
+            "name": "Deployment & Documentation",
+            "goal": "Production deployment, monitoring setup, and documentation",
+            "tasks": [
+              {
+                "id": "task-4-1",
+                "name": "Set up production monitoring",
+                "description": "Metrics, dashboards, alerting, and on-call procedures",
+                "status": "pending",
+                "estimatedHours": 16,
+                "dependencies": [
+                  "task-3-2",
+                  "task-3-3"
+                ]
+              },
+              {
+                "id": "task-4-2",
+                "name": "Deploy to production",
+                "description": "Blue-green deployment, rollback procedures, validation",
+                "status": "pending",
+                "estimatedHours": 12,
+                "dependencies": [
+                  "task-4-1"
+                ]
+              },
+              {
+                "id": "task-4-3",
+                "name": "Create documentation and runbooks",
+                "description": "API docs, architecture guide, operational procedures",
+                "status": "pending",
+                "estimatedHours": 12,
+                "dependencies": [
+                  "task-4-1"
+                ]
+              }
+            ],
+            "estimatedHours": 40,
+            "dependencies": [
+              "phase-3"
+            ]
+          }
+        ],
+        "estimatedDuration": "220 hours (~6 weeks, ~2 months)",
+        "status": "approved",
+        "id": "f7e39cfb-05ae-4ac4-b791-4a68608e48ae",
+        "createdAt": "2026-06-15T11:29:24.504Z",
+        "updatedAt": "2026-06-15T11:29:28.483Z",
+        "approvedBy": "current-user",
+        "approvedAt": "2026-06-15T11:29:28.483Z"
+      }
+    },
+    {
+      "field": "timestamp",
+      "newValue": "2026-06-15T11:29:28.484Z"
+    }
+  ],
+  "ipAddress": "::1",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+  "status": "success",
+  "id": "29641800-3a82-4bd2-adfb-fe3d1bb543cf",
+  "createdAt": "2026-06-15T11:29:28.485Z",
+  "updatedAt": "2026-06-15T11:29:28.485Z"
+}
