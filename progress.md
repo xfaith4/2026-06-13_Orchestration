@@ -51,18 +51,61 @@
   - `backend/tests/integration/run-materialize.test.ts` (created)
 
 ### Phase 5: Delivery
-- **Status:** in_progress
+- **Status:** complete
 - Actions taken:
   - Prepared final roadmap verdict, implementation summary, and residual blocker notes.
 - Files created/modified:
   - `progress.md`
+
+### Phase 6: Select the next truthful roadmap slice
+- **Status:** complete
+- Actions taken:
+  - Re-read the post-Phase-29 roadmap sections and confirmed Phase 30 is now the next unfinished later-phase slice after the Phase 31 backend work.
+  - Checked current code for any existing `stackConstraints` or output-language mismatch logic and found none.
+  - Verified that Phase 30 maps directly to the documented Python-vs-TypeScript drift from the earlier real orchestration run.
+- Files created/modified:
+  - `task_plan.md`
+  - `findings.md`
+
+### Phase 7: Implement Phase 30 backend core
+- **Status:** complete
+- Actions taken:
+  - Added optional `stackConstraints` metadata to the shared roadmap and run types so runs can carry target-stack rules from roadmap creation onward.
+  - Added `StackConstraintBuilder` and injected its formatted block at the top of LLM task prompts.
+  - Extended task and phase execution so stack constraints flow through run creation, phase execution, task execution, auto-run execution, and manual execution routes.
+  - Added post-execution language detection based on code fences and materialized artifact paths, then persisted mismatch warnings into `error-logs` with real run, phase, and task context.
+- Files created/modified:
+  - `shared/src/index.ts`
+  - `shared/src/types/index.ts`
+  - `backend/src/services/stack-constraint-builder.ts` (created)
+  - `backend/src/services/task-executor.ts`
+  - `backend/src/services/phase-executor.ts`
+  - `backend/src/services/run-service.ts`
+  - `backend/src/routes/runs.ts`
+  - `backend/src/routes/execution.ts`
+  - `backend/tests/services/stack-constraint-builder.test.ts` (created)
+  - `backend/tests/services/task-executor.test.ts` (created)
+  - `backend/tests/services/phase-executor.test.ts` (created)
+  - `backend/tests/services/run-service.test.ts` (created)
+
+### Phase 8: Verify and hand off
+- **Status:** complete
+- Actions taken:
+  - Ran focused backend tests for the Phase 30 slice covering prompt injection, language detection, warning logging, and run metadata propagation.
+  - Re-ran backend typecheck to separate the new slice from the repo-wide TypeScript blocker.
+  - Recorded that the remaining unfinished roadmap work is the explicit UI follow-up for setting `stackConstraints` during run creation.
+- Files created/modified:
+  - `progress.md`
+  - `task_plan.md`
+  - `findings.md`
 
 ## Test Results
 | Test | Input | Expected | Actual | Status |
 |------|-------|----------|--------|--------|
 | Planning file discovery | `rg --files -g 'task_plan.md' -g 'findings.md' -g 'progress.md'` | Existing files or none | None found | pass |
 | Backend targeted tests | `npm test -- --run tests/services/output-parser.test.ts tests/services/artifact-store.test.ts tests/integration/run-materialize.test.ts` | Parser/materialization tests pass | 28/28 passed | pass |
-| Backend typecheck | `npm run typecheck` | No type errors | Blocked by pre-existing workspace alias and older backend TS errors | blocked |
+| Phase 30 targeted tests | `npm test -- --run tests/services/stack-constraint-builder.test.ts tests/services/task-executor.test.ts tests/services/phase-executor.test.ts tests/services/run-service.test.ts` | Prompt injection, mismatch detection, warning logging, and run propagation tests pass | 8/8 passed | pass |
+| Backend typecheck | `npm run typecheck` | No type errors | Blocked by pre-existing `@unifiedaitoolbox/shared` resolution failures and older backend strict-typing errors | blocked |
 
 ## Error Log
 | Timestamp | Error | Attempt | Resolution |
@@ -70,12 +113,13 @@
 | 2026-06-20 | No planning files existed in repo root | 1 | Created fresh planning files. |
 | 2026-06-20 | Backend `vitest` and `tsc` commands were missing | 1 | Installed dependencies with `npm ci` at repo root. |
 | 2026-06-20 | Materialization integration test failed with `ENOENT` | 1 | Switched artifact path resolution to `PersistenceService.getDataDir()`. |
+| 2026-06-20 | Backend typecheck still fails after the Phase 30 slice | 1 | Confirmed the blocker is repo-wide shared-package resolution plus older strict-mode errors outside the modified seam. |
 
 ## 5-Question Reboot Check
 | Question | Answer |
 |----------|--------|
-| Where am I? | Phase 5 delivery after implementing and verifying the Phase 31 slice. |
-| Where am I going? | Final summary plus any follow-up based on the remaining repo-level blockers. |
+| Where am I? | Phase 8 handoff after implementing and verifying the Phase 30 backend core slice. |
+| Where am I going? | Final summary plus the next truthful follow-up: the deferred run-creation UI field and the repo-wide TypeScript cleanup. |
 | What's the goal? | Audit the roadmap against repo reality and land the next bounded hardening task. |
-| What have I learned? | The roadmap is stale, and Phase 31 was the most truthful incomplete seam. |
-| What have I done? | Audited roadmap drift, implemented run artifact materialization, added tests, and separated pre-existing typecheck blockers from this patch. |
+| What have I learned? | The roadmap is still stale overall, but Phase 30 was the next truthful execution slice after Phase 31 and could be completed without broadening into UI work. |
+| What have I done? | Audited roadmap drift, completed Phase 31 artifact materialization, added Phase 30 stack-constraint enforcement, added focused tests, and separated pre-existing typecheck blockers from this patch. |

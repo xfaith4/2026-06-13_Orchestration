@@ -259,6 +259,8 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
     const phaseResult = await phaseExecutor.executePhase({
       phase,
       agentAssignments,
+      runId,
+      stackConstraints: currentRun.stackConstraints,
       onTaskComplete: async (taskId, output) => {
         if (!output.success || !output.output) {
           return;

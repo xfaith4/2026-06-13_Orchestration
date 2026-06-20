@@ -1,5 +1,10 @@
-import { ExecutionPhase, ExecutionTask, Run } from '@unifiedaitoolbox/shared';
-import { TaskExecutor, TaskExecutionInput, TaskExecutionOutput } from './task-executor.js';
+import { ExecutionPhase, StackConstraints } from '@unifiedaitoolbox/shared';
+import {
+  TaskExecutor,
+  TaskExecutionInput,
+  TaskExecutionOutput,
+  TaskExecutionWarning,
+} from './task-executor.js';
 import { CostTracker } from './cost-tracker.js';
 import { ErrorLogger } from './error-logger.js';
 
@@ -8,6 +13,8 @@ export interface PhaseExecutionInput {
   agentAssignments: Record<string, string>; // taskId -> agentId
   promptAssignments?: Record<string, string>; // taskId -> promptId
   variables?: Record<string, string>;
+  runId?: string;
+  stackConstraints?: StackConstraints;
   onTaskComplete?: (taskId: string, output: TaskExecutionOutput) => Promise<void>;
 }
 
@@ -60,6 +67,9 @@ export class PhaseExecutor {
           agentId,
           promptId: input.promptAssignments?.[task.id],
           variables: input.variables,
+          runId: input.runId,
+          phaseId,
+          stackConstraints: input.stackConstraints,
         };
 
         const result = await this.taskExecutor.executeTask(executionInput);
@@ -70,6 +80,10 @@ export class PhaseExecutor {
           if (result.cost) {
             totalCost += result.cost.estimatedCost;
           }
+
+          if (result.warnings?.length) {
+            await this.logTaskWarnings(input.runId, phaseId, task.id, result.warnings);
+          }
         } else {
           tasksFailed++;
 
@@ -77,7 +91,7 @@ export class PhaseExecutor {
           await this.errorLogger.logError(
             new Error(result.error || 'Task execution failed'),
             {
-              runId: '',
+              runId: input.runId,
               phaseId,
               taskId: task.id,
               service: 'phase-executor',
@@ -160,5 +174,29 @@ export class PhaseExecutor {
       ready: issues.length === 0,
       issues,
     };
+  }
+
+  private async logTaskWarnings(
+    runId: string | undefined,
+    phaseId: string,
+    taskId: string,
+    warnings: TaskExecutionWarning[]
+  ): Promise<void> {
+    for (const warning of warnings) {
+      await this.errorLogger.logError(
+        {
+          message: warning.message,
+          code: warning.code,
+          name: 'StackConstraintWarning',
+        },
+        {
+          runId,
+          phaseId,
+          taskId,
+          service: 'phase-executor',
+          operation: 'stackConstraintCheck',
+        }
+      );
+    }
   }
 }
