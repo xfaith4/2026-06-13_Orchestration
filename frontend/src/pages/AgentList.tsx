@@ -4,7 +4,7 @@ import { apiClient } from '../services/api';
 interface Agent {
   id: string;
   name: string;
-  type: string;
+  role: string;
   description: string;
   capabilities: string[];
   createdAt: string;
@@ -164,8 +164,8 @@ export function AgentList() {
                     <h3 className="text-lg font-semibold text-gray-900">{agent.name}</h3>
                     <p className="text-sm text-gray-600 mt-1">{agent.description}</p>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getTypeColor(agent.type)}`}>
-                    {agent.type}
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getTypeColor(agent.role)}`}>
+                    {agent.role}
                   </span>
                 </div>
 
