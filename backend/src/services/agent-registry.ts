@@ -60,9 +60,9 @@ export class AgentRegistry {
     return this.customAgents.get(agentId) || this.agents.get(agentId);
   }
 
-  // Get agents by type
-  getAgentsByType(type: string): AgentDefinition[] {
-    return this.getAllAgents().filter(agent => agent.type === type);
+  // Get agents by role
+  getAgentsByType(role: string): AgentDefinition[] {
+    return this.getAllAgents().filter(agent => agent.role === role);
   }
 
   // Search agents
@@ -75,15 +75,15 @@ export class AgentRegistry {
     );
   }
 
-  // Get unique agent types
+  // Get unique agent roles
   getAgentTypes(): string[] {
-    const types = new Set<string>();
+    const roles = new Set<string>();
     for (const agent of this.getAllAgents()) {
-      if (agent.type) {
-        types.add(agent.type);
+      if (agent.role) {
+        roles.add(agent.role);
       }
     }
-    return Array.from(types).sort();
+    return Array.from(roles).sort();
   }
 
   // Get agents by capability
@@ -148,10 +148,10 @@ export class AgentRegistry {
   async getStatistics(): Promise<AgentStats> {
     const allAgents = this.getAllAgents();
 
-    // Count by type
+    // Count by role
     const agentsByType: Record<string, number> = {};
     for (const agent of allAgents) {
-      agentsByType[agent.type] = (agentsByType[agent.type] || 0) + 1;
+      agentsByType[agent.role] = (agentsByType[agent.role] || 0) + 1;
     }
 
     // Count by capability

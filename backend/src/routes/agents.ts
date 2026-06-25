@@ -34,9 +34,9 @@ export const createAgentRoutes = (
 
       let agents = registry.getAllAgents();
 
-      // Filter by type
+      // Filter by role
       if (type) {
-        agents = agents.filter(a => a.type === type);
+        agents = agents.filter(a => a.role === type);
       }
 
       // Search by name or description
@@ -159,19 +159,20 @@ export const createAgentRoutes = (
     try {
       await ensureInitialized();
 
-      const { name, type, description, capabilities, inputs, outputs } = req.body;
+      const { name, type, role, description, capabilities, constraints, prompt } = req.body;
+      const agentRole = role || type;
 
-      if (!name || !type) {
-        throw new ApiError(400, 'name and type are required');
+      if (!name || !agentRole) {
+        throw new ApiError(400, 'name and role are required');
       }
 
       const newAgent = await registry.createAgent({
         name,
-        type,
+        role: agentRole,
         description: description || '',
         capabilities: capabilities || [],
-        inputs: inputs || {},
-        outputs: outputs || {},
+        constraints: constraints || [],
+        prompt,
       });
 
       res.status(201).json(createResponse(newAgent));

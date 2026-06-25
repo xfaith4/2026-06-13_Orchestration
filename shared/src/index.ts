@@ -175,13 +175,34 @@ export interface Run extends BaseEntity {
   phaseCosts?: PhaseCost[];
 }
 
+export interface AgentIOContract {
+  inputSchema?: Record<string, unknown>;
+  outputSchema?: Record<string, unknown>;
+}
+
+export interface AgentRouting {
+  preferredModels?: string[];
+  maxTokens?: number;
+}
+
 export interface AgentDefinition extends BaseEntity {
+  // identity
   name: string;
-  type: string;
+  role: string;
   description: string;
+
+  // behavior
+  prompt?: string;
   capabilities: string[];
-  inputs: Record<string, unknown>;
-  outputs: Record<string, unknown>;
+  constraints: string[];
+
+  // contracts
+  ioContract?: AgentIOContract;
+  routing?: AgentRouting;
+
+  // provenance (set by loader, not authored)
+  sourceFile?: string;
+  loadedAt?: string;
 }
 
 export interface PromptDefinition extends BaseEntity {
