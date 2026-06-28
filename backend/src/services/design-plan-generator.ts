@@ -1,5 +1,5 @@
 import { Application, DesignPlan, DesignComponent } from '@unifiedaitoolbox/shared';
-import { LLMClient } from './llm-client.js';
+import { LLMClient } from '@fuhrhaus/orchestration-core';
 
 const SYSTEM_PROMPT = `You are an expert software architect. Given an application description,
 produce a thorough design plan as a single JSON object.
@@ -30,7 +30,7 @@ export class DesignPlanGenerator {
   async generateFromApplication(
     application: Application
   ): Promise<Omit<DesignPlan, 'id' | 'createdAt' | 'updatedAt'>> {
-    if (LLMClient.isAvailable()) {
+    if (process.env.ANTHROPIC_API_KEY) {
       try {
         return await this.generateWithLLM(application);
       } catch (err) {
@@ -43,7 +43,7 @@ export class DesignPlanGenerator {
   private async generateWithLLM(
     application: Application
   ): Promise<Omit<DesignPlan, 'id' | 'createdAt' | 'updatedAt'>> {
-    const client = new LLMClient();
+    const client = new LLMClient({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
     const userMessage = `Generate a design plan for this application:
 

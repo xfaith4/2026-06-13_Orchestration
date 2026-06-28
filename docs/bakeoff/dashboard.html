@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Model-Routing Bake-off — Ultimate Agentic App Factory — First Build Slice</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --line:#30363d;
+    --txt:#e6edf3; --muted:#8b949e;
+    --haiku:#2dd4bf; --sonnet:#60a5fa; --opus:#c084fc; --repair:#f0a868;
+    --pass:#3fb950; --fail:#f85149; --accent:#58a6ff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:1200px;margin:0 auto;padding:32px 24px 80px}
+  h1{font-size:24px;margin:0 0 4px} h2{font-size:16px;margin:36px 0 14px;color:var(--accent);border-bottom:1px solid var(--line);padding-bottom:6px}
+  .sub{color:var(--muted);margin:0 0 8px}
+  .caveat{background:#1f2937;border-left:3px solid var(--repair);padding:10px 14px;border-radius:4px;color:#cbd5e1;font-size:13px;margin:14px 0}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}
+  .card h3{margin:0 0 12px;font-size:15px;display:flex;align-items:center;gap:8px}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+  .metric{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed #222b36}
+  .metric:last-child{border-bottom:0}
+  .metric .k{color:var(--muted)} .metric .v{font-variant-numeric:tabular-nums;font-weight:600}
+  .pill{padding:1px 8px;border-radius:999px;font-size:12px;font-weight:700}
+  .pass{background:rgba(63,185,80,.15);color:var(--pass)} .fail{background:rgba(248,81,73,.15);color:var(--fail)}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:18px}
+  .bar-row{display:flex;align-items:center;gap:10px;margin:7px 0}
+  .bar-row .lbl{width:130px;color:var(--muted);font-size:13px;text-align:right;flex:none}
+  .track{flex:1;background:#0b0f14;border-radius:5px;overflow:hidden;display:flex;height:22px}
+  .seg{height:100%}
+  .bar-row .val{width:120px;font-variant-numeric:tabular-nums;font-size:13px;flex:none}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:600} td.num{text-align:right;font-variant-numeric:tabular-nums}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin:6px 0 14px;color:var(--muted);font-size:12px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .agentbar{display:inline-flex;height:14px;border-radius:3px;margin-right:2px}
+  .winner{outline:2px solid var(--pass)}
+  details{margin-top:8px} summary{cursor:pointer;color:var(--accent)}
+  .mini{color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Model-Routing Bake-off</h1>
+  <p class="sub">Ultimate Agentic App Factory — First Build Slice · generated 2026-06-28T02:35:14.290Z</p>
+  <div class="caveat" id="caveat"></div>
+
+  <div class="cards" id="cards"></div>
+
+  <h2>Quality depth <span class="mini">(test assertions vs. unresolved errors — the real story behind pass/fail)</span></h2>
+  <div class="panel">
+    <div class="legend"><span><span class="dot" style="background:#3fb950"></span>test assertions (coverage attempted)</span><span><span class="dot" style="background:#f85149"></span>final tsc errors (unresolved)</span></div>
+    <div id="qualChart"></div>
+    <table id="qualTable" style="margin-top:14px"><thead><tr><th>Arm</th><th class="num">Files</th><th class="num">Src lines</th><th class="num">Test files</th><th class="num">Assertions</th><th class="num">Final errors</th><th>tsc</th><th>vitest</th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <h2>Total cost by arm <span class="mini">(stacked by model)</span></h2>
+  <div class="panel"><div class="legend" id="legend1"></div><div id="costChart"></div></div>
+
+  <h2>Duration per phase</h2>
+  <div class="panel" id="phaseChart"></div>
+
+  <h2>Output tokens by arm <span class="mini">(stacked by model)</span></h2>
+  <div class="panel"><div id="tokChart"></div></div>
+
+  <h2>Agent cast (multi-agent arms)</h2>
+  <div class="panel" id="agentChart"></div>
+
+  <h2>Cost breakdown by model</h2>
+  <div class="panel"><table id="costTable"><thead><tr><th>Arm</th><th>Model</th><th class="num">Calls</th><th class="num">In tok</th><th class="num">Out tok</th><th class="num">Cost</th></tr></thead><tbody></tbody></table></div>
+
+  <h2>Per-phase detail</h2>
+  <div id="phaseTables"></div>
+</div>
+
+<script>
+const DATA = {"goal":"Ultimate Agentic App Factory — First Build Slice","generatedFromSamples":1,"arms":{"uniform-haiku":{"arm":"uniform-haiku","durationMs":546752,"phaseCount":5,"taskCount":15,"filesWritten":20,"tscPassedFinal":false,"vitestPassedFinal":false,"totalErrorsFinal":61,"testFiles":2,"assertions":84,"srcLines":2812,"calls":[{"scope":"plan","phase":"PLANNING","agent":"planner","model":"claude-haiku-4-5-20251001","inTok":5646,"outTok":1738,"ms":15171},{"scope":"task","phase":"Product Schema & State Backbone","agent":"architect","model":"claude-haiku-4-5-20251001","inTok":469,"outTok":4096,"ms":19534},{"scope":"task","phase":"Product Schema & State Backbone","agent":"architect","model":"claude-haiku-4-5-20251001","inTok":458,"outTok":3700,"ms":18114},{"scope":"task","phase":"Product Schema & State Backbone","agent":"test","model":"claude-haiku-4-5-20251001","inTok":493,"outTok":4096,"ms":17986},{"scope":"task","phase":"Web Shell & Route Map","agent":"architect","model":"claude-haiku-4-5-20251001","inTok":468,"outTok":2484,"ms":12931},{"scope":"task","phase":"Web Shell & Route Map","agent":"engineer","model":"claude-haiku-4-5-20251001","inTok":475,"outTok":3263,"ms":16416},{"scope":"task","phase":"Web Shell & Route Map","agent":"test","model":"claude-haiku-4-5-20251001","inTok":549,"outTok":2631,"ms":13337},{"scope":"repair","phase":"Web Shell & Route Map","agent":"repair","model":"claude-haiku-4-5-20251001","inTok":964,"outTok":809,"ms":3176},{"scope":"task","phase":"Idea & Prompt Refinement Models","agent":"engineer","model":"claude-haiku-4-5-20251001","inTok":554,"outTok":4096,"ms":19961},{"scope":"task","phase":"Idea & Prompt Refinement Models","agent":"engineer","model":"claude-haiku-4-5-20251001","inTok":558,"outTok":4096,"ms":20807},{"scope":"task","phase":"Idea & Prompt Refinement Models","agent":"test","model":"claude-haiku-4-5-20251001","inTok":588,"outTok":4096,"ms":17958},{"scope":"repair","phase":"Idea & Prompt Refinement Models","agent":"repair","model":"claude-haiku-4-5-20251001","inTok":5066,"outTok":3887,"ms":16691},{"scope":"repair","phase":"Idea & Prompt Refinement Models","agent":"repair","model":"claude-haiku-4-5-20251001","inTok":3231,"outTok":3040,"ms":14683},{"scope":"repair","phase":"Idea & Prompt Refinement Models","agent":"repair","model":"claude-haiku-4-5-20251001","inTok":5066,"outTok":4096,"ms":17437},{"scope":"repair","phase":"Idea & Prompt Refinement Models","agent":"repair","model":"claude-haiku-4-5-20251001","inTok":3194,"outTok":3051,"ms":14268},{"scope":"repair","phase":"Idea & Prompt Refinement Models","agent":"repair","model":"claude-haiku-4-5-20251001","inTok":5066,"outTok":3887,"ms":16155},{"scope":"task","phase":"Roadmap & Agent Registry","agent":"architect","model":"claude-haiku-4-5-20251001","inTok":583,"outTok":4096,"ms":21150},{"scope":"task","phase":"Roadmap & Agent Registry","agent":"architect","model":"claude-haiku-4-5-20251001","inTok":611,"outTok":4096,"ms":20994},{"scope":"task","phase":"Roadmap & Agent Registry","agent":"test","model":"claude-haiku-4-5-20251001","inTok":642,"outTok":4096,"ms":19457},{"scope":"repair","phase":"Roadmap & Agent Registry","agent":"repair","model":"claude-haiku-4-5-20251001","inTok":6573,"outTok":3946,"ms":16676},{"scope":"repair","phase":"Roadmap & Agent Registry","agent":"repair","model":"claude-haiku-4-5-20251001","inTok":5871,"outTok":3946,"ms":17052},{"scope":"repair","phase":"Roadmap & Agent Registry","agent":"repair","model":"claude-haiku-4-5-20251001","inTok":5871,"outTok":3946,"ms":16591},{"scope":"task","phase":"Run State & Artifact Manifest","agent":"engineer","model":"claude-haiku-4-5-20251001","inTok":644,"outTok":4096,"ms":18733},{"scope":"task","phase":"Run State & Artifact Manifest","agent":"engineer","model":"claude-haiku-4-5-20251001","inTok":665,"outTok":4096,"ms":18331},{"scope":"task","phase":"Run State & Artifact Manifest","agent":"test","model":"claude-haiku-4-5-20251001","inTok":670,"outTok":4096,"ms":18405},{"scope":"repair","phase":"Run State & Artifact Manifest","agent":"repair","model":"claude-haiku-4-5-20251001","inTok":5871,"outTok":3946,"ms":16547},{"scope":"repair","phase":"Run State & Artifact Manifest","agent":"repair","model":"claude-haiku-4-5-20251001","inTok":2275,"outTok":1837,"ms":7692},{"scope":"repair","phase":"Run State & Artifact Manifest","agent":"repair","model":"claude-haiku-4-5-20251001","inTok":1458,"outTok":1251,"ms":6165},{"scope":"repair","phase":"Run State & Artifact Manifest","agent":"repair","model":"claude-haiku-4-5-20251001","inTok":5871,"outTok":4033,"ms":18006},{"scope":"repair","phase":"Run State & Artifact Manifest","agent":"repair","model":"claude-haiku-4-5-20251001","inTok":2181,"outTok":1761,"ms":8429},{"scope":"repair","phase":"Run State & Artifact Manifest","agent":"repair","model":"claude-haiku-4-5-20251001","inTok":6114,"outTok":4033,"ms":16901},{"scope":"repair","phase":"Run State & Artifact Manifest","agent":"repair","model":"claude-haiku-4-5-20251001","inTok":1976,"outTok":1800,"ms":7422}],"phases":[{"name":"Product Schema & State Backbone","tasks":[{"name":"Define core data models","agent":"architect","model":"claude-haiku-4-5-20251001"},{"name":"Build state validation schemas","agent":"architect","model":"claude-haiku-4-5-20251001"},{"name":"Test schema contracts","agent":"test","model":"claude-haiku-4-5-20251001"}],"durationMs":62083,"filesAfter":0,"repairAttempts":1,"tscPassed":false},{"name":"Web Shell & Route Map","tasks":[{"name":"Design route architecture","agent":"architect","model":"claude-haiku-4-5-20251001"},{"name":"Build app shell loader","agent":"engineer","model":"claude-haiku-4-5-20251001"},{"name":"Test app initialization","agent":"test","model":"claude-haiku-4-5-20251001"}],"durationMs":50924,"filesAfter":8,"repairAttempts":1,"tscPassed":true},{"name":"Idea & Prompt Refinement Models","tasks":[{"name":"Create idea intake service","agent":"engineer","model":"claude-haiku-4-5-20251001"},{"name":"Build refinement state tracker","agent":"engineer","model":"claude-haiku-4-5-20251001"},{"name":"Test idea & refinement workflows","agent":"test","model":"claude-haiku-4-5-20251001"}],"durationMs":148510,"filesAfter":11,"repairAttempts":3,"tscPassed":false},{"name":"Roadmap & Agent Registry","tasks":[{"name":"Define roadmap builder contract","agent":"architect","model":"claude-haiku-4-5-20251001"},{"name":"Create agent registry","agent":"architect","model":"claude-haiku-4-5-20251001"},{"name":"Test roadmap generation & agent lookup","agent":"test","model":"claude-haiku-4-5-20251001"}],"durationMs":122668,"filesAfter":16,"repairAttempts":3,"tscPassed":false},{"name":"Run State & Artifact Manifest","tasks":[{"name":"Build run manager","agent":"engineer","model":"claude-haiku-4-5-20251001"},{"name":"Create artifact manifest tracker","agent":"engineer","model":"claude-haiku-4-5-20251001"},{"name":"Test run & artifact operations","agent":"test","model":"claude-haiku-4-5-20251001"}],"durationMs":147393,"filesAfter":20,"repairAttempts":3,"tscPassed":false}],"byModel":{"claude-haiku-4-5-20251001":{"in":80721,"out":108141,"calls":32,"cost":0.4971408000000001}},"agentHistogram":{"architect":5,"test":5,"engineer":5},"totalCost":0.4971408000000001,"notes":[]},"tiered":{"arm":"tiered","durationMs":1548579,"phaseCount":5,"taskCount":16,"filesWritten":11,"tscPassedFinal":false,"vitestPassedFinal":false,"totalErrorsFinal":6,"testFiles":2,"assertions":83,"srcLines":2265,"calls":[{"scope":"plan","phase":"PLANNING","agent":"planner","model":"claude-opus-4-8","inTok":8459,"outTok":1796,"ms":18167},{"scope":"task","phase":"Domain Schemas and Types","agent":"architect","model":"claude-sonnet-4-6","inTok":465,"outTok":2917,"ms":32046},{"scope":"task","phase":"Domain Schemas and Types","agent":"architect","model":"claude-sonnet-4-6","inTok":483,"outTok":4096,"ms":41803},{"scope":"task","phase":"Domain Schemas and Types","agent":"architect","model":"claude-sonnet-4-6","inTok":467,"outTok":2012,"ms":25007},{"scope":"task","phase":"Domain Schemas and Types","agent":"architect","model":"claude-sonnet-4-6","inTok":480,"outTok":3404,"ms":39136},{"scope":"repair","phase":"Domain Schemas and Types","agent":"repair","model":"claude-sonnet-4-6","inTok":2228,"outTok":2155,"ms":23218},{"scope":"repair","phase":"Domain Schemas and Types","agent":"repair","model":"claude-sonnet-4-6","inTok":3957,"outTok":3456,"ms":36514},{"scope":"repair","phase":"Domain Schemas and Types","agent":"repair","model":"claude-opus-4-8","inTok":5089,"outTok":4096,"ms":32667},{"scope":"repair","phase":"Domain Schemas and Types","agent":"repair","model":"claude-opus-4-8","inTok":5089,"outTok":4096,"ms":32312},{"scope":"task","phase":"Idea Intake and Refinement","agent":"engineer","model":"claude-sonnet-4-6","inTok":500,"outTok":4096,"ms":40773},{"scope":"task","phase":"Idea Intake and Refinement","agent":"engineer","model":"claude-sonnet-4-6","inTok":519,"outTok":4096,"ms":52748},{"scope":"task","phase":"Idea Intake and Refinement","agent":"test","model":"claude-sonnet-4-6","inTok":522,"outTok":4096,"ms":47248},{"scope":"repair","phase":"Idea Intake and Refinement","agent":"repair","model":"claude-sonnet-4-6","inTok":3865,"outTok":3525,"ms":36996},{"scope":"task","phase":"Roadmap State Model","agent":"engineer","model":"claude-sonnet-4-6","inTok":514,"outTok":4096,"ms":44607},{"scope":"task","phase":"Roadmap State Model","agent":"engineer","model":"claude-sonnet-4-6","inTok":520,"outTok":3288,"ms":33875},{"scope":"task","phase":"Roadmap State Model","agent":"test","model":"claude-sonnet-4-6","inTok":561,"outTok":4096,"ms":40714},{"scope":"repair","phase":"Roadmap State Model","agent":"repair","model":"claude-sonnet-4-6","inTok":3737,"outTok":2448,"ms":22889},{"scope":"repair","phase":"Roadmap State Model","agent":"repair","model":"claude-sonnet-4-6","inTok":1324,"outTok":1031,"ms":9606},{"scope":"repair","phase":"Roadmap State Model","agent":"repair","model":"claude-sonnet-4-6","inTok":3878,"outTok":3150,"ms":28519},{"scope":"repair","phase":"Roadmap State Model","agent":"repair","model":"claude-opus-4-8","inTok":3787,"outTok":3533,"ms":27965},{"scope":"repair","phase":"Roadmap State Model","agent":"repair","model":"claude-opus-4-8","inTok":1791,"outTok":1540,"ms":12911},{"scope":"repair","phase":"Roadmap State Model","agent":"repair","model":"claude-opus-4-8","inTok":7265,"outTok":4096,"ms":31823},{"scope":"repair","phase":"Roadmap State Model","agent":"repair","model":"claude-opus-4-8","inTok":3839,"outTok":3533,"ms":27934},{"scope":"repair","phase":"Roadmap State Model","agent":"repair","model":"claude-opus-4-8","inTok":7265,"outTok":4096,"ms":31487},{"scope":"task","phase":"Registry and Dashboard Shells","agent":"engineer","model":"claude-sonnet-4-6","inTok":545,"outTok":4096,"ms":47428},{"scope":"task","phase":"Registry and Dashboard Shells","agent":"engineer","model":"claude-sonnet-4-6","inTok":561,"outTok":4096,"ms":47632},{"scope":"task","phase":"Registry and Dashboard Shells","agent":"engineer","model":"claude-sonnet-4-6","inTok":567,"outTok":3343,"ms":34934},{"scope":"task","phase":"Registry and Dashboard Shells","agent":"test","model":"claude-sonnet-4-6","inTok":603,"outTok":4096,"ms":40340},{"scope":"repair","phase":"Registry and Dashboard Shells","agent":"repair","model":"claude-sonnet-4-6","inTok":1043,"outTok":900,"ms":7910},{"scope":"repair","phase":"Registry and Dashboard Shells","agent":"repair","model":"claude-sonnet-4-6","inTok":364,"outTok":248,"ms":4000},{"scope":"repair","phase":"Registry and Dashboard Shells","agent":"repair","model":"claude-sonnet-4-6","inTok":5165,"outTok":3086,"ms":32134},{"scope":"repair","phase":"Registry and Dashboard Shells","agent":"repair","model":"claude-sonnet-4-6","inTok":3034,"outTok":2741,"ms":28444},{"scope":"repair","phase":"Registry and Dashboard Shells","agent":"repair","model":"claude-opus-4-8","inTok":487,"outTok":1438,"ms":12349},{"scope":"repair","phase":"Registry and Dashboard Shells","agent":"repair","model":"claude-opus-4-8","inTok":5054,"outTok":4096,"ms":32811},{"scope":"repair","phase":"Registry and Dashboard Shells","agent":"repair","model":"claude-opus-4-8","inTok":1405,"outTok":1117,"ms":9196},{"scope":"repair","phase":"Registry and Dashboard Shells","agent":"repair","model":"claude-opus-4-8","inTok":5054,"outTok":4096,"ms":31622},{"scope":"task","phase":"Review and Repair","agent":"critic","model":"claude-sonnet-4-6","inTok":575,"outTok":4096,"ms":69404},{"scope":"task","phase":"Review and Repair","agent":"critic","model":"claude-sonnet-4-6","inTok":587,"outTok":4096,"ms":42496},{"scope":"repair","phase":"Review and Repair","agent":"repair","model":"claude-sonnet-4-6","inTok":1120,"outTok":857,"ms":8899},{"scope":"repair","phase":"Review and Repair","agent":"repair","model":"claude-sonnet-4-6","inTok":2611,"outTok":2575,"ms":27141},{"scope":"repair","phase":"Review and Repair","agent":"repair","model":"claude-sonnet-4-6","inTok":4781,"outTok":2573,"ms":22500},{"scope":"repair","phase":"Review and Repair","agent":"repair","model":"claude-sonnet-4-6","inTok":1837,"outTok":942,"ms":9428},{"scope":"repair","phase":"Review and Repair","agent":"repair","model":"claude-sonnet-4-6","inTok":4514,"outTok":3189,"ms":32922},{"scope":"repair","phase":"Review and Repair","agent":"repair","model":"claude-sonnet-4-6","inTok":2941,"outTok":2808,"ms":30289},{"scope":"repair","phase":"Review and Repair","agent":"repair","model":"claude-opus-4-8","inTok":3008,"outTok":2700,"ms":21545},{"scope":"repair","phase":"Review and Repair","agent":"repair","model":"claude-opus-4-8","inTok":1470,"outTok":1100,"ms":9198},{"scope":"repair","phase":"Review and Repair","agent":"repair","model":"claude-opus-4-8","inTok":6171,"outTok":3281,"ms":25709},{"scope":"repair","phase":"Review and Repair","agent":"repair","model":"claude-opus-4-8","inTok":1598,"outTok":1312,"ms":11260},{"scope":"repair","phase":"Review and Repair","agent":"repair","model":"claude-opus-4-8","inTok":4871,"outTok":4096,"ms":32049},{"scope":"repair","phase":"Review and Repair","agent":"repair","model":"claude-opus-4-8","inTok":1498,"outTok":1089,"ms":9072},{"scope":"repair","phase":"Review and Repair","agent":"repair","model":"claude-opus-4-8","inTok":1589,"outTok":1314,"ms":14237},{"scope":"repair","phase":"Review and Repair","agent":"repair","model":"claude-opus-4-8","inTok":4871,"outTok":4096,"ms":31903}],"phases":[{"name":"Domain Schemas and Types","tasks":[{"name":"Define core state types","agent":"architect","model":"claude-sonnet-4-6"},{"name":"Define roadmap state schema","agent":"architect","model":"claude-sonnet-4-6"},{"name":"Define agent registry schema","agent":"architect","model":"claude-sonnet-4-6"},{"name":"Define artifact manifest schema","agent":"architect","model":"claude-sonnet-4-6"}],"durationMs":276371,"filesAfter":3,"repairAttempts":3,"tscPassed":false},{"name":"Idea Intake and Refinement","tasks":[{"name":"Implement idea intake store","agent":"engineer","model":"claude-sonnet-4-6"},{"name":"Implement refinement engine","agent":"engineer","model":"claude-sonnet-4-6"},{"name":"Test refinement engine","agent":"test","model":"claude-sonnet-4-6"}],"durationMs":182724,"filesAfter":4,"repairAttempts":1,"tscPassed":true},{"name":"Roadmap State Model","tasks":[{"name":"Implement roadmap state manager","agent":"engineer","model":"claude-sonnet-4-6"},{"name":"Implement manual phase updates","agent":"engineer","model":"claude-sonnet-4-6"},{"name":"Test roadmap state transitions","agent":"test","model":"claude-sonnet-4-6"}],"durationMs":322954,"filesAfter":7,"repairAttempts":3,"tscPassed":false},{"name":"Registry and Dashboard Shells","tasks":[{"name":"Implement agent registry viewer","agent":"engineer","model":"claude-sonnet-4-6"},{"name":"Implement run dashboard model","agent":"engineer","model":"claude-sonnet-4-6"},{"name":"Implement artifact manifest viewer","agent":"engineer","model":"claude-sonnet-4-6"},{"name":"Test dashboard and registry","agent":"test","model":"claude-sonnet-4-6"}],"durationMs":339519,"filesAfter":11,"repairAttempts":3,"tscPassed":false},{"name":"Review and Repair","tasks":[{"name":"Review skeleton integration","agent":"critic","model":"claude-sonnet-4-6"},{"name":"Repair flagged issues","agent":"critic","model":"claude-sonnet-4-6"}],"durationMs":408842,"filesAfter":12,"repairAttempts":3,"tscPassed":false}],"byModel":{"claude-opus-4-8":{"in":79660,"out":56521,"calls":20,"cost":5.433975},"claude-sonnet-4-6":{"in":54868,"out":95704,"calls":32,"cost":1.6001640000000001}},"agentHistogram":{"architect":4,"engineer":7,"test":3,"critic":2},"totalCost":7.034139000000001,"notes":[]},"contract-first":{"arm":"contract-first","durationMs":1527865,"phaseCount":6,"taskCount":16,"filesWritten":17,"tscPassedFinal":false,"vitestPassedFinal":false,"totalErrorsFinal":18,"testFiles":4,"assertions":155,"srcLines":2556,"calls":[{"scope":"plan","phase":"PLANNING","agent":"planner","model":"claude-opus-4-8","inTok":8459,"outTok":1858,"ms":18883},{"scope":"contract","phase":"CONTRACTS","agent":"architect","model":"claude-opus-4-8","inTok":799,"outTok":2409,"ms":20084},{"scope":"task","phase":"Core Domain Schemas","agent":"architect","model":"claude-sonnet-4-6","inTok":2241,"outTok":2426,"ms":24014},{"scope":"task","phase":"Core Domain Schemas","agent":"architect","model":"claude-sonnet-4-6","inTok":2250,"outTok":3135,"ms":31190},{"scope":"task","phase":"Core Domain Schemas","agent":"architect","model":"claude-sonnet-4-6","inTok":2269,"outTok":1977,"ms":21036},{"scope":"task","phase":"Core Domain Schemas","agent":"architect","model":"claude-sonnet-4-6","inTok":2283,"outTok":920,"ms":11326},{"scope":"repair","phase":"Core Domain Schemas","agent":"repair","model":"claude-sonnet-4-6","inTok":1347,"outTok":1174,"ms":11505},{"scope":"task","phase":"Idea Intake & Refinement","agent":"engineer","model":"claude-sonnet-4-6","inTok":2294,"outTok":1865,"ms":20357},{"scope":"task","phase":"Idea Intake & Refinement","agent":"engineer","model":"claude-sonnet-4-6","inTok":2315,"outTok":1771,"ms":26690},{"scope":"task","phase":"Idea Intake & Refinement","agent":"test","model":"claude-sonnet-4-6","inTok":2328,"outTok":3069,"ms":33860},{"scope":"repair","phase":"Idea Intake & Refinement","agent":"repair","model":"claude-sonnet-4-6","inTok":861,"outTok":1666,"ms":17869},{"scope":"repair","phase":"Idea Intake & Refinement","agent":"repair","model":"claude-sonnet-4-6","inTok":3353,"outTok":4095,"ms":40650},{"scope":"repair","phase":"Idea Intake & Refinement","agent":"repair","model":"claude-opus-4-8","inTok":1149,"outTok":916,"ms":7784},{"scope":"repair","phase":"Idea Intake & Refinement","agent":"repair","model":"claude-opus-4-8","inTok":2453,"outTok":1856,"ms":14987},{"scope":"repair","phase":"Idea Intake & Refinement","agent":"repair","model":"claude-opus-4-8","inTok":1900,"outTok":1683,"ms":13552},{"scope":"repair","phase":"Idea Intake & Refinement","agent":"repair","model":"claude-opus-4-8","inTok":5009,"outTok":4096,"ms":32770},{"scope":"repair","phase":"Idea Intake & Refinement","agent":"repair","model":"claude-opus-4-8","inTok":1575,"outTok":1335,"ms":11079},{"scope":"repair","phase":"Idea Intake & Refinement","agent":"repair","model":"claude-opus-4-8","inTok":1841,"outTok":1541,"ms":13328},{"scope":"repair","phase":"Idea Intake & Refinement","agent":"repair","model":"claude-opus-4-8","inTok":2472,"outTok":2277,"ms":18289},{"scope":"repair","phase":"Idea Intake & Refinement","agent":"repair","model":"claude-opus-4-8","inTok":5009,"outTok":4096,"ms":32313},{"scope":"task","phase":"Roadmap State & Agent Registry","agent":"engineer","model":"claude-sonnet-4-6","inTok":2336,"outTok":4096,"ms":40459},{"scope":"task","phase":"Roadmap State & Agent Registry","agent":"engineer","model":"claude-sonnet-4-6","inTok":2346,"outTok":3872,"ms":40851},{"scope":"task","phase":"Roadmap State & Agent Registry","agent":"test","model":"claude-sonnet-4-6","inTok":2389,"outTok":4096,"ms":41815},{"scope":"repair","phase":"Roadmap State & Agent Registry","agent":"repair","model":"claude-sonnet-4-6","inTok":3631,"outTok":3143,"ms":31283},{"scope":"repair","phase":"Roadmap State & Agent Registry","agent":"repair","model":"claude-sonnet-4-6","inTok":2823,"outTok":2663,"ms":23777},{"scope":"repair","phase":"Roadmap State & Agent Registry","agent":"repair","model":"claude-sonnet-4-6","inTok":1432,"outTok":1185,"ms":11311},{"scope":"repair","phase":"Roadmap State & Agent Registry","agent":"repair","model":"claude-sonnet-4-6","inTok":2436,"outTok":1890,"ms":18671},{"scope":"repair","phase":"Roadmap State & Agent Registry","agent":"repair","model":"claude-opus-4-8","inTok":4929,"outTok":4096,"ms":32582},{"scope":"repair","phase":"Roadmap State & Agent Registry","agent":"repair","model":"claude-opus-4-8","inTok":3847,"outTok":3541,"ms":27783},{"scope":"repair","phase":"Roadmap State & Agent Registry","agent":"repair","model":"claude-opus-4-8","inTok":3029,"outTok":3173,"ms":25150},{"scope":"repair","phase":"Roadmap State & Agent Registry","agent":"repair","model":"claude-opus-4-8","inTok":4929,"outTok":4096,"ms":32658},{"scope":"repair","phase":"Roadmap State & Agent Registry","agent":"repair","model":"claude-opus-4-8","inTok":3898,"outTok":3549,"ms":27666},{"scope":"task","phase":"Run Dashboard & Artifact Manifest","agent":"engineer","model":"claude-sonnet-4-6","inTok":2368,"outTok":4096,"ms":41795},{"scope":"task","phase":"Run Dashboard & Artifact Manifest","agent":"engineer","model":"claude-sonnet-4-6","inTok":2384,"outTok":4096,"ms":38449},{"scope":"task","phase":"Run Dashboard & Artifact Manifest","agent":"test","model":"claude-sonnet-4-6","inTok":2412,"outTok":4096,"ms":41647},{"scope":"repair","phase":"Run Dashboard & Artifact Manifest","agent":"repair","model":"claude-sonnet-4-6","inTok":3562,"outTok":3623,"ms":34977},{"scope":"repair","phase":"Run Dashboard & Artifact Manifest","agent":"repair","model":"claude-sonnet-4-6","inTok":1743,"outTok":1476,"ms":13948},{"scope":"repair","phase":"Run Dashboard & Artifact Manifest","agent":"repair","model":"claude-sonnet-4-6","inTok":3824,"outTok":3351,"ms":32088},{"scope":"repair","phase":"Run Dashboard & Artifact Manifest","agent":"repair","model":"claude-sonnet-4-6","inTok":2348,"outTok":1788,"ms":17250},{"scope":"repair","phase":"Run Dashboard & Artifact Manifest","agent":"repair","model":"claude-opus-4-8","inTok":4881,"outTok":4096,"ms":31760},{"scope":"repair","phase":"Run Dashboard & Artifact Manifest","agent":"repair","model":"claude-opus-4-8","inTok":2939,"outTok":4096,"ms":32751},{"scope":"repair","phase":"Run Dashboard & Artifact Manifest","agent":"repair","model":"claude-opus-4-8","inTok":4881,"outTok":4096,"ms":32996},{"scope":"repair","phase":"Run Dashboard & Artifact Manifest","agent":"repair","model":"claude-opus-4-8","inTok":3114,"outTok":2944,"ms":23054},{"scope":"task","phase":"Review & Repair","agent":"critic","model":"claude-sonnet-4-6","inTok":2387,"outTok":4096,"ms":79498},{"scope":"task","phase":"Review & Repair","agent":"engineer","model":"claude-sonnet-4-6","inTok":2404,"outTok":4096,"ms":42409},{"scope":"repair","phase":"Review & Repair","agent":"repair","model":"claude-sonnet-4-6","inTok":537,"outTok":366,"ms":4408},{"scope":"repair","phase":"Review & Repair","agent":"repair","model":"claude-sonnet-4-6","inTok":801,"outTok":582,"ms":5801},{"scope":"repair","phase":"Review & Repair","agent":"repair","model":"claude-sonnet-4-6","inTok":751,"outTok":607,"ms":5794},{"scope":"repair","phase":"Review & Repair","agent":"repair","model":"claude-sonnet-4-6","inTok":1486,"outTok":1157,"ms":9998},{"scope":"repair","phase":"Review & Repair","agent":"repair","model":"claude-sonnet-4-6","inTok":1293,"outTok":718,"ms":7382},{"scope":"repair","phase":"Review & Repair","agent":"repair","model":"claude-sonnet-4-6","inTok":847,"outTok":587,"ms":5630},{"scope":"repair","phase":"Review & Repair","agent":"repair","model":"claude-sonnet-4-6","inTok":3784,"outTok":3364,"ms":32646},{"scope":"repair","phase":"Review & Repair","agent":"repair","model":"claude-opus-4-8","inTok":1971,"outTok":1569,"ms":12920},{"scope":"repair","phase":"Review & Repair","agent":"repair","model":"claude-opus-4-8","inTok":1512,"outTok":1725,"ms":14070},{"scope":"repair","phase":"Review & Repair","agent":"repair","model":"claude-opus-4-8","inTok":1093,"outTok":909,"ms":7810},{"scope":"repair","phase":"Review & Repair","agent":"repair","model":"claude-opus-4-8","inTok":4909,"outTok":4096,"ms":37093},{"scope":"repair","phase":"Review & Repair","agent":"repair","model":"claude-opus-4-8","inTok":1940,"outTok":1680,"ms":13933},{"scope":"repair","phase":"Review & Repair","agent":"repair","model":"claude-opus-4-8","inTok":4420,"outTok":4065,"ms":36481},{"scope":"repair","phase":"Review & Repair","agent":"repair","model":"claude-opus-4-8","inTok":1542,"outTok":1271,"ms":10446},{"scope":"repair","phase":"Review & Repair","agent":"repair","model":"claude-opus-4-8","inTok":5031,"outTok":4096,"ms":32081}],"phases":[{"name":"CONTRACTS","tasks":[{"name":"shared contracts.ts","agent":"architect","model":"claude-opus-4-8"}],"durationMs":20085,"filesAfter":1,"repairAttempts":0,"tscPassed":null},{"name":"Core Domain Schemas","tasks":[{"name":"Define idea and prompt types","agent":"architect","model":"claude-sonnet-4-6"},{"name":"Define roadmap state model","agent":"architect","model":"claude-sonnet-4-6"},{"name":"Define agent and artifact types","agent":"architect","model":"claude-sonnet-4-6"},{"name":"Define route map","agent":"architect","model":"claude-sonnet-4-6"}],"durationMs":109240,"filesAfter":7,"repairAttempts":1,"tscPassed":true},{"name":"Idea Intake & Refinement","tasks":[{"name":"Implement idea intake store","agent":"engineer","model":"claude-sonnet-4-6"},{"name":"Implement refinement engine","agent":"engineer","model":"claude-sonnet-4-6"},{"name":"Test refinement engine","agent":"test","model":"claude-sonnet-4-6"}],"durationMs":294083,"filesAfter":11,"repairAttempts":3,"tscPassed":false},{"name":"Roadmap State & Agent Registry","tasks":[{"name":"Implement roadmap state manager","agent":"engineer","model":"claude-sonnet-4-6"},{"name":"Implement agent registry viewer","agent":"engineer","model":"claude-sonnet-4-6"},{"name":"Test roadmap and registry","agent":"test","model":"claude-sonnet-4-6"}],"durationMs":364708,"filesAfter":14,"repairAttempts":3,"tscPassed":false},{"name":"Run Dashboard & Artifact Manifest","tasks":[{"name":"Implement run dashboard model","agent":"engineer","model":"claude-sonnet-4-6"},{"name":"Implement artifact manifest viewer","agent":"engineer","model":"claude-sonnet-4-6"},{"name":"Test dashboard and manifest","agent":"test","model":"claude-sonnet-4-6"}],"durationMs":351579,"filesAfter":17,"repairAttempts":3,"tscPassed":false},{"name":"Review & Repair","tasks":[{"name":"Review skeleton for gaps","agent":"critic","model":"claude-sonnet-4-6"},{"name":"Repair identified defects","agent":"engineer","model":"claude-sonnet-4-6"}],"durationMs":369284,"filesAfter":18,"repairAttempts":3,"tscPassed":false}],"byModel":{"claude-opus-4-8":{"in":89531,"out":75165,"calls":27,"cost":6.98034},"claude-sonnet-4-6":{"in":71865,"out":81142,"calls":33,"cost":1.4327249999999996}},"agentHistogram":{"architect":4,"engineer":7,"test":3,"critic":1},"totalCost":8.413065,"notes":[]},"single-opus":{"arm":"single-opus","durationMs":546240,"phaseCount":5,"taskCount":5,"filesWritten":12,"tscPassedFinal":false,"vitestPassedFinal":false,"totalErrorsFinal":3,"testFiles":4,"assertions":46,"srcLines":1058,"calls":[{"scope":"plan","phase":"PLANNING","agent":"planner","model":"claude-opus-4-8","inTok":8459,"outTok":1908,"ms":21350},{"scope":"task","phase":"Core Schemas and Types","agent":"opus-solo","model":"claude-opus-4-8","inTok":1008,"outTok":6000,"ms":52540},{"scope":"task","phase":"Idea Intake and Refinement","agent":"opus-solo","model":"claude-opus-4-8","inTok":965,"outTok":5649,"ms":46899},{"scope":"task","phase":"Roadmap State Backbone","agent":"opus-solo","model":"claude-opus-4-8","inTok":987,"outTok":5457,"ms":45900},{"scope":"repair","phase":"Roadmap State Backbone","agent":"repair","model":"claude-opus-4-8","inTok":1235,"outTok":982,"ms":8447},{"scope":"repair","phase":"Roadmap State Backbone","agent":"repair","model":"claude-opus-4-8","inTok":1622,"outTok":1394,"ms":11338},{"scope":"repair","phase":"Roadmap State Backbone","agent":"repair","model":"claude-opus-4-8","inTok":1088,"outTok":877,"ms":8061},{"scope":"task","phase":"Registry, Runs, Artifacts","agent":"opus-solo","model":"claude-opus-4-8","inTok":1129,"outTok":6000,"ms":52198},{"scope":"repair","phase":"Registry, Runs, Artifacts","agent":"repair","model":"claude-opus-4-8","inTok":1362,"outTok":2237,"ms":18451},{"scope":"repair","phase":"Registry, Runs, Artifacts","agent":"repair","model":"claude-opus-4-8","inTok":1788,"outTok":1320,"ms":11628},{"scope":"repair","phase":"Registry, Runs, Artifacts","agent":"repair","model":"claude-opus-4-8","inTok":1485,"outTok":3126,"ms":24743},{"scope":"repair","phase":"Registry, Runs, Artifacts","agent":"repair","model":"claude-opus-4-8","inTok":1508,"outTok":1285,"ms":11089},{"scope":"repair","phase":"Registry, Runs, Artifacts","agent":"repair","model":"claude-opus-4-8","inTok":1552,"outTok":1361,"ms":11099},{"scope":"repair","phase":"Registry, Runs, Artifacts","agent":"repair","model":"claude-opus-4-8","inTok":1763,"outTok":1381,"ms":12068},{"scope":"repair","phase":"Registry, Runs, Artifacts","agent":"repair","model":"claude-opus-4-8","inTok":1580,"outTok":1528,"ms":13039},{"scope":"repair","phase":"Registry, Runs, Artifacts","agent":"repair","model":"claude-opus-4-8","inTok":1973,"outTok":1288,"ms":11071},{"scope":"repair","phase":"Registry, Runs, Artifacts","agent":"repair","model":"claude-opus-4-8","inTok":1673,"outTok":1656,"ms":13992},{"scope":"repair","phase":"Registry, Runs, Artifacts","agent":"repair","model":"claude-opus-4-8","inTok":2044,"outTok":1301,"ms":10701},{"scope":"task","phase":"Review and Repair","agent":"opus-solo","model":"claude-opus-4-8","inTok":972,"outTok":6000,"ms":51932},{"scope":"repair","phase":"Review and Repair","agent":"repair","model":"claude-opus-4-8","inTok":1386,"outTok":1063,"ms":9127},{"scope":"repair","phase":"Review and Repair","agent":"repair","model":"claude-opus-4-8","inTok":1014,"outTok":993,"ms":9747},{"scope":"repair","phase":"Review and Repair","agent":"repair","model":"claude-opus-4-8","inTok":1674,"outTok":1304,"ms":11707},{"scope":"repair","phase":"Review and Repair","agent":"repair","model":"claude-opus-4-8","inTok":1373,"outTok":1125,"ms":9820},{"scope":"repair","phase":"Review and Repair","agent":"repair","model":"claude-opus-4-8","inTok":1603,"outTok":1470,"ms":12495},{"scope":"repair","phase":"Review and Repair","agent":"repair","model":"claude-opus-4-8","inTok":1397,"outTok":1139,"ms":9901},{"scope":"repair","phase":"Review and Repair","agent":"repair","model":"claude-opus-4-8","inTok":1711,"outTok":1440,"ms":11927}],"phases":[{"name":"Core Schemas and Types","tasks":[{"name":"Core Schemas and Types","agent":"opus-solo","model":"claude-opus-4-8"}],"durationMs":58934,"filesAfter":2,"repairAttempts":0,"tscPassed":true},{"name":"Idea Intake and Refinement","tasks":[{"name":"Idea Intake and Refinement","agent":"opus-solo","model":"claude-opus-4-8"}],"durationMs":49515,"filesAfter":6,"repairAttempts":0,"tscPassed":true},{"name":"Roadmap State Backbone","tasks":[{"name":"Roadmap State Backbone","agent":"opus-solo","model":"claude-opus-4-8"}],"durationMs":78907,"filesAfter":10,"repairAttempts":1,"tscPassed":true},{"name":"Registry, Runs, Artifacts","tasks":[{"name":"Registry, Runs, Artifacts","agent":"opus-solo","model":"claude-opus-4-8"}],"durationMs":200381,"filesAfter":12,"repairAttempts":3,"tscPassed":false},{"name":"Review and Repair","tasks":[{"name":"Review and Repair","agent":"opus-solo","model":"claude-opus-4-8"}],"durationMs":137150,"filesAfter":12,"repairAttempts":3,"tscPassed":false}],"byModel":{"claude-opus-4-8":{"in":44351,"out":59284,"calls":26,"cost":5.111564999999999}},"agentHistogram":{"opus-solo":5},"totalCost":5.111564999999999,"notes":[]}}};
+const STAMP = "2026-06-28T02:35:14.290Z";
+const MODEL_COLOR = {};
+const COLORS = { haiku:'#2dd4bf', sonnet:'#60a5fa', opus:'#c084fc' };
+const armNames = Object.keys(DATA.arms);
+const ARM_DOT = { 'uniform-haiku':'#2dd4bf', 'tiered':'#60a5fa', 'single-opus':'#c084fc' };
+const shortModel = m => m.split('-')[1];
+const colorFor = m => COLORS[shortModel(m)] || '#888';
+const fmt$ = n => '$'+n.toFixed(3);
+const fmtN = n => n.toLocaleString();
+const el = (t,c,h)=>{const e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e;};
+
+function tokTotals(arm){let i=0,o=0;for(const m in arm.byModel){i+=arm.byModel[m].in;o+=arm.byModel[m].out;}return{i,o};}
+
+// caveat
+document.getElementById('caveat').innerHTML =
+  '<b>Scope & method:</b> n='+DATA.generatedFromSamples+' sample per arm (directional, not statistical). '+
+  'Bounded to the roadmap\'s own "First Build Slice" (8-item skeleton) as a strict-TS + vitest library; '+
+  'the full roadmap was given to every arm\'s planner. tsc/vitest run by the production validator; repair is tsc-only, capped at 2 attempts/phase. '+
+  '<br><b>Read pass/fail with care:</b> the binary gate rewards the arm that attempts the least. Weigh it against '+
+  '<i>test depth</i> (assertions) and <i>error density</i> below — an arm can "pass" with very shallow tests while another "fails" by a few trivial errors despite far deeper coverage.';
+
+// summary cards
+const cards = document.getElementById('cards');
+let bestCost=Infinity, bestArm=null;
+for(const name of armNames){const a=DATA.arms[name]; if(a.tscPassedFinal && a.vitestPassedFinal && a.totalCost<bestCost){bestCost=a.totalCost;bestArm=name;}}
+for(const name of armNames){
+  const a=DATA.arms[name]; const t=tokTotals(a);
+  const card=el('div','card'+(name===bestArm?' winner':''));
+  card.appendChild(el('h3',null,'<span class="dot" style="background:'+(ARM_DOT[name]||'#888')+'"></span>'+name+(name===bestArm?' &#127942;':'')));
+  const rows=[
+    ['Total cost', fmt$(a.totalCost)],
+    ['Duration', (a.durationMs/1000).toFixed(0)+'s'],
+    ['Tokens (in / out)', fmtN(t.i)+' / '+fmtN(t.o)],
+    ['Phases / tasks', a.phaseCount+' / '+a.taskCount],
+    ['Files / source lines', a.filesWritten+' / '+fmtN(a.srcLines||0)],
+    ['Test files / assertions', (a.testFiles||0)+' / '+(a.assertions||0)],
+    ['Final tsc errors', a.totalErrorsFinal],
+    ['tsc', '<span class="pill '+(a.tscPassedFinal?'pass':'fail')+'">'+(a.tscPassedFinal?'PASS':'FAIL')+'</span>'],
+    ['vitest', '<span class="pill '+(a.vitestPassedFinal?'pass':'fail')+'">'+(a.vitestPassedFinal?'PASS':'FAIL')+'</span>'],
+  ];
+  for(const [k,v] of rows){const m=el('div','metric'); m.appendChild(el('span','k',k)); m.appendChild(el('span','v',v)); card.appendChild(m);}
+  cards.appendChild(card);
+}
+
+// quality depth: assertions (green) vs final errors (red), two bars per arm
+const qualChart=document.getElementById('qualChart');
+const maxAssert=Math.max(1,...armNames.map(n=>DATA.arms[n].assertions||0));
+const maxErr=Math.max(1,...armNames.map(n=>DATA.arms[n].totalErrorsFinal||0));
+for(const name of armNames){const a=DATA.arms[name];
+  const r1=el('div','bar-row'); r1.appendChild(el('div','lbl',name));
+  const tr=el('div','track'); const s=el('div','seg'); s.style.background='#3fb950'; s.style.width=(100*(a.assertions||0)/maxAssert)+'%'; s.title=(a.assertions||0)+' assertions'; tr.appendChild(s);
+  r1.appendChild(tr); r1.appendChild(el('div','val',(a.assertions||0)+' assert · '+(a.totalErrorsFinal||0)+' err'));
+  qualChart.appendChild(r1);
+  const r2=el('div','bar-row'); r2.appendChild(el('div','lbl',''));
+  const tr2=el('div','track'); tr2.style.height='10px'; const s2=el('div','seg'); s2.style.background='#f85149'; s2.style.width=(100*(a.totalErrorsFinal||0)/maxErr)+'%'; s2.title=(a.totalErrorsFinal||0)+' final tsc errors'; tr2.appendChild(s2);
+  r2.appendChild(tr2); r2.appendChild(el('div','val',''));
+  qualChart.appendChild(r2);
+}
+const qtb=document.querySelector('#qualTable tbody');
+for(const name of armNames){const a=DATA.arms[name]; const tr=el('tr');
+  tr.appendChild(el('td',null,'<b>'+name+'</b>'));
+  tr.appendChild(el('td','num',a.filesWritten));
+  tr.appendChild(el('td','num',fmtN(a.srcLines||0)));
+  tr.appendChild(el('td','num',a.testFiles||0));
+  tr.appendChild(el('td','num',a.assertions||0));
+  tr.appendChild(el('td','num',a.totalErrorsFinal));
+  tr.appendChild(el('td',null,a.tscPassedFinal?'<span class="pill pass">PASS</span>':'<span class="pill fail">FAIL</span>'));
+  tr.appendChild(el('td',null,a.vitestPassedFinal?'<span class="pill pass">PASS</span>':'<span class="pill fail">FAIL</span>'));
+  qtb.appendChild(tr);
+}
+
+// legend
+const legend=document.getElementById('legend1');
+for(const m of ['haiku','sonnet','opus']) legend.appendChild(el('span',null,'<span class="dot" style="background:'+COLORS[m]+'"></span>'+m));
+
+// stacked bar helper
+function stackedRow(label, segments, valText, maxTotal){
+  const row=el('div','bar-row'); row.appendChild(el('div','lbl',label));
+  const track=el('div','track');
+  for(const s of segments){ if(s.value<=0) continue; const seg=el('div','seg'); seg.style.background=s.color; seg.style.width=(100*s.value/maxTotal)+'%'; seg.title=s.title; track.appendChild(seg);}
+  row.appendChild(track); row.appendChild(el('div','val',valText)); return row;
+}
+
+// cost chart
+const costChart=document.getElementById('costChart');
+const maxCost=Math.max(...armNames.map(n=>DATA.arms[n].totalCost));
+for(const name of armNames){const a=DATA.arms[name];
+  const segs=Object.entries(a.byModel).map(([m,e])=>({value:e.cost,color:colorFor(m),title:shortModel(m)+' '+fmt$(e.cost)}));
+  costChart.appendChild(stackedRow(name, segs, fmt$(a.totalCost), maxCost));
+}
+
+// token chart (output tokens stacked by model)
+const tokChart=document.getElementById('tokChart');
+const maxOut=Math.max(...armNames.map(n=>tokTotals(DATA.arms[n]).o));
+for(const name of armNames){const a=DATA.arms[name];
+  const segs=Object.entries(a.byModel).map(([m,e])=>({value:e.out,color:colorFor(m),title:shortModel(m)+' '+fmtN(e.out)+' out'}));
+  tokChart.appendChild(stackedRow(name, segs, fmtN(tokTotals(a).o)+' out', maxOut));
+}
+
+// duration per phase (grouped: a sub-section per arm)
+const phaseChart=document.getElementById('phaseChart');
+const allPhaseDur=[]; for(const n of armNames) for(const p of DATA.arms[n].phases) allPhaseDur.push(p.durationMs);
+const maxPhase=Math.max(1,...allPhaseDur);
+for(const name of armNames){const a=DATA.arms[name];
+  phaseChart.appendChild(el('div',null,'<b style="color:'+(ARM_DOT[name]||'#888')+'">'+name+'</b> <span class="mini">'+(a.durationMs/1000).toFixed(0)+'s total</span>'));
+  for(const p of a.phases){
+    const row=el('div','bar-row'); row.appendChild(el('div','lbl',p.name.slice(0,22)));
+    const track=el('div','track'); const seg=el('div','seg');
+    seg.style.background=ARM_DOT[name]||'#888'; seg.style.width=(100*p.durationMs/maxPhase)+'%';
+    seg.title=p.name+' '+(p.durationMs/1000).toFixed(1)+'s'; track.appendChild(seg); row.appendChild(track);
+    const rep=p.repairAttempts?(' &#128295;'+p.repairAttempts):''; const tsc=p.tscPassed?'<span style="color:var(--pass)">&#10003;</span>':'<span style="color:var(--fail)">&#10007;</span>';
+    row.appendChild(el('div','val',(p.durationMs/1000).toFixed(1)+'s '+tsc+rep));
+    phaseChart.appendChild(row);
+  }
+}
+
+// agent cast histogram
+const agentChart=document.getElementById('agentChart');
+const AG_COLOR={architect:'#f0a868',engineer:'#60a5fa',test:'#3fb950',critic:'#c084fc','opus-solo':'#c084fc',repair:'#f85149',planner:'#8b949e'};
+for(const name of armNames){const a=DATA.arms[name];
+  const hist=a.agentHistogram||{}; const total=Object.values(hist).reduce((s,v)=>s+v,0);
+  if(total===0){continue;}
+  const row=el('div','bar-row'); row.appendChild(el('div','lbl',name));
+  const track=el('div','track');
+  for(const [ag,n] of Object.entries(hist)){const seg=el('div','seg');seg.style.background=AG_COLOR[ag]||'#888';seg.style.width=(100*n/total)+'%';seg.title=ag+' ×'+n;track.appendChild(seg);}
+  row.appendChild(track); row.appendChild(el('div','val',Object.entries(hist).map(([a,n])=>a+'×'+n).join(', ')));
+  agentChart.appendChild(row);
+}
+if(!agentChart.children.length) agentChart.appendChild(el('p','mini','single-opus runs one agent with shared context — no agent cast to chart.'));
+
+// cost table
+const ctb=document.querySelector('#costTable tbody');
+for(const name of armNames){const a=DATA.arms[name]; const ms=Object.keys(a.byModel);
+  ms.forEach((m,i)=>{const e=a.byModel[m]; const tr=el('tr');
+    tr.appendChild(el('td',null,i===0?('<b>'+name+'</b>'):''));
+    tr.appendChild(el('td',null,'<span class="dot" style="background:'+colorFor(m)+'"></span> '+shortModel(m)));
+    tr.appendChild(el('td','num',e.calls)); tr.appendChild(el('td','num',fmtN(e.in)));
+    tr.appendChild(el('td','num',fmtN(e.out))); tr.appendChild(el('td','num',fmt$(e.cost)));
+    ctb.appendChild(tr);});
+}
+
+// per-phase tables
+const pt=document.getElementById('phaseTables');
+for(const name of armNames){const a=DATA.arms[name];
+  const det=el('details'); det.appendChild(el('summary',null,name+' — '+a.phaseCount+' phases, '+a.taskCount+' tasks'));
+  const tbl=el('table'); tbl.innerHTML='<thead><tr><th>Phase</th><th>Tasks (agent)</th><th class="num">Dur</th><th class="num">Repairs</th><th>tsc</th></tr></thead>';
+  const tb=el('tbody');
+  for(const p of a.phases){const tr=el('tr');
+    tr.appendChild(el('td',null,p.name));
+    tr.appendChild(el('td',null,p.tasks.map(t=>t.name+' <span class="mini">('+t.agent+')</span>').join('<br>')));
+    tr.appendChild(el('td','num',(p.durationMs/1000).toFixed(1)+'s'));
+    tr.appendChild(el('td','num',p.repairAttempts));
+    tr.appendChild(el('td',null,p.tscPassed?'<span class="pill pass">PASS</span>':'<span class="pill fail">FAIL</span>'));
+    tb.appendChild(tr);}
+  tbl.appendChild(tb); det.appendChild(tbl); pt.appendChild(det);
+}
+</script>
+</body>
+</html>

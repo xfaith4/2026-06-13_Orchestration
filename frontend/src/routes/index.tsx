@@ -15,7 +15,7 @@ import { CostAnalyticsPage } from '../pages/CostAnalyticsPage';
 import { AuditLog } from '../pages/AuditLog';
 import { AgentList } from '../pages/AgentList';
 import { PromptList } from '../pages/PromptList';
-import { EmptyState } from '../components/EmptyState';
+import { ContractList } from '../pages/ContractList';
 
 export function AppRoutes() {
   return (
@@ -145,7 +145,7 @@ export function AppRoutes() {
           path="/contracts"
           element={
             <MainLayout>
-              <EmptyState title="Contracts" message="API contract management is coming soon." />
+              <ContractList />
             </MainLayout>
           }
         />

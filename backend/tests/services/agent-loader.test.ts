@@ -3,8 +3,7 @@ import { promises as fs } from 'fs';
 import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { AgentLoader } from '../../src/services/agent-loader.js';
-import { toExecutionInput } from '../../src/services/agent-mapping.js';
+import { AgentLoader, toExecutionInput } from '@fuhrhaus/orchestration-core';
 import { AgentDefinition } from '@unifiedaitoolbox/shared';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -25,7 +24,8 @@ describe('AgentLoader against the real agents/ directory (live, not mocked)', ()
     const loader = new AgentLoader(REAL_AGENTS_DIR);
     const agents = await loader.loadAllAgents();
 
-    expect(agents.length).toBeGreaterThan(30);
+    // 25 yaml + 2 .agent.json stubs; the 4 legacy container files were removed in F3
+    expect(agents.length).toBe(27);
 
     for (const [name, role] of Object.entries(NAMED_TEAM)) {
       const agent = agents.find(a => a.name === name && a.sourceFile?.endsWith('.yaml'));

@@ -1,6 +1,6 @@
 import { ErrorRecord, ErrorType, ErrorSeverity } from '@unifiedaitoolbox/shared';
 import { PersistenceService } from './persistence.js';
-import { ErrorHandler, ErrorContext } from './error-handler.js';
+import { ErrorHandler, ErrorContext } from '@fuhrhaus/orchestration-core';
 import { v4 as uuidv4 } from 'uuid';
 
 export class ErrorLogger {

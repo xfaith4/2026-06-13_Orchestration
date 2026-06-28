@@ -1,9 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ExecutionTask } from '@unifiedaitoolbox/shared';
 import { TaskExecutor, detectOutputLanguages } from '../../src/services/task-executor.js';
-import { AgentRegistry } from '../../src/services/agent-registry.js';
+import { AgentRegistry, LLMClient } from '@fuhrhaus/orchestration-core';
 import { PromptRegistry } from '../../src/services/prompt-registry.js';
-import { LLMClient } from '../../src/services/llm-client.js';
 
 const baseTask: ExecutionTask = {
   id: 'task-1',
@@ -46,7 +45,6 @@ describe('TaskExecutor', () => {
   it('injects the stack constraint block into LLM task prompts', async () => {
     process.env.ANTHROPIC_API_KEY = 'test-key';
 
-    vi.spyOn(LLMClient, 'isAvailable').mockReturnValue(true);
     const callSpy = vi.spyOn(LLMClient.prototype, 'call').mockResolvedValue({
       text: 'Implementation complete.',
       inputTokens: 120,
@@ -100,7 +98,6 @@ describe('TaskExecutor', () => {
   it('returns a warning when generated code violates the constrained language', async () => {
     process.env.ANTHROPIC_API_KEY = 'test-key';
 
-    vi.spyOn(LLMClient, 'isAvailable').mockReturnValue(true);
     vi.spyOn(LLMClient.prototype, 'call').mockResolvedValue({
       text: `\`\`\`json
 {

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { TaskQueue } from '../../src/services/task-queue.js';
+import { TaskQueue } from '@fuhrhaus/orchestration-core';
 import { ExecutionPhase, ExecutionTask } from '@unifiedaitoolbox/shared';
 
 describe('TaskQueue', () => {

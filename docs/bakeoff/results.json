@@ -1,0 +1,2125 @@
+{
+  "goal": "Ultimate Agentic App Factory — First Build Slice",
+  "generatedFromSamples": 1,
+  "arms": {
+    "uniform-haiku": {
+      "arm": "uniform-haiku",
+      "durationMs": 546752,
+      "phaseCount": 5,
+      "taskCount": 15,
+      "filesWritten": 20,
+      "tscPassedFinal": false,
+      "vitestPassedFinal": false,
+      "totalErrorsFinal": 61,
+      "testFiles": 2,
+      "assertions": 84,
+      "srcLines": 2812,
+      "calls": [
+        {
+          "scope": "plan",
+          "phase": "PLANNING",
+          "agent": "planner",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 5646,
+          "outTok": 1738,
+          "ms": 15171
+        },
+        {
+          "scope": "task",
+          "phase": "Product Schema & State Backbone",
+          "agent": "architect",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 469,
+          "outTok": 4096,
+          "ms": 19534
+        },
+        {
+          "scope": "task",
+          "phase": "Product Schema & State Backbone",
+          "agent": "architect",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 458,
+          "outTok": 3700,
+          "ms": 18114
+        },
+        {
+          "scope": "task",
+          "phase": "Product Schema & State Backbone",
+          "agent": "test",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 493,
+          "outTok": 4096,
+          "ms": 17986
+        },
+        {
+          "scope": "task",
+          "phase": "Web Shell & Route Map",
+          "agent": "architect",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 468,
+          "outTok": 2484,
+          "ms": 12931
+        },
+        {
+          "scope": "task",
+          "phase": "Web Shell & Route Map",
+          "agent": "engineer",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 475,
+          "outTok": 3263,
+          "ms": 16416
+        },
+        {
+          "scope": "task",
+          "phase": "Web Shell & Route Map",
+          "agent": "test",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 549,
+          "outTok": 2631,
+          "ms": 13337
+        },
+        {
+          "scope": "repair",
+          "phase": "Web Shell & Route Map",
+          "agent": "repair",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 964,
+          "outTok": 809,
+          "ms": 3176
+        },
+        {
+          "scope": "task",
+          "phase": "Idea & Prompt Refinement Models",
+          "agent": "engineer",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 554,
+          "outTok": 4096,
+          "ms": 19961
+        },
+        {
+          "scope": "task",
+          "phase": "Idea & Prompt Refinement Models",
+          "agent": "engineer",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 558,
+          "outTok": 4096,
+          "ms": 20807
+        },
+        {
+          "scope": "task",
+          "phase": "Idea & Prompt Refinement Models",
+          "agent": "test",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 588,
+          "outTok": 4096,
+          "ms": 17958
+        },
+        {
+          "scope": "repair",
+          "phase": "Idea & Prompt Refinement Models",
+          "agent": "repair",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 5066,
+          "outTok": 3887,
+          "ms": 16691
+        },
+        {
+          "scope": "repair",
+          "phase": "Idea & Prompt Refinement Models",
+          "agent": "repair",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 3231,
+          "outTok": 3040,
+          "ms": 14683
+        },
+        {
+          "scope": "repair",
+          "phase": "Idea & Prompt Refinement Models",
+          "agent": "repair",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 5066,
+          "outTok": 4096,
+          "ms": 17437
+        },
+        {
+          "scope": "repair",
+          "phase": "Idea & Prompt Refinement Models",
+          "agent": "repair",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 3194,
+          "outTok": 3051,
+          "ms": 14268
+        },
+        {
+          "scope": "repair",
+          "phase": "Idea & Prompt Refinement Models",
+          "agent": "repair",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 5066,
+          "outTok": 3887,
+          "ms": 16155
+        },
+        {
+          "scope": "task",
+          "phase": "Roadmap & Agent Registry",
+          "agent": "architect",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 583,
+          "outTok": 4096,
+          "ms": 21150
+        },
+        {
+          "scope": "task",
+          "phase": "Roadmap & Agent Registry",
+          "agent": "architect",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 611,
+          "outTok": 4096,
+          "ms": 20994
+        },
+        {
+          "scope": "task",
+          "phase": "Roadmap & Agent Registry",
+          "agent": "test",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 642,
+          "outTok": 4096,
+          "ms": 19457
+        },
+        {
+          "scope": "repair",
+          "phase": "Roadmap & Agent Registry",
+          "agent": "repair",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 6573,
+          "outTok": 3946,
+          "ms": 16676
+        },
+        {
+          "scope": "repair",
+          "phase": "Roadmap & Agent Registry",
+          "agent": "repair",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 5871,
+          "outTok": 3946,
+          "ms": 17052
+        },
+        {
+          "scope": "repair",
+          "phase": "Roadmap & Agent Registry",
+          "agent": "repair",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 5871,
+          "outTok": 3946,
+          "ms": 16591
+        },
+        {
+          "scope": "task",
+          "phase": "Run State & Artifact Manifest",
+          "agent": "engineer",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 644,
+          "outTok": 4096,
+          "ms": 18733
+        },
+        {
+          "scope": "task",
+          "phase": "Run State & Artifact Manifest",
+          "agent": "engineer",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 665,
+          "outTok": 4096,
+          "ms": 18331
+        },
+        {
+          "scope": "task",
+          "phase": "Run State & Artifact Manifest",
+          "agent": "test",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 670,
+          "outTok": 4096,
+          "ms": 18405
+        },
+        {
+          "scope": "repair",
+          "phase": "Run State & Artifact Manifest",
+          "agent": "repair",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 5871,
+          "outTok": 3946,
+          "ms": 16547
+        },
+        {
+          "scope": "repair",
+          "phase": "Run State & Artifact Manifest",
+          "agent": "repair",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 2275,
+          "outTok": 1837,
+          "ms": 7692
+        },
+        {
+          "scope": "repair",
+          "phase": "Run State & Artifact Manifest",
+          "agent": "repair",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 1458,
+          "outTok": 1251,
+          "ms": 6165
+        },
+        {
+          "scope": "repair",
+          "phase": "Run State & Artifact Manifest",
+          "agent": "repair",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 5871,
+          "outTok": 4033,
+          "ms": 18006
+        },
+        {
+          "scope": "repair",
+          "phase": "Run State & Artifact Manifest",
+          "agent": "repair",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 2181,
+          "outTok": 1761,
+          "ms": 8429
+        },
+        {
+          "scope": "repair",
+          "phase": "Run State & Artifact Manifest",
+          "agent": "repair",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 6114,
+          "outTok": 4033,
+          "ms": 16901
+        },
+        {
+          "scope": "repair",
+          "phase": "Run State & Artifact Manifest",
+          "agent": "repair",
+          "model": "claude-haiku-4-5-20251001",
+          "inTok": 1976,
+          "outTok": 1800,
+          "ms": 7422
+        }
+      ],
+      "phases": [
+        {
+          "name": "Product Schema & State Backbone",
+          "tasks": [
+            {
+              "name": "Define core data models",
+              "agent": "architect",
+              "model": "claude-haiku-4-5-20251001"
+            },
+            {
+              "name": "Build state validation schemas",
+              "agent": "architect",
+              "model": "claude-haiku-4-5-20251001"
+            },
+            {
+              "name": "Test schema contracts",
+              "agent": "test",
+              "model": "claude-haiku-4-5-20251001"
+            }
+          ],
+          "durationMs": 62083,
+          "filesAfter": 0,
+          "repairAttempts": 1,
+          "tscPassed": false
+        },
+        {
+          "name": "Web Shell & Route Map",
+          "tasks": [
+            {
+              "name": "Design route architecture",
+              "agent": "architect",
+              "model": "claude-haiku-4-5-20251001"
+            },
+            {
+              "name": "Build app shell loader",
+              "agent": "engineer",
+              "model": "claude-haiku-4-5-20251001"
+            },
+            {
+              "name": "Test app initialization",
+              "agent": "test",
+              "model": "claude-haiku-4-5-20251001"
+            }
+          ],
+          "durationMs": 50924,
+          "filesAfter": 8,
+          "repairAttempts": 1,
+          "tscPassed": true
+        },
+        {
+          "name": "Idea & Prompt Refinement Models",
+          "tasks": [
+            {
+              "name": "Create idea intake service",
+              "agent": "engineer",
+              "model": "claude-haiku-4-5-20251001"
+            },
+            {
+              "name": "Build refinement state tracker",
+              "agent": "engineer",
+              "model": "claude-haiku-4-5-20251001"
+            },
+            {
+              "name": "Test idea & refinement workflows",
+              "agent": "test",
+              "model": "claude-haiku-4-5-20251001"
+            }
+          ],
+          "durationMs": 148510,
+          "filesAfter": 11,
+          "repairAttempts": 3,
+          "tscPassed": false
+        },
+        {
+          "name": "Roadmap & Agent Registry",
+          "tasks": [
+            {
+              "name": "Define roadmap builder contract",
+              "agent": "architect",
+              "model": "claude-haiku-4-5-20251001"
+            },
+            {
+              "name": "Create agent registry",
+              "agent": "architect",
+              "model": "claude-haiku-4-5-20251001"
+            },
+            {
+              "name": "Test roadmap generation & agent lookup",
+              "agent": "test",
+              "model": "claude-haiku-4-5-20251001"
+            }
+          ],
+          "durationMs": 122668,
+          "filesAfter": 16,
+          "repairAttempts": 3,
+          "tscPassed": false
+        },
+        {
+          "name": "Run State & Artifact Manifest",
+          "tasks": [
+            {
+              "name": "Build run manager",
+              "agent": "engineer",
+              "model": "claude-haiku-4-5-20251001"
+            },
+            {
+              "name": "Create artifact manifest tracker",
+              "agent": "engineer",
+              "model": "claude-haiku-4-5-20251001"
+            },
+            {
+              "name": "Test run & artifact operations",
+              "agent": "test",
+              "model": "claude-haiku-4-5-20251001"
+            }
+          ],
+          "durationMs": 147393,
+          "filesAfter": 20,
+          "repairAttempts": 3,
+          "tscPassed": false
+        }
+      ],
+      "byModel": {
+        "claude-haiku-4-5-20251001": {
+          "in": 80721,
+          "out": 108141,
+          "calls": 32,
+          "cost": 0.4971408000000001
+        }
+      },
+      "agentHistogram": {
+        "architect": 5,
+        "test": 5,
+        "engineer": 5
+      },
+      "totalCost": 0.4971408000000001,
+      "notes": []
+    },
+    "tiered": {
+      "arm": "tiered",
+      "durationMs": 1548579,
+      "phaseCount": 5,
+      "taskCount": 16,
+      "filesWritten": 11,
+      "tscPassedFinal": false,
+      "vitestPassedFinal": false,
+      "totalErrorsFinal": 6,
+      "testFiles": 2,
+      "assertions": 83,
+      "srcLines": 2265,
+      "calls": [
+        {
+          "scope": "plan",
+          "phase": "PLANNING",
+          "agent": "planner",
+          "model": "claude-opus-4-8",
+          "inTok": 8459,
+          "outTok": 1796,
+          "ms": 18167
+        },
+        {
+          "scope": "task",
+          "phase": "Domain Schemas and Types",
+          "agent": "architect",
+          "model": "claude-sonnet-4-6",
+          "inTok": 465,
+          "outTok": 2917,
+          "ms": 32046
+        },
+        {
+          "scope": "task",
+          "phase": "Domain Schemas and Types",
+          "agent": "architect",
+          "model": "claude-sonnet-4-6",
+          "inTok": 483,
+          "outTok": 4096,
+          "ms": 41803
+        },
+        {
+          "scope": "task",
+          "phase": "Domain Schemas and Types",
+          "agent": "architect",
+          "model": "claude-sonnet-4-6",
+          "inTok": 467,
+          "outTok": 2012,
+          "ms": 25007
+        },
+        {
+          "scope": "task",
+          "phase": "Domain Schemas and Types",
+          "agent": "architect",
+          "model": "claude-sonnet-4-6",
+          "inTok": 480,
+          "outTok": 3404,
+          "ms": 39136
+        },
+        {
+          "scope": "repair",
+          "phase": "Domain Schemas and Types",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 2228,
+          "outTok": 2155,
+          "ms": 23218
+        },
+        {
+          "scope": "repair",
+          "phase": "Domain Schemas and Types",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 3957,
+          "outTok": 3456,
+          "ms": 36514
+        },
+        {
+          "scope": "repair",
+          "phase": "Domain Schemas and Types",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 5089,
+          "outTok": 4096,
+          "ms": 32667
+        },
+        {
+          "scope": "repair",
+          "phase": "Domain Schemas and Types",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 5089,
+          "outTok": 4096,
+          "ms": 32312
+        },
+        {
+          "scope": "task",
+          "phase": "Idea Intake and Refinement",
+          "agent": "engineer",
+          "model": "claude-sonnet-4-6",
+          "inTok": 500,
+          "outTok": 4096,
+          "ms": 40773
+        },
+        {
+          "scope": "task",
+          "phase": "Idea Intake and Refinement",
+          "agent": "engineer",
+          "model": "claude-sonnet-4-6",
+          "inTok": 519,
+          "outTok": 4096,
+          "ms": 52748
+        },
+        {
+          "scope": "task",
+          "phase": "Idea Intake and Refinement",
+          "agent": "test",
+          "model": "claude-sonnet-4-6",
+          "inTok": 522,
+          "outTok": 4096,
+          "ms": 47248
+        },
+        {
+          "scope": "repair",
+          "phase": "Idea Intake and Refinement",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 3865,
+          "outTok": 3525,
+          "ms": 36996
+        },
+        {
+          "scope": "task",
+          "phase": "Roadmap State Model",
+          "agent": "engineer",
+          "model": "claude-sonnet-4-6",
+          "inTok": 514,
+          "outTok": 4096,
+          "ms": 44607
+        },
+        {
+          "scope": "task",
+          "phase": "Roadmap State Model",
+          "agent": "engineer",
+          "model": "claude-sonnet-4-6",
+          "inTok": 520,
+          "outTok": 3288,
+          "ms": 33875
+        },
+        {
+          "scope": "task",
+          "phase": "Roadmap State Model",
+          "agent": "test",
+          "model": "claude-sonnet-4-6",
+          "inTok": 561,
+          "outTok": 4096,
+          "ms": 40714
+        },
+        {
+          "scope": "repair",
+          "phase": "Roadmap State Model",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 3737,
+          "outTok": 2448,
+          "ms": 22889
+        },
+        {
+          "scope": "repair",
+          "phase": "Roadmap State Model",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 1324,
+          "outTok": 1031,
+          "ms": 9606
+        },
+        {
+          "scope": "repair",
+          "phase": "Roadmap State Model",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 3878,
+          "outTok": 3150,
+          "ms": 28519
+        },
+        {
+          "scope": "repair",
+          "phase": "Roadmap State Model",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 3787,
+          "outTok": 3533,
+          "ms": 27965
+        },
+        {
+          "scope": "repair",
+          "phase": "Roadmap State Model",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1791,
+          "outTok": 1540,
+          "ms": 12911
+        },
+        {
+          "scope": "repair",
+          "phase": "Roadmap State Model",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 7265,
+          "outTok": 4096,
+          "ms": 31823
+        },
+        {
+          "scope": "repair",
+          "phase": "Roadmap State Model",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 3839,
+          "outTok": 3533,
+          "ms": 27934
+        },
+        {
+          "scope": "repair",
+          "phase": "Roadmap State Model",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 7265,
+          "outTok": 4096,
+          "ms": 31487
+        },
+        {
+          "scope": "task",
+          "phase": "Registry and Dashboard Shells",
+          "agent": "engineer",
+          "model": "claude-sonnet-4-6",
+          "inTok": 545,
+          "outTok": 4096,
+          "ms": 47428
+        },
+        {
+          "scope": "task",
+          "phase": "Registry and Dashboard Shells",
+          "agent": "engineer",
+          "model": "claude-sonnet-4-6",
+          "inTok": 561,
+          "outTok": 4096,
+          "ms": 47632
+        },
+        {
+          "scope": "task",
+          "phase": "Registry and Dashboard Shells",
+          "agent": "engineer",
+          "model": "claude-sonnet-4-6",
+          "inTok": 567,
+          "outTok": 3343,
+          "ms": 34934
+        },
+        {
+          "scope": "task",
+          "phase": "Registry and Dashboard Shells",
+          "agent": "test",
+          "model": "claude-sonnet-4-6",
+          "inTok": 603,
+          "outTok": 4096,
+          "ms": 40340
+        },
+        {
+          "scope": "repair",
+          "phase": "Registry and Dashboard Shells",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 1043,
+          "outTok": 900,
+          "ms": 7910
+        },
+        {
+          "scope": "repair",
+          "phase": "Registry and Dashboard Shells",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 364,
+          "outTok": 248,
+          "ms": 4000
+        },
+        {
+          "scope": "repair",
+          "phase": "Registry and Dashboard Shells",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 5165,
+          "outTok": 3086,
+          "ms": 32134
+        },
+        {
+          "scope": "repair",
+          "phase": "Registry and Dashboard Shells",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 3034,
+          "outTok": 2741,
+          "ms": 28444
+        },
+        {
+          "scope": "repair",
+          "phase": "Registry and Dashboard Shells",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 487,
+          "outTok": 1438,
+          "ms": 12349
+        },
+        {
+          "scope": "repair",
+          "phase": "Registry and Dashboard Shells",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 5054,
+          "outTok": 4096,
+          "ms": 32811
+        },
+        {
+          "scope": "repair",
+          "phase": "Registry and Dashboard Shells",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1405,
+          "outTok": 1117,
+          "ms": 9196
+        },
+        {
+          "scope": "repair",
+          "phase": "Registry and Dashboard Shells",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 5054,
+          "outTok": 4096,
+          "ms": 31622
+        },
+        {
+          "scope": "task",
+          "phase": "Review and Repair",
+          "agent": "critic",
+          "model": "claude-sonnet-4-6",
+          "inTok": 575,
+          "outTok": 4096,
+          "ms": 69404
+        },
+        {
+          "scope": "task",
+          "phase": "Review and Repair",
+          "agent": "critic",
+          "model": "claude-sonnet-4-6",
+          "inTok": 587,
+          "outTok": 4096,
+          "ms": 42496
+        },
+        {
+          "scope": "repair",
+          "phase": "Review and Repair",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 1120,
+          "outTok": 857,
+          "ms": 8899
+        },
+        {
+          "scope": "repair",
+          "phase": "Review and Repair",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 2611,
+          "outTok": 2575,
+          "ms": 27141
+        },
+        {
+          "scope": "repair",
+          "phase": "Review and Repair",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 4781,
+          "outTok": 2573,
+          "ms": 22500
+        },
+        {
+          "scope": "repair",
+          "phase": "Review and Repair",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 1837,
+          "outTok": 942,
+          "ms": 9428
+        },
+        {
+          "scope": "repair",
+          "phase": "Review and Repair",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 4514,
+          "outTok": 3189,
+          "ms": 32922
+        },
+        {
+          "scope": "repair",
+          "phase": "Review and Repair",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 2941,
+          "outTok": 2808,
+          "ms": 30289
+        },
+        {
+          "scope": "repair",
+          "phase": "Review and Repair",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 3008,
+          "outTok": 2700,
+          "ms": 21545
+        },
+        {
+          "scope": "repair",
+          "phase": "Review and Repair",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1470,
+          "outTok": 1100,
+          "ms": 9198
+        },
+        {
+          "scope": "repair",
+          "phase": "Review and Repair",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 6171,
+          "outTok": 3281,
+          "ms": 25709
+        },
+        {
+          "scope": "repair",
+          "phase": "Review and Repair",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1598,
+          "outTok": 1312,
+          "ms": 11260
+        },
+        {
+          "scope": "repair",
+          "phase": "Review and Repair",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 4871,
+          "outTok": 4096,
+          "ms": 32049
+        },
+        {
+          "scope": "repair",
+          "phase": "Review and Repair",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1498,
+          "outTok": 1089,
+          "ms": 9072
+        },
+        {
+          "scope": "repair",
+          "phase": "Review and Repair",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1589,
+          "outTok": 1314,
+          "ms": 14237
+        },
+        {
+          "scope": "repair",
+          "phase": "Review and Repair",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 4871,
+          "outTok": 4096,
+          "ms": 31903
+        }
+      ],
+      "phases": [
+        {
+          "name": "Domain Schemas and Types",
+          "tasks": [
+            {
+              "name": "Define core state types",
+              "agent": "architect",
+              "model": "claude-sonnet-4-6"
+            },
+            {
+              "name": "Define roadmap state schema",
+              "agent": "architect",
+              "model": "claude-sonnet-4-6"
+            },
+            {
+              "name": "Define agent registry schema",
+              "agent": "architect",
+              "model": "claude-sonnet-4-6"
+            },
+            {
+              "name": "Define artifact manifest schema",
+              "agent": "architect",
+              "model": "claude-sonnet-4-6"
+            }
+          ],
+          "durationMs": 276371,
+          "filesAfter": 3,
+          "repairAttempts": 3,
+          "tscPassed": false
+        },
+        {
+          "name": "Idea Intake and Refinement",
+          "tasks": [
+            {
+              "name": "Implement idea intake store",
+              "agent": "engineer",
+              "model": "claude-sonnet-4-6"
+            },
+            {
+              "name": "Implement refinement engine",
+              "agent": "engineer",
+              "model": "claude-sonnet-4-6"
+            },
+            {
+              "name": "Test refinement engine",
+              "agent": "test",
+              "model": "claude-sonnet-4-6"
+            }
+          ],
+          "durationMs": 182724,
+          "filesAfter": 4,
+          "repairAttempts": 1,
+          "tscPassed": true
+        },
+        {
+          "name": "Roadmap State Model",
+          "tasks": [
+            {
+              "name": "Implement roadmap state manager",
+              "agent": "engineer",
+              "model": "claude-sonnet-4-6"
+            },
+            {
+              "name": "Implement manual phase updates",
+              "agent": "engineer",
+              "model": "claude-sonnet-4-6"
+            },
+            {
+              "name": "Test roadmap state transitions",
+              "agent": "test",
+              "model": "claude-sonnet-4-6"
+            }
+          ],
+          "durationMs": 322954,
+          "filesAfter": 7,
+          "repairAttempts": 3,
+          "tscPassed": false
+        },
+        {
+          "name": "Registry and Dashboard Shells",
+          "tasks": [
+            {
+              "name": "Implement agent registry viewer",
+              "agent": "engineer",
+              "model": "claude-sonnet-4-6"
+            },
+            {
+              "name": "Implement run dashboard model",
+              "agent": "engineer",
+              "model": "claude-sonnet-4-6"
+            },
+            {
+              "name": "Implement artifact manifest viewer",
+              "agent": "engineer",
+              "model": "claude-sonnet-4-6"
+            },
+            {
+              "name": "Test dashboard and registry",
+              "agent": "test",
+              "model": "claude-sonnet-4-6"
+            }
+          ],
+          "durationMs": 339519,
+          "filesAfter": 11,
+          "repairAttempts": 3,
+          "tscPassed": false
+        },
+        {
+          "name": "Review and Repair",
+          "tasks": [
+            {
+              "name": "Review skeleton integration",
+              "agent": "critic",
+              "model": "claude-sonnet-4-6"
+            },
+            {
+              "name": "Repair flagged issues",
+              "agent": "critic",
+              "model": "claude-sonnet-4-6"
+            }
+          ],
+          "durationMs": 408842,
+          "filesAfter": 12,
+          "repairAttempts": 3,
+          "tscPassed": false
+        }
+      ],
+      "byModel": {
+        "claude-opus-4-8": {
+          "in": 79660,
+          "out": 56521,
+          "calls": 20,
+          "cost": 5.433975
+        },
+        "claude-sonnet-4-6": {
+          "in": 54868,
+          "out": 95704,
+          "calls": 32,
+          "cost": 1.6001640000000001
+        }
+      },
+      "agentHistogram": {
+        "architect": 4,
+        "engineer": 7,
+        "test": 3,
+        "critic": 2
+      },
+      "totalCost": 7.034139000000001,
+      "notes": []
+    },
+    "contract-first": {
+      "arm": "contract-first",
+      "durationMs": 1527865,
+      "phaseCount": 6,
+      "taskCount": 16,
+      "filesWritten": 17,
+      "tscPassedFinal": false,
+      "vitestPassedFinal": false,
+      "totalErrorsFinal": 18,
+      "testFiles": 4,
+      "assertions": 155,
+      "srcLines": 2556,
+      "calls": [
+        {
+          "scope": "plan",
+          "phase": "PLANNING",
+          "agent": "planner",
+          "model": "claude-opus-4-8",
+          "inTok": 8459,
+          "outTok": 1858,
+          "ms": 18883
+        },
+        {
+          "scope": "contract",
+          "phase": "CONTRACTS",
+          "agent": "architect",
+          "model": "claude-opus-4-8",
+          "inTok": 799,
+          "outTok": 2409,
+          "ms": 20084
+        },
+        {
+          "scope": "task",
+          "phase": "Core Domain Schemas",
+          "agent": "architect",
+          "model": "claude-sonnet-4-6",
+          "inTok": 2241,
+          "outTok": 2426,
+          "ms": 24014
+        },
+        {
+          "scope": "task",
+          "phase": "Core Domain Schemas",
+          "agent": "architect",
+          "model": "claude-sonnet-4-6",
+          "inTok": 2250,
+          "outTok": 3135,
+          "ms": 31190
+        },
+        {
+          "scope": "task",
+          "phase": "Core Domain Schemas",
+          "agent": "architect",
+          "model": "claude-sonnet-4-6",
+          "inTok": 2269,
+          "outTok": 1977,
+          "ms": 21036
+        },
+        {
+          "scope": "task",
+          "phase": "Core Domain Schemas",
+          "agent": "architect",
+          "model": "claude-sonnet-4-6",
+          "inTok": 2283,
+          "outTok": 920,
+          "ms": 11326
+        },
+        {
+          "scope": "repair",
+          "phase": "Core Domain Schemas",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 1347,
+          "outTok": 1174,
+          "ms": 11505
+        },
+        {
+          "scope": "task",
+          "phase": "Idea Intake & Refinement",
+          "agent": "engineer",
+          "model": "claude-sonnet-4-6",
+          "inTok": 2294,
+          "outTok": 1865,
+          "ms": 20357
+        },
+        {
+          "scope": "task",
+          "phase": "Idea Intake & Refinement",
+          "agent": "engineer",
+          "model": "claude-sonnet-4-6",
+          "inTok": 2315,
+          "outTok": 1771,
+          "ms": 26690
+        },
+        {
+          "scope": "task",
+          "phase": "Idea Intake & Refinement",
+          "agent": "test",
+          "model": "claude-sonnet-4-6",
+          "inTok": 2328,
+          "outTok": 3069,
+          "ms": 33860
+        },
+        {
+          "scope": "repair",
+          "phase": "Idea Intake & Refinement",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 861,
+          "outTok": 1666,
+          "ms": 17869
+        },
+        {
+          "scope": "repair",
+          "phase": "Idea Intake & Refinement",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 3353,
+          "outTok": 4095,
+          "ms": 40650
+        },
+        {
+          "scope": "repair",
+          "phase": "Idea Intake & Refinement",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1149,
+          "outTok": 916,
+          "ms": 7784
+        },
+        {
+          "scope": "repair",
+          "phase": "Idea Intake & Refinement",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 2453,
+          "outTok": 1856,
+          "ms": 14987
+        },
+        {
+          "scope": "repair",
+          "phase": "Idea Intake & Refinement",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1900,
+          "outTok": 1683,
+          "ms": 13552
+        },
+        {
+          "scope": "repair",
+          "phase": "Idea Intake & Refinement",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 5009,
+          "outTok": 4096,
+          "ms": 32770
+        },
+        {
+          "scope": "repair",
+          "phase": "Idea Intake & Refinement",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1575,
+          "outTok": 1335,
+          "ms": 11079
+        },
+        {
+          "scope": "repair",
+          "phase": "Idea Intake & Refinement",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1841,
+          "outTok": 1541,
+          "ms": 13328
+        },
+        {
+          "scope": "repair",
+          "phase": "Idea Intake & Refinement",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 2472,
+          "outTok": 2277,
+          "ms": 18289
+        },
+        {
+          "scope": "repair",
+          "phase": "Idea Intake & Refinement",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 5009,
+          "outTok": 4096,
+          "ms": 32313
+        },
+        {
+          "scope": "task",
+          "phase": "Roadmap State & Agent Registry",
+          "agent": "engineer",
+          "model": "claude-sonnet-4-6",
+          "inTok": 2336,
+          "outTok": 4096,
+          "ms": 40459
+        },
+        {
+          "scope": "task",
+          "phase": "Roadmap State & Agent Registry",
+          "agent": "engineer",
+          "model": "claude-sonnet-4-6",
+          "inTok": 2346,
+          "outTok": 3872,
+          "ms": 40851
+        },
+        {
+          "scope": "task",
+          "phase": "Roadmap State & Agent Registry",
+          "agent": "test",
+          "model": "claude-sonnet-4-6",
+          "inTok": 2389,
+          "outTok": 4096,
+          "ms": 41815
+        },
+        {
+          "scope": "repair",
+          "phase": "Roadmap State & Agent Registry",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 3631,
+          "outTok": 3143,
+          "ms": 31283
+        },
+        {
+          "scope": "repair",
+          "phase": "Roadmap State & Agent Registry",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 2823,
+          "outTok": 2663,
+          "ms": 23777
+        },
+        {
+          "scope": "repair",
+          "phase": "Roadmap State & Agent Registry",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 1432,
+          "outTok": 1185,
+          "ms": 11311
+        },
+        {
+          "scope": "repair",
+          "phase": "Roadmap State & Agent Registry",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 2436,
+          "outTok": 1890,
+          "ms": 18671
+        },
+        {
+          "scope": "repair",
+          "phase": "Roadmap State & Agent Registry",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 4929,
+          "outTok": 4096,
+          "ms": 32582
+        },
+        {
+          "scope": "repair",
+          "phase": "Roadmap State & Agent Registry",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 3847,
+          "outTok": 3541,
+          "ms": 27783
+        },
+        {
+          "scope": "repair",
+          "phase": "Roadmap State & Agent Registry",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 3029,
+          "outTok": 3173,
+          "ms": 25150
+        },
+        {
+          "scope": "repair",
+          "phase": "Roadmap State & Agent Registry",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 4929,
+          "outTok": 4096,
+          "ms": 32658
+        },
+        {
+          "scope": "repair",
+          "phase": "Roadmap State & Agent Registry",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 3898,
+          "outTok": 3549,
+          "ms": 27666
+        },
+        {
+          "scope": "task",
+          "phase": "Run Dashboard & Artifact Manifest",
+          "agent": "engineer",
+          "model": "claude-sonnet-4-6",
+          "inTok": 2368,
+          "outTok": 4096,
+          "ms": 41795
+        },
+        {
+          "scope": "task",
+          "phase": "Run Dashboard & Artifact Manifest",
+          "agent": "engineer",
+          "model": "claude-sonnet-4-6",
+          "inTok": 2384,
+          "outTok": 4096,
+          "ms": 38449
+        },
+        {
+          "scope": "task",
+          "phase": "Run Dashboard & Artifact Manifest",
+          "agent": "test",
+          "model": "claude-sonnet-4-6",
+          "inTok": 2412,
+          "outTok": 4096,
+          "ms": 41647
+        },
+        {
+          "scope": "repair",
+          "phase": "Run Dashboard & Artifact Manifest",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 3562,
+          "outTok": 3623,
+          "ms": 34977
+        },
+        {
+          "scope": "repair",
+          "phase": "Run Dashboard & Artifact Manifest",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 1743,
+          "outTok": 1476,
+          "ms": 13948
+        },
+        {
+          "scope": "repair",
+          "phase": "Run Dashboard & Artifact Manifest",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 3824,
+          "outTok": 3351,
+          "ms": 32088
+        },
+        {
+          "scope": "repair",
+          "phase": "Run Dashboard & Artifact Manifest",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 2348,
+          "outTok": 1788,
+          "ms": 17250
+        },
+        {
+          "scope": "repair",
+          "phase": "Run Dashboard & Artifact Manifest",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 4881,
+          "outTok": 4096,
+          "ms": 31760
+        },
+        {
+          "scope": "repair",
+          "phase": "Run Dashboard & Artifact Manifest",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 2939,
+          "outTok": 4096,
+          "ms": 32751
+        },
+        {
+          "scope": "repair",
+          "phase": "Run Dashboard & Artifact Manifest",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 4881,
+          "outTok": 4096,
+          "ms": 32996
+        },
+        {
+          "scope": "repair",
+          "phase": "Run Dashboard & Artifact Manifest",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 3114,
+          "outTok": 2944,
+          "ms": 23054
+        },
+        {
+          "scope": "task",
+          "phase": "Review & Repair",
+          "agent": "critic",
+          "model": "claude-sonnet-4-6",
+          "inTok": 2387,
+          "outTok": 4096,
+          "ms": 79498
+        },
+        {
+          "scope": "task",
+          "phase": "Review & Repair",
+          "agent": "engineer",
+          "model": "claude-sonnet-4-6",
+          "inTok": 2404,
+          "outTok": 4096,
+          "ms": 42409
+        },
+        {
+          "scope": "repair",
+          "phase": "Review & Repair",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 537,
+          "outTok": 366,
+          "ms": 4408
+        },
+        {
+          "scope": "repair",
+          "phase": "Review & Repair",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 801,
+          "outTok": 582,
+          "ms": 5801
+        },
+        {
+          "scope": "repair",
+          "phase": "Review & Repair",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 751,
+          "outTok": 607,
+          "ms": 5794
+        },
+        {
+          "scope": "repair",
+          "phase": "Review & Repair",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 1486,
+          "outTok": 1157,
+          "ms": 9998
+        },
+        {
+          "scope": "repair",
+          "phase": "Review & Repair",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 1293,
+          "outTok": 718,
+          "ms": 7382
+        },
+        {
+          "scope": "repair",
+          "phase": "Review & Repair",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 847,
+          "outTok": 587,
+          "ms": 5630
+        },
+        {
+          "scope": "repair",
+          "phase": "Review & Repair",
+          "agent": "repair",
+          "model": "claude-sonnet-4-6",
+          "inTok": 3784,
+          "outTok": 3364,
+          "ms": 32646
+        },
+        {
+          "scope": "repair",
+          "phase": "Review & Repair",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1971,
+          "outTok": 1569,
+          "ms": 12920
+        },
+        {
+          "scope": "repair",
+          "phase": "Review & Repair",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1512,
+          "outTok": 1725,
+          "ms": 14070
+        },
+        {
+          "scope": "repair",
+          "phase": "Review & Repair",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1093,
+          "outTok": 909,
+          "ms": 7810
+        },
+        {
+          "scope": "repair",
+          "phase": "Review & Repair",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 4909,
+          "outTok": 4096,
+          "ms": 37093
+        },
+        {
+          "scope": "repair",
+          "phase": "Review & Repair",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1940,
+          "outTok": 1680,
+          "ms": 13933
+        },
+        {
+          "scope": "repair",
+          "phase": "Review & Repair",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 4420,
+          "outTok": 4065,
+          "ms": 36481
+        },
+        {
+          "scope": "repair",
+          "phase": "Review & Repair",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1542,
+          "outTok": 1271,
+          "ms": 10446
+        },
+        {
+          "scope": "repair",
+          "phase": "Review & Repair",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 5031,
+          "outTok": 4096,
+          "ms": 32081
+        }
+      ],
+      "phases": [
+        {
+          "name": "CONTRACTS",
+          "tasks": [
+            {
+              "name": "shared contracts.ts",
+              "agent": "architect",
+              "model": "claude-opus-4-8"
+            }
+          ],
+          "durationMs": 20085,
+          "filesAfter": 1,
+          "repairAttempts": 0,
+          "tscPassed": null
+        },
+        {
+          "name": "Core Domain Schemas",
+          "tasks": [
+            {
+              "name": "Define idea and prompt types",
+              "agent": "architect",
+              "model": "claude-sonnet-4-6"
+            },
+            {
+              "name": "Define roadmap state model",
+              "agent": "architect",
+              "model": "claude-sonnet-4-6"
+            },
+            {
+              "name": "Define agent and artifact types",
+              "agent": "architect",
+              "model": "claude-sonnet-4-6"
+            },
+            {
+              "name": "Define route map",
+              "agent": "architect",
+              "model": "claude-sonnet-4-6"
+            }
+          ],
+          "durationMs": 109240,
+          "filesAfter": 7,
+          "repairAttempts": 1,
+          "tscPassed": true
+        },
+        {
+          "name": "Idea Intake & Refinement",
+          "tasks": [
+            {
+              "name": "Implement idea intake store",
+              "agent": "engineer",
+              "model": "claude-sonnet-4-6"
+            },
+            {
+              "name": "Implement refinement engine",
+              "agent": "engineer",
+              "model": "claude-sonnet-4-6"
+            },
+            {
+              "name": "Test refinement engine",
+              "agent": "test",
+              "model": "claude-sonnet-4-6"
+            }
+          ],
+          "durationMs": 294083,
+          "filesAfter": 11,
+          "repairAttempts": 3,
+          "tscPassed": false
+        },
+        {
+          "name": "Roadmap State & Agent Registry",
+          "tasks": [
+            {
+              "name": "Implement roadmap state manager",
+              "agent": "engineer",
+              "model": "claude-sonnet-4-6"
+            },
+            {
+              "name": "Implement agent registry viewer",
+              "agent": "engineer",
+              "model": "claude-sonnet-4-6"
+            },
+            {
+              "name": "Test roadmap and registry",
+              "agent": "test",
+              "model": "claude-sonnet-4-6"
+            }
+          ],
+          "durationMs": 364708,
+          "filesAfter": 14,
+          "repairAttempts": 3,
+          "tscPassed": false
+        },
+        {
+          "name": "Run Dashboard & Artifact Manifest",
+          "tasks": [
+            {
+              "name": "Implement run dashboard model",
+              "agent": "engineer",
+              "model": "claude-sonnet-4-6"
+            },
+            {
+              "name": "Implement artifact manifest viewer",
+              "agent": "engineer",
+              "model": "claude-sonnet-4-6"
+            },
+            {
+              "name": "Test dashboard and manifest",
+              "agent": "test",
+              "model": "claude-sonnet-4-6"
+            }
+          ],
+          "durationMs": 351579,
+          "filesAfter": 17,
+          "repairAttempts": 3,
+          "tscPassed": false
+        },
+        {
+          "name": "Review & Repair",
+          "tasks": [
+            {
+              "name": "Review skeleton for gaps",
+              "agent": "critic",
+              "model": "claude-sonnet-4-6"
+            },
+            {
+              "name": "Repair identified defects",
+              "agent": "engineer",
+              "model": "claude-sonnet-4-6"
+            }
+          ],
+          "durationMs": 369284,
+          "filesAfter": 18,
+          "repairAttempts": 3,
+          "tscPassed": false
+        }
+      ],
+      "byModel": {
+        "claude-opus-4-8": {
+          "in": 89531,
+          "out": 75165,
+          "calls": 27,
+          "cost": 6.98034
+        },
+        "claude-sonnet-4-6": {
+          "in": 71865,
+          "out": 81142,
+          "calls": 33,
+          "cost": 1.4327249999999996
+        }
+      },
+      "agentHistogram": {
+        "architect": 4,
+        "engineer": 7,
+        "test": 3,
+        "critic": 1
+      },
+      "totalCost": 8.413065,
+      "notes": []
+    },
+    "single-opus": {
+      "arm": "single-opus",
+      "durationMs": 546240,
+      "phaseCount": 5,
+      "taskCount": 5,
+      "filesWritten": 12,
+      "tscPassedFinal": false,
+      "vitestPassedFinal": false,
+      "totalErrorsFinal": 3,
+      "testFiles": 4,
+      "assertions": 46,
+      "srcLines": 1058,
+      "calls": [
+        {
+          "scope": "plan",
+          "phase": "PLANNING",
+          "agent": "planner",
+          "model": "claude-opus-4-8",
+          "inTok": 8459,
+          "outTok": 1908,
+          "ms": 21350
+        },
+        {
+          "scope": "task",
+          "phase": "Core Schemas and Types",
+          "agent": "opus-solo",
+          "model": "claude-opus-4-8",
+          "inTok": 1008,
+          "outTok": 6000,
+          "ms": 52540
+        },
+        {
+          "scope": "task",
+          "phase": "Idea Intake and Refinement",
+          "agent": "opus-solo",
+          "model": "claude-opus-4-8",
+          "inTok": 965,
+          "outTok": 5649,
+          "ms": 46899
+        },
+        {
+          "scope": "task",
+          "phase": "Roadmap State Backbone",
+          "agent": "opus-solo",
+          "model": "claude-opus-4-8",
+          "inTok": 987,
+          "outTok": 5457,
+          "ms": 45900
+        },
+        {
+          "scope": "repair",
+          "phase": "Roadmap State Backbone",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1235,
+          "outTok": 982,
+          "ms": 8447
+        },
+        {
+          "scope": "repair",
+          "phase": "Roadmap State Backbone",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1622,
+          "outTok": 1394,
+          "ms": 11338
+        },
+        {
+          "scope": "repair",
+          "phase": "Roadmap State Backbone",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1088,
+          "outTok": 877,
+          "ms": 8061
+        },
+        {
+          "scope": "task",
+          "phase": "Registry, Runs, Artifacts",
+          "agent": "opus-solo",
+          "model": "claude-opus-4-8",
+          "inTok": 1129,
+          "outTok": 6000,
+          "ms": 52198
+        },
+        {
+          "scope": "repair",
+          "phase": "Registry, Runs, Artifacts",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1362,
+          "outTok": 2237,
+          "ms": 18451
+        },
+        {
+          "scope": "repair",
+          "phase": "Registry, Runs, Artifacts",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1788,
+          "outTok": 1320,
+          "ms": 11628
+        },
+        {
+          "scope": "repair",
+          "phase": "Registry, Runs, Artifacts",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1485,
+          "outTok": 3126,
+          "ms": 24743
+        },
+        {
+          "scope": "repair",
+          "phase": "Registry, Runs, Artifacts",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1508,
+          "outTok": 1285,
+          "ms": 11089
+        },
+        {
+          "scope": "repair",
+          "phase": "Registry, Runs, Artifacts",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1552,
+          "outTok": 1361,
+          "ms": 11099
+        },
+        {
+          "scope": "repair",
+          "phase": "Registry, Runs, Artifacts",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1763,
+          "outTok": 1381,
+          "ms": 12068
+        },
+        {
+          "scope": "repair",
+          "phase": "Registry, Runs, Artifacts",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1580,
+          "outTok": 1528,
+          "ms": 13039
+        },
+        {
+          "scope": "repair",
+          "phase": "Registry, Runs, Artifacts",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1973,
+          "outTok": 1288,
+          "ms": 11071
+        },
+        {
+          "scope": "repair",
+          "phase": "Registry, Runs, Artifacts",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1673,
+          "outTok": 1656,
+          "ms": 13992
+        },
+        {
+          "scope": "repair",
+          "phase": "Registry, Runs, Artifacts",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 2044,
+          "outTok": 1301,
+          "ms": 10701
+        },
+        {
+          "scope": "task",
+          "phase": "Review and Repair",
+          "agent": "opus-solo",
+          "model": "claude-opus-4-8",
+          "inTok": 972,
+          "outTok": 6000,
+          "ms": 51932
+        },
+        {
+          "scope": "repair",
+          "phase": "Review and Repair",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1386,
+          "outTok": 1063,
+          "ms": 9127
+        },
+        {
+          "scope": "repair",
+          "phase": "Review and Repair",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1014,
+          "outTok": 993,
+          "ms": 9747
+        },
+        {
+          "scope": "repair",
+          "phase": "Review and Repair",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1674,
+          "outTok": 1304,
+          "ms": 11707
+        },
+        {
+          "scope": "repair",
+          "phase": "Review and Repair",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1373,
+          "outTok": 1125,
+          "ms": 9820
+        },
+        {
+          "scope": "repair",
+          "phase": "Review and Repair",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1603,
+          "outTok": 1470,
+          "ms": 12495
+        },
+        {
+          "scope": "repair",
+          "phase": "Review and Repair",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1397,
+          "outTok": 1139,
+          "ms": 9901
+        },
+        {
+          "scope": "repair",
+          "phase": "Review and Repair",
+          "agent": "repair",
+          "model": "claude-opus-4-8",
+          "inTok": 1711,
+          "outTok": 1440,
+          "ms": 11927
+        }
+      ],
+      "phases": [
+        {
+          "name": "Core Schemas and Types",
+          "tasks": [
+            {
+              "name": "Core Schemas and Types",
+              "agent": "opus-solo",
+              "model": "claude-opus-4-8"
+            }
+          ],
+          "durationMs": 58934,
+          "filesAfter": 2,
+          "repairAttempts": 0,
+          "tscPassed": true
+        },
+        {
+          "name": "Idea Intake and Refinement",
+          "tasks": [
+            {
+              "name": "Idea Intake and Refinement",
+              "agent": "opus-solo",
+              "model": "claude-opus-4-8"
+            }
+          ],
+          "durationMs": 49515,
+          "filesAfter": 6,
+          "repairAttempts": 0,
+          "tscPassed": true
+        },
+        {
+          "name": "Roadmap State Backbone",
+          "tasks": [
+            {
+              "name": "Roadmap State Backbone",
+              "agent": "opus-solo",
+              "model": "claude-opus-4-8"
+            }
+          ],
+          "durationMs": 78907,
+          "filesAfter": 10,
+          "repairAttempts": 1,
+          "tscPassed": true
+        },
+        {
+          "name": "Registry, Runs, Artifacts",
+          "tasks": [
+            {
+              "name": "Registry, Runs, Artifacts",
+              "agent": "opus-solo",
+              "model": "claude-opus-4-8"
+            }
+          ],
+          "durationMs": 200381,
+          "filesAfter": 12,
+          "repairAttempts": 3,
+          "tscPassed": false
+        },
+        {
+          "name": "Review and Repair",
+          "tasks": [
+            {
+              "name": "Review and Repair",
+              "agent": "opus-solo",
+              "model": "claude-opus-4-8"
+            }
+          ],
+          "durationMs": 137150,
+          "filesAfter": 12,
+          "repairAttempts": 3,
+          "tscPassed": false
+        }
+      ],
+      "byModel": {
+        "claude-opus-4-8": {
+          "in": 44351,
+          "out": 59284,
+          "calls": 26,
+          "cost": 5.111564999999999
+        }
+      },
+      "agentHistogram": {
+        "opus-solo": 5
+      },
+      "totalCost": 5.111564999999999,
+      "notes": []
+    }
+  }
+}

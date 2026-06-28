@@ -1,5 +1,5 @@
 import { Run, PhaseCost } from '@unifiedaitoolbox/shared';
-import { CostCalculator } from './cost-calculator.js';
+import { CostCalculator } from '@fuhrhaus/orchestration-core';
 
 export class CostTracker {
   private calculator: CostCalculator;

@@ -101,17 +101,63 @@ const EXTENSION_ALIASES: Record<string, string> = {
 
 export class OutputParser {
   parseTaskOutput(raw: unknown): FileArtifact[] {
-    const root = this.toStructuredData(raw);
-    if (!root) {
-      return [];
-    }
-
     const artifacts = new Map<string, FileArtifact>();
     const visited = new Set<object>();
 
-    this.collectArtifacts(root, artifacts, visited);
+    // Path 1 — JSON-structured output (original behavior).
+    const root = this.toStructuredData(raw);
+    if (root) {
+      this.collectArtifacts(root, artifacts, visited);
+    }
+
+    // Path 2 — Markdown file-block extraction.
+    // Handles the natural LLM output format:
+    //   ## File: src/foo.ts
+    //   ```typescript
+    //   // code
+    //   ```
+    // Runs on every string found anywhere in the output object.
+    for (const text of this.allStrings(raw)) {
+      for (const artifact of this.extractMarkdownFileBlocks(text)) {
+        if (!artifacts.has(artifact.filePath)) {
+          artifacts.set(artifact.filePath, artifact);
+        }
+      }
+    }
 
     return Array.from(artifacts.values());
+  }
+
+  // Collect every string leaf reachable from `raw` (bounded depth to avoid
+  // infinite recursion on unusual structures).
+  private allStrings(raw: unknown, depth = 0): string[] {
+    if (depth > 8) return [];
+    if (typeof raw === 'string') return [raw];
+    if (!raw || typeof raw !== 'object') return [];
+    const texts: string[] = [];
+    for (const v of Object.values(raw as Record<string, unknown>)) {
+      texts.push(...this.allStrings(v, depth + 1));
+    }
+    return texts;
+  }
+
+  // Extract files from LLM markdown that uses the ## File: header convention.
+  private extractMarkdownFileBlocks(text: string): FileArtifact[] {
+    const results: FileArtifact[] = [];
+    // Matches: ## File: path/to/file.ext\n```lang\ncontent\n```
+    const pattern = /^##\s+[Ff]ile:\s*(\S+)[ \t]*\n```(\w+)?[ \t]*\n([\s\S]*?)^```/gm;
+    let match: RegExpExecArray | null;
+    while ((match = pattern.exec(text)) !== null) {
+      const rawPath = match[1].trim();
+      const language = match[2] || undefined;
+      const content = match[3];  // preserve internal whitespace exactly
+      if (!rawPath || !content.trim()) continue;
+      const filePath = this.normalizeFilePath(rawPath);
+      if (filePath) {
+        results.push({ filePath, content, language });
+      }
+    }
+    return results;
   }
 
   private toStructuredData(raw: unknown): unknown {

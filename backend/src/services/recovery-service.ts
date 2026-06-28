@@ -1,5 +1,5 @@
 import { CircuitBreakerState } from '@unifiedaitoolbox/shared';
-import { ErrorHandler } from './error-handler.js';
+import { ErrorHandler } from '@fuhrhaus/orchestration-core';
 
 export interface RetryPolicy {
   maxRetries: number;

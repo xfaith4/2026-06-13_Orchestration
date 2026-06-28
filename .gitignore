@@ -89,3 +89,9 @@ htmlcov/
 .prettierignore
 tsbuildinfo
 
+# Orchestration runtime output (generated per run — not source)
+output/
+data/run-events/
+backend/.bakeoff/
+backend/.bakeoff-roadmap/
+

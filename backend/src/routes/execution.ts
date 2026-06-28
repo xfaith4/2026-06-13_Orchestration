@@ -5,11 +5,11 @@ import { createResponse, ApiError } from '../types/responses.js';
 import { TaskExecutor } from '../services/task-executor.js';
 import type { TaskExecutionWarning } from '../services/task-executor.js';
 import { PhaseExecutor } from '../services/phase-executor.js';
-import { AgentRegistry } from '../services/agent-registry.js';
+import { AgentRegistry, RunStateMachine } from '@fuhrhaus/orchestration-core';
+import { PersistenceAgentStore } from '../services/persistence-agent-store.js';
 import { PromptRegistry } from '../services/prompt-registry.js';
 import { CostTracker } from '../services/cost-tracker.js';
 import { ErrorLogger } from '../services/error-logger.js';
-import { RunStateMachine } from '../services/run-state-machine.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -62,7 +62,7 @@ export const createExecutionRoutes = (persistence: PersistenceService) => {
       const agentsDir = path.join(__dirname, '..', '..', '..', 'agents');
       const promptsDir = path.join(__dirname, '..', '..', '..', 'Prompts');
 
-      agentRegistry = new AgentRegistry(persistence, agentsDir);
+      agentRegistry = new AgentRegistry(new PersistenceAgentStore(persistence), agentsDir);
       promptRegistry = new PromptRegistry(persistence, promptsDir);
       costTracker = new CostTracker();
       errorLogger = new ErrorLogger(persistence);

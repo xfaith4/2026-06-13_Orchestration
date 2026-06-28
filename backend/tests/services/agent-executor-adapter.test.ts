@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AgentExecutorAdapter } from '../../src/services/agent-executor-adapter.js';
+import { AgentExecutorAdapter } from '@fuhrhaus/orchestration-core';
 import {
   AgentExecutor,
   AgentExecutionInput,

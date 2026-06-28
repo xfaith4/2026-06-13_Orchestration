@@ -1,7 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { PersistenceService } from '../services/persistence.js';
 import type { ValidationService } from '../services/validation.js';
-import { AgentRegistry } from '../services/agent-registry.js';
+import { AgentRegistry } from '@fuhrhaus/orchestration-core';
+import { PersistenceAgentStore } from '../services/persistence-agent-store.js';
 import { createResponse, ApiError } from '../types/responses.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -14,7 +15,8 @@ export const createAgentRoutes = (
 ) => {
   const router = Router();
   const agentsDir = path.join(__dirname, '..', '..', '..', 'agents');
-  const registry = new AgentRegistry(persistence, agentsDir);
+  const store = new PersistenceAgentStore(persistence);
+  const registry = new AgentRegistry(store, agentsDir);
   let registryInitialized = false;
 
   // Initialize registry on first request

@@ -3,6 +3,11 @@ import Anthropic from '@anthropic-ai/sdk';
 const DEFAULT_MODEL = 'claude-haiku-4-5-20251001';
 const MAX_TOKENS_DEFAULT = 4096;
 
+export interface LLMClientOptions {
+  apiKey: string;
+  model?: string;
+}
+
 export interface LLMMessage {
   role: 'user' | 'assistant';
   content: string;
@@ -27,15 +32,9 @@ export class LLMClient {
   private client: Anthropic;
   private model: string;
 
-  constructor() {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      throw new Error(
-        'ANTHROPIC_API_KEY is not set. Add it to your .env file to enable real LLM execution.'
-      );
-    }
-    this.client = new Anthropic({ apiKey });
-    this.model = process.env.ANTHROPIC_MODEL || DEFAULT_MODEL;
+  constructor(options: LLMClientOptions) {
+    this.client = new Anthropic({ apiKey: options.apiKey });
+    this.model = options.model || DEFAULT_MODEL;
   }
 
   async call(options: LLMCallOptions): Promise<LLMCallResult> {
@@ -77,9 +76,5 @@ export class LLMClient {
 
     // Return as-is and let the caller handle parse failure
     return text.trim();
-  }
-
-  static isAvailable(): boolean {
-    return Boolean(process.env.ANTHROPIC_API_KEY);
   }
 }

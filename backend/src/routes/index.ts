@@ -8,6 +8,7 @@ import { createRunRoutes } from './runs.js';
 import { createAgentRoutes } from './agents.js';
 import { createPromptRoutes } from './prompts.js';
 import { createGenericCrudRoutes } from './generic-crud.js';
+import { createGovernanceContractRoutes } from './governance-contracts.js';
 
 export const createApiRoutes = (
   persistence: PersistenceService,
@@ -22,6 +23,7 @@ export const createApiRoutes = (
   router.use('/agents', createAgentRoutes(persistence, validation));
   router.use('/prompts', createPromptRoutes(persistence, validation));
   router.use('/contracts', createGenericCrudRoutes(persistence, validation, 'contracts'));
+  router.use('/governance-contracts', createGovernanceContractRoutes());
 
   return router;
 };

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { RunStateMachine } from '../../src/services/run-state-machine.js';
+import { RunStateMachine } from '@fuhrhaus/orchestration-core';
 
 describe('RunStateMachine', () => {
   let stateMachine: RunStateMachine;

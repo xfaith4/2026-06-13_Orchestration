@@ -1,29 +1,35 @@
 import { DesignPlan, Roadmap, Phase, Task } from '@unifiedaitoolbox/shared';
-import { LLMClient } from './llm-client.js';
+import { LLMClient } from '@fuhrhaus/orchestration-core';
 
-const SYSTEM_PROMPT = `You are an expert software project manager and technical lead. Given an
-approved design plan, generate a detailed implementation roadmap.
+// Task descriptions must be compact directives — not prose paragraphs.
+// They become the executing agent's primary instruction, so every word
+// of ambiguity costs output tokens and risks interpretive drift.
+//
+// Compressed directive format: ACTION: X | OUTPUT: file(s) | CONSTRAINT: Y
+// Wrong: "Create a comprehensive TypeScript configuration with strict mode and modern ES standards."
+// Right: "CREATE: tsconfig.json | strict:true target:ES2020 module:ESNext | NO other files"
+const SYSTEM_PROMPT = `Generate an implementation roadmap as a single JSON object.
 
-The roadmap must be a single JSON object matching this exact schema:
+Schema:
 {
   "title": "string",
   "description": "string",
-  "estimatedDuration": "string — e.g. '240 hours (~6 weeks)'",
+  "estimatedDuration": "string — e.g. '40 hours'",
   "phases": [
     {
-      "id": "string — e.g. 'phase-0'",
+      "id": "phase-0",
       "number": 0,
       "name": "string",
-      "goal": "string",
-      "estimatedHours": 40,
+      "goal": "string — one sentence",
+      "estimatedHours": 8,
       "dependencies": [],
       "tasks": [
         {
-          "id": "string — e.g. 'task-0-1'",
-          "name": "string",
-          "description": "string — specific implementation detail",
+          "id": "task-0-1",
+          "name": "string — ≤8 words",
+          "description": "string — compact directive: WHAT | OUTPUT | CONSTRAINT (no prose)",
           "status": "pending",
-          "estimatedHours": 8,
+          "estimatedHours": 2,
           "dependencies": []
         }
       ]
@@ -31,14 +37,18 @@ The roadmap must be a single JSON object matching this exact schema:
   ]
 }
 
-Rules:
-- Produce 3-6 sequential phases that fully cover implementation from setup to deployment
-- Each phase must have 3-6 concrete, specific tasks
-- Task IDs must be unique across all phases (use 'task-{phaseNumber}-{taskNumber}' format)
-- Phase dependencies reference phase IDs of prerequisite phases
-- Task dependencies reference task IDs within the same or earlier phases
-- estimatedHours should be realistic for a professional engineer
-- Respond with ONLY the JSON object, no preamble or trailing text`;
+Task description rules — CRITICAL:
+- Format: ACTION: X | OUTPUT: Y | CONSTRAINT: Z
+- One line. No sentences. No "should", "comprehensive", "appropriate".
+- Name every file that must be produced (e.g. src/types/index.ts)
+- State explicit constraints: versions, no-extra-deps, line-count limits
+- Good: "CREATE: src/types/index.ts | interfaces Run Phase Task Artifact | discriminated union status fields"
+- Bad: "Implement the TypeScript interface definitions for the core state model"
+
+Other rules:
+- 3-6 phases, 3-6 tasks per phase
+- Task IDs: task-{phase}-{n} (unique across all phases)
+- Respond with ONLY the JSON object`;
 
 export class RoadmapGenerator {
   async generateFromDesignPlan(
@@ -49,7 +59,7 @@ export class RoadmapGenerator {
       throw new Error('Design plan must be approved before generating roadmap');
     }
 
-    if (LLMClient.isAvailable()) {
+    if (process.env.ANTHROPIC_API_KEY) {
       try {
         return await this.generateWithLLM(designPlan, applicationId);
       } catch (err) {
@@ -63,7 +73,7 @@ export class RoadmapGenerator {
     designPlan: DesignPlan,
     applicationId: string
   ): Promise<Omit<Roadmap, 'id' | 'createdAt' | 'updatedAt'>> {
-    const client = new LLMClient();
+    const client = new LLMClient({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
     const userMessage = `Generate an implementation roadmap for this approved design plan:
 

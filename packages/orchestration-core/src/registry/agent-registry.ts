@@ -1,6 +1,6 @@
 import { AgentDefinition } from '@unifiedaitoolbox/shared';
-import { PersistenceService } from './persistence.js';
-import { AgentLoader, LoadedAgent } from './agent-loader.js';
+import { AgentStore } from './agent-store.js';
+import { AgentLoader, LoadedAgent } from '../loader/agent-loader.js';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface AgentStats {
@@ -18,7 +18,7 @@ export class AgentRegistry {
   private initialized: boolean = false;
 
   constructor(
-    private persistence: PersistenceService,
+    private store: AgentStore,
     agentsDir: string
   ) {
     this.loader = new AgentLoader(agentsDir);
@@ -36,7 +36,7 @@ export class AgentRegistry {
 
     // Load custom agents from persistence if they exist
     try {
-      const customAgents = await this.persistence.list<AgentDefinition>('agents');
+      const customAgents = await this.store.list();
       for (const agent of customAgents) {
         this.customAgents.set(agent.id, agent);
       }
@@ -105,7 +105,7 @@ export class AgentRegistry {
       updatedAt: new Date().toISOString(),
     };
 
-    await this.persistence.create<AgentDefinition>('agents', newAgent);
+    await this.store.create(newAgent);
     this.customAgents.set(newAgent.id, newAgent);
 
     return newAgent;
@@ -126,7 +126,7 @@ export class AgentRegistry {
       updatedAt: new Date().toISOString(),
     };
 
-    await this.persistence.update<AgentDefinition>('agents', agentId, updated);
+    await this.store.update(agentId, updated);
     this.customAgents.set(agentId, updated);
 
     return updated;
@@ -138,7 +138,7 @@ export class AgentRegistry {
       return false;
     }
 
-    await this.persistence.delete('agents', agentId);
+    await this.store.delete(agentId);
     this.customAgents.delete(agentId);
 
     return true;

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { HandoffValidator } from '../../src/services/handoff-validator.js';
+import { HandoffValidator } from '@fuhrhaus/orchestration-core';
 import { HandoffContract } from '@unifiedaitoolbox/shared';
 
 describe('HandoffValidator', () => {

@@ -24,43 +24,12 @@ io_contract:
       summary: { type: string }
       conflicts_resolved: { type: array, items: { type: string } }
 prompt: |
-  You are the Synthesizer.
+  Synthesizer. Merge analysis, implementation, and critique into a coherent execution plan.
 
-  Goal: merge Researcher + Engineer + Critic into a single execution-ready roadmap that a dev team can follow.
-
-  Inputs:
-  - researcher_output (string)
-  - engineer_output (string)
-  - critic_output (string)
-  - goal (string)
-
-  Rules:
-  - Resolve contradictions explicitly (state the decision + why).
-  - Bake Critic fixes into the plan; do not merely restate issues.
-  - Prefer shippable slices: MVP first, then hardening, then nice-to-haves.
-  - Output must be consumable: phases, deliverables, acceptance criteria.
-
-  Output MUST be valid JSON matching output_schema and NOTHING ELSE:
-  {
-    "roadmap": [
-      {
-        "phase": "Phase 1: MVP",
-        "objective": "…",
-        "deliverables": ["…"],
-        "tasks": ["…"],
-        "dependencies": ["…"],
-        "acceptance": ["…"],
-        "estimate": "S|M|L (and/or hours)"
-      }
-    ],
-    "deliverables": ["…"],
-    "summary": "1–2 paragraphs: what we’re building, how it works, and what ‘done’ means.",
-    "conflicts_resolved": [
-      "Conflict: … | Decision: … | Rationale: …"
-    ]
-  }
-
-  Keep roadmap phases tight (3–6 phases).
+  Resolve contradictions explicitly: Conflict | Decision | Rationale.
+  Prefer shippable slices — MVP first, hardening second.
+  Output phases with: objective, deliverables, acceptance criteria.
+  For any files produced: ## File: path/to/file.ext\n```lang\ncontent```.
 routing_hints:
   preferred_models: [gpt-5.5, gpt-5.4, claude-sonnet-4-6]
   max_tokens: 3500
