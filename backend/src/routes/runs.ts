@@ -29,6 +29,7 @@ import { captureBaseline } from '../services/baseline.js';
 import { readProjectFiles, findContractModule, checkCoherence } from '../services/contract-spine.js';
 import { loadJobTypes, buildAndValidate } from '../services/contract-compiler.js';
 import { DEFAULT_REPAIR_POLICY, failureSignature, classifyFailureClass, repairGate, type EscalateAfter } from '../services/repair-policy.js';
+import { checkPlanIntegrity, orderProducersFirst } from '../services/gate.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -280,6 +281,12 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
     // Select the best-fit agent per task based on capabilities and task content
     const agentAssignments = buildAgentAssignments(phase, agents);
 
+    // Phase 37: producer-then-reviewer ordering — a reviewer (Critic/Validator) never runs
+    // before the producer output it reviews exists.
+    const roleOfTask = (t: { id: string }) =>
+      agents.find(a => a.id === agentAssignments[t.id])?.role;
+    const orderedPhase = { ...phase, tasks: orderProducersFirst(phase.tasks, roleOfTask) };
+
     // Phase 34: inject the accumulating shared contract so this phase's workers import
     // shared types instead of redefining them (anti-drift).
     const priorFiles = await readProjectFiles(projectWriter.root);
@@ -290,7 +297,7 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
     }
 
     const phaseResult = await phaseExecutor.executePhase({
-      phase,
+      phase: orderedPhase,
       agentAssignments,
       runId,
       stackConstraints: currentRun.stackConstraints,
@@ -674,6 +681,13 @@ export const createRunRoutes = (
       const run = await persistence.read<Run>('runs', id);
       if (!run) {
         throw new ApiError(404, 'Run not found');
+      }
+
+      // Phase 37: pre-run DAG integrity gate — refuse to start a structurally-broken plan
+      // (unknown task dependencies or dependency cycles) before spending any model calls.
+      const planCheck = checkPlanIntegrity(run.phases);
+      if (!planCheck.ok) {
+        throw new ApiError(422, `Run cannot start — plan integrity failed: ${planCheck.errors.join('; ')}`);
       }
 
       // Phase 35: harden the run into a complete, schema-valid contract before starting.

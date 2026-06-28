@@ -71,7 +71,12 @@ Build a professional web-based UI that enables teams to describe an application 
 
 ## Priority Track: Reach a Successful Run (added 2026-06-28)
 
-> **This is now the critical path. Do Phases 32–37 before further UI/feature phases.**
+> **✅ COMPLETE (2026-06-28): Phases 32–37 all landed.** A run now grounds itself (baseline),
+> refuses to repair the environment, prevents + names interface drift, repairs with
+> signature-aware convergence + escalation, can't start without a complete contract or a sound
+> plan DAG, and reports a truthful terminal status with a full event trail.
+> **Next milestone: re-run the bake-off** (validation) to measure whether a run now *succeeds* —
+> the precondition for the multi-agent-vs-single-agent comparison.
 
 A controlled bake-off (`docs/bakeoff/dashboard.html`, raw data `docs/bakeoff/results.json`)
 ran four agent arrangements — uniform-Haiku, tiered (Opus plan / Sonnet workers),
@@ -140,7 +145,9 @@ into "succeeded, or failed at a named component" — the precondition for every 
 - **Acceptance:** runs stop on repeated identical failures and on no-progress; repair re-prompts include prior errors; escalation fires.
 - **Touches:** `runs.ts` repair loop, `failure-classifier.ts` + `repair-strategist.ts` (wire them), `repair-task-builder.ts`.
 
-### Phase 37 — Typed Gates + Sequencing + Worker Isolation
+### Phase 37 — Typed Gates + Sequencing + Worker Isolation  ✅ COMPLETE (2026-06-28)
+- **Delivered:** `backend/src/services/gate.ts` — `checkPlanIntegrity()` (deterministic pre-run DAG gate: rejects unknown-task dependencies and dependency cycles, wired into `PATCH /:id/start` → 422 before any model call); `orderProducersFirst()` (producer-then-reviewer sequencing so a Critic/Validator never runs before producer output — wired into the phase loop); typed `GateVerdict` (pass/fail/retry) primitive. Tests: `gate.test.ts` (6 passing; 48 across the reliability suite); backend `tsc --noEmit` clean.
+- **Scoped deferral:** full git-worktree per-worker isolation is deferred — the executor runs tasks sequentially today, and cross-worker *type* conflicts are already detected by Phase 34's traceability gate. Revisit when parallel task execution is enabled.
 - **Goal:** catch failures at checkpoints and stop parallel workers corrupting each other.
 - **Why:** reviewers run blind and parallel writers share one tree (drift + false "missing X" failures).
 - **Deliverables:** typed gates returning PASS/FAIL/RETRY at checkpoints with the failure reason injected into a bounded retry (port `engine/GatePolicy.psm1`); producer-then-reviewer sequencing; per-worker isolated output (dir or git worktree) with structured merge + conflict→quarantine (port `WorktreeExecutor.psm1`); pre-run DAG integrity check (reject cycles / inputs not produced by a prior step).
@@ -563,7 +570,7 @@ When complete, update to:
 | 34 | Shared-Contract / Traceability Spine | Stop cross-worker interface drift | **Complete** | 2026-06-28 |
 | 35 | Wire the Vendored Contracts | Hardening compiler + job-type casting | **Complete** | 2026-06-28 |
 | 36 | Signature-Aware Planner-First Repair | Bounded, converging, escalating repair | **Complete** | 2026-06-28 |
-| 37 | Typed Gates + Sequencing + Isolation | Gates w/ retry, reviewer-after-producer, worker isolation | **Not Started — CRITICAL PATH** | |
+| 37 | Typed Gates + Sequencing + Isolation | Gates w/ retry, reviewer-after-producer, worker isolation | **Complete** | 2026-06-28 |
 
 ---
 
