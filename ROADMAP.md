@@ -1,9 +1,9 @@
 # Web-Based Multi-Agent Orchestration Platform — Implementation Roadmap (Revised)
 
-**Roadmap Version:** 2.0 (Revised for Coding-Agent Execution)
-**Last Updated:** 2026-06-14
+**Roadmap Version:** 2.1 (Reliability Track added)
+**Last Updated:** 2026-06-28
 **Target Completion:** Q3 2026
-**Status:** Ready for Incremental Coding-Agent Execution
+**Status:** CRITICAL PATH is now the Reliability Track (Phases 32–37) — see "Priority Track: Reach a Successful Run" below. Feature/UI phases are paused until a run succeeds.
 
 ---
 
@@ -66,6 +66,82 @@ These estimates assume:
 ## Product Goal
 
 Build a professional web-based UI that enables teams to describe an application idea, generate and approve a design plan, create an implementation roadmap, execute the roadmap using a choreographed multi-agent team, monitor execution in real-time, track costs and tokens, repair failures automatically, and push generated code to GitHub — all while maintaining an auditable approval trail and contract-driven safety validation.
+
+---
+
+## Priority Track: Reach a Successful Run (added 2026-06-28)
+
+> **This is now the critical path. Do Phases 32–37 before further UI/feature phases.**
+
+A controlled bake-off (`docs/bakeoff/dashboard.html`, raw data `docs/bakeoff/results.json`)
+ran four agent arrangements — uniform-Haiku, tiered (Opus plan / Sonnet workers),
+contract-first, and single-Opus — against a real roadmap. **None produced a working
+application.** Failure modes: cross-worker interface/contract drift, planning failures, and
+non-convergent repair loops. A four-layer audit of the mature prior version (the sibling
+`UnifiedAIToolbox` project) found it had already hit, diagnosed, and largely solved these
+exact failures — its own conclusion (that repo's `docs/ROADMAP.md`, item RM-014):
+*"the limiting factor is no longer design — it is evidence."*
+
+Supporting analysis (in this repo): `docs/PULL_FORWARD_FROM_UNIFIEDAITOOLBOX.md` (what to
+port + source paths), `docs/MODEL_ROUTING_BASELINE.md` (bake-off results), and
+`docs/AGENT_ARCHITECTURE_LANDSCAPE.md` (industry reality: single-agent + scaffolding wins;
+multi-agent fan-out mostly fails at app-building).
+
+**Why this is the critical path:** the multi-agent-vs-single-agent question *cannot be
+answered until a run succeeds at all*. These phases convert runs from "failed, unknown why"
+into "succeeded, or failed at a named component" — the precondition for every later phase.
+
+| # | Phase | Fixes (failure mode) | Source |
+|---|-------|----------------------|--------|
+| 32 | Evidence Spine & Lifecycle Invariants | "fails, unknown why"; false success | PULL_FORWARD T1.3 |
+| 33 | Green Baseline Before Repair | non-convergent repair | T1.1 |
+| 34 | Shared-Contract / Traceability Spine | interface drift (bake-off #1) | T1.2 |
+| 35 | Wire the Vendored Contracts | planning failures | T2.4 |
+| 36 | Signature-Aware Planner-First Repair | repair never converges | T2.5 |
+| 37 | Typed Gates + Sequencing + Isolation | drift + false-failure churn | T2.6 |
+
+### Phase 32 — Evidence Spine & Lifecycle Invariants  ✅ COMPLETE (2026-06-28)
+- **Delivered:** `OrchestrationEvent`/`RunValidationOutcome` types (`shared/src`); `RunEventLog` appending a canonical per-run `data/run-events/<id>.jsonl`; `transitionRunStatus` as the single run-status writer + `decideTerminalStatus` terminal-honesty guard (`backend/src/services/run-status.ts`); wired into `executeRunAsync` (run_started/agent_started/agent_completed/artifact_created/validation_started/validation_completed/run_completed/run_failed); `run.validation` now separate from `run.status`; `GET /api/runs/:id/events`. Tests: `run-status.test.ts` + `run-event-log.test.ts` (11 passing); backend `tsc --noEmit` clean. **Next: Phase 33.**
+- **Goal:** Make every run truthfully report what happened, so failures name their own cause.
+- **Why:** The bake-off failed "across all styles, can't tell why." Without a truthful event/state spine every later fix is guesswork (UnifiedAIToolbox RM-014).
+- **Deliverables:** canonical append-only `events.jsonl` per run (typed run/agent/artifact/validation events); **orchestrator-only status authority** (agents never write run-level `status`); **execution-state ≠ quality-outcome** (`completed` ≠ `validated`; never derive status by substring-scraping prose); **terminal-honesty guard** (a build run that materialized no runnable output is `failed`, never `completed`).
+- **Acceptance:** every run emits a typed event stream; no run is `completed` without materialized, validated output; status is single-owner. Port invariants from UnifiedAIToolbox `CLAUDE.md`, `docs/contracts/RUN_LIFECYCLE.md`, `EVENT_TAXONOMY.md`.
+- **Touches:** `backend/src/routes/runs.ts`, `backend/src/services/persistence.ts`, `shared/src` (Run + event types).
+
+### Phase 33 — Green Baseline Before Repair
+- **Goal:** Establish a known-good "before" state so repair can tell "I broke it" from "already broken."
+- **Why:** #1 cause of non-convergent repair; the loop currently repairs blind.
+- **Deliverables:** a discovery + baseline step (install/build/test) recorded as a typed artifact (model on the already-vendored `contracts/repo_context_schema.v1.json`); repair only proceeds against a captured baseline; transient-IO failures degrade to "insufficient evidence," not code failure.
+- **Acceptance:** no repair task runs without a recorded baseline; runs distinguish pre-existing vs introduced failures.
+- **Touches:** new baseline/repo-context service, `project-validator.ts`, `runs.ts` repair loop.
+
+### Phase 34 — Shared-Contract / Traceability Spine  (anti-drift)
+- **Goal:** Stop agents redefining each other's interfaces (the bake-off's #1 failure).
+- **Why:** the YAML conversion *regressed* — it dropped the cross-agent IO wiring (`source_agent`/`consumed_by`/`io_reference`) the mature `agent-library.json` used to bind producers and consumers to one field vocabulary.
+- **Deliverables:** a shared contract/type artifact produced before fan-out (ConceptualModelContract + acceptance tests) consumed by all workers; restored cross-agent IO references; a deterministic traceability check (every required contract id → file/symbol/probe), reviewer-reconciled.
+- **Acceptance:** workers import the shared contract instead of redefining types; a traceability gate verifies coverage deterministically (not via prompt).
+- **Touches:** `agents/*.yaml` + `agent-loader`, new contract/traceability service, `task-executor.ts`.
+
+### Phase 35 — Wire the Vendored Contracts (compiler + casting)
+- **Goal:** make the vendored governance contracts *enforce* a complete spec before a run starts.
+- **Why:** `contracts/build_app_*.json` + `maintenance_*.json` are currently inert (only listed by `/api/governance-contracts`). Planning failures dominate when runs start from a vague goal.
+- **Deliverables:** request→contract hardening compiler (merge job-type defaults, re-validate against the strict schema, refuse to start if incomplete); job-type → roster + required/forbidden-stage casting. Port `contract_compiler.ps1`, `job_types.json`, `job_router.ps1`.
+- **Acceptance:** a run cannot start without a complete, schema-valid contract (roster, stages, gates, budget); required phases present, forbidden phases rejected.
+- **Touches:** new `contract-compiler` service, a `job_types.json`, `roadmap-generator.ts`, `runs.ts` start path.
+
+### Phase 36 — Signature-Aware Planner-First Repair
+- **Goal:** make repair converge or stop honestly.
+- **Why:** the loop is a blind `MAX_REPAIR_ATTEMPTS = 3` counter — no same-failure detection, no progress check (`runs.ts`); `failure_treatment_policy.v1.json` is vendored but unwired.
+- **Deliverables:** wire `failure_treatment_policy` — classify into its `failure_class`; cap by `max_same_failure_signature`; require a `plan_delta` each repair (no delta → stop); planner-first ownership + escalation (Supervisor→Commissioner→Human); carry attempt history into re-prompts.
+- **Acceptance:** runs stop on repeated identical failures and on no-progress; repair re-prompts include prior errors; escalation fires.
+- **Touches:** `runs.ts` repair loop, `failure-classifier.ts` + `repair-strategist.ts` (wire them), `repair-task-builder.ts`.
+
+### Phase 37 — Typed Gates + Sequencing + Worker Isolation
+- **Goal:** catch failures at checkpoints and stop parallel workers corrupting each other.
+- **Why:** reviewers run blind and parallel writers share one tree (drift + false "missing X" failures).
+- **Deliverables:** typed gates returning PASS/FAIL/RETRY at checkpoints with the failure reason injected into a bounded retry (port `engine/GatePolicy.psm1`); producer-then-reviewer sequencing; per-worker isolated output (dir or git worktree) with structured merge + conflict→quarantine (port `WorktreeExecutor.psm1`); pre-run DAG integrity check (reject cycles / inputs not produced by a prior step).
+- **Acceptance:** gates can RETRY-with-reason and halt cleanly; reviewers always see producer output; conflicting parallel changes surface as detected conflicts, not silent corruption.
+- **Touches:** `phase-executor.ts`, `project-writer.ts` (isolation), new gate service, `roadmap-generator.ts` (DAG integrity).
 
 ---
 
@@ -478,6 +554,12 @@ When complete, update to:
 | 29 | Final Acceptance & Release | UAT, audit, release | Not Started | |
 | 30 | Agent Prompt Language Constraints | Enforce target language/stack in all task prompts | Not Started | |
 | 31 | Run Artifact Materialization | Write generated files to disk on run completion | Not Started | |
+| 32 | Evidence Spine & Lifecycle Invariants | Truthful events/status so failures name their cause | **Complete** | 2026-06-28 |
+| 33 | Green Baseline Before Repair | Known-good baseline so repair can converge | **Not Started — CRITICAL PATH** | |
+| 34 | Shared-Contract / Traceability Spine | Stop cross-worker interface drift | **Not Started — CRITICAL PATH** | |
+| 35 | Wire the Vendored Contracts | Hardening compiler + job-type casting | **Not Started — CRITICAL PATH** | |
+| 36 | Signature-Aware Planner-First Repair | Bounded, converging, escalating repair | **Not Started — CRITICAL PATH** | |
+| 37 | Typed Gates + Sequencing + Isolation | Gates w/ retry, reviewer-after-producer, worker isolation | **Not Started — CRITICAL PATH** | |
 
 ---
 

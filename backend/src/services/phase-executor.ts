@@ -15,6 +15,7 @@ export interface PhaseExecutionInput {
   variables?: Record<string, string>;
   runId?: string;
   stackConstraints?: StackConstraints;
+  onTaskStart?: (taskId: string, agentId: string) => Promise<void>;
   onTaskComplete?: (taskId: string, output: TaskExecutionOutput) => Promise<void>;
 }
 
@@ -59,6 +60,10 @@ export class PhaseExecutor {
             duration: 0,
           });
           continue;
+        }
+
+        if (input.onTaskStart) {
+          await input.onTaskStart(task.id, agentId);
         }
 
         // Execute task

@@ -6,7 +6,8 @@ import { ValidationService } from '../services/validation.js';
 import { RunService } from '../services/run-service.js';
 import { CostTracker } from '../services/cost-tracker.js';
 import { ErrorLogger } from '../services/error-logger.js';
-import { AgentRegistry } from '../services/agent-registry.js';
+import { AgentRegistry } from '@fuhrhaus/orchestration-core';
+import { PersistenceAgentStore } from '../services/persistence-agent-store.js';
 import { PromptRegistry } from '../services/prompt-registry.js';
 import { TaskExecutor } from '../services/task-executor.js';
 import { PhaseExecutor } from '../services/phase-executor.js';
@@ -18,6 +19,12 @@ import { OutputParser } from '../services/output-parser.js';
 import { Roadmap, Run } from '@unifiedaitoolbox/shared';
 import { createResponse, ApiError } from '../types/responses.js';
 import { createGenericCrudRoutes } from './generic-crud.js';
+import { buildAgentAssignments, selectAgentForTask } from '../services/agent-selector.js';
+import { ProjectWriter, projectOutputDir } from '../services/project-writer.js';
+import { ProjectValidator, type ProjectValidationReport } from '../services/project-validator.js';
+import { buildRepairTasks } from '../services/repair-task-builder.js';
+import { RunEventLog } from '../services/run-event-log.js';
+import { transitionRunStatus, decideTerminalStatus, toValidationOutcome } from '../services/run-status.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -206,7 +213,7 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
   const promptsDir = path.join(__dirname, '..', '..', '..', 'Prompts');
   const artifactsDir = getArtifactsDirectory(persistence);
 
-  const agentRegistry = new AgentRegistry(persistence, agentsDir);
+  const agentRegistry = new AgentRegistry(new PersistenceAgentStore(persistence), agentsDir);
   const promptRegistry = new PromptRegistry(persistence, promptsDir);
   await agentRegistry.initialize();
   await promptRegistry.initialize();
@@ -220,9 +227,20 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
   const outputParser = new OutputParser();
   const existingArtifacts = await buildExistingArtifactMap(artifactStore, runId);
 
+  // Project writer — writes extracted files to output/projects/{runId}/ so the
+  // Validator can run real build tools against them.
+  const repoRoot = path.join(__dirname, '..', '..', '..');
+  const projectWriter = new ProjectWriter(projectOutputDir(repoRoot, runId));
+  const eventLog = new RunEventLog(persistence.getDataDir());
+  // Tracks the most recent phase validation so terminal status reflects quality, not just "ran".
+  let lastValidationReport: ProjectValidationReport | null = null;
+
+  // Set to true after exhausting repair attempts on npm-install without fixing it.
+  // Reset to false if a repair agent writes a new package.json, allowing one more retry.
+  let npmGaveUp = false;
+
   const agents = agentRegistry.getAllAgents();
-  const defaultAgent = agents[0];
-  if (!defaultAgent) {
+  if (!agents.length) {
     console.warn(`[auto-exec] No agents available for run ${runId} — execution skipped`);
     return;
   }
@@ -231,6 +249,10 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
   if (!currentRun) return;
 
   const runStartTime = new Date();
+  await eventLog.emit(runId, 'run_started', {
+    msg: currentRun.title,
+    data: { phases: currentRun.phases.length, attempt_number: 1 },
+  });
 
   for (const phase of currentRun.phases) {
     // Re-read in case run was paused/cancelled externally
@@ -250,22 +272,30 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
     await persistence.update<Run>('runs', runId, inProgressRun);
     currentRun = inProgressRun;
 
-    // Assign default agent to every task in this phase
-    const agentAssignments: Record<string, string> = {};
-    for (const task of phase.tasks) {
-      agentAssignments[task.id] = defaultAgent.id;
-    }
+    // Select the best-fit agent per task based on capabilities and task content
+    const agentAssignments = buildAgentAssignments(phase, agents);
 
     const phaseResult = await phaseExecutor.executePhase({
       phase,
       agentAssignments,
       runId,
       stackConstraints: currentRun.stackConstraints,
+      onTaskStart: async (taskId, agentId) => {
+        await eventLog.emit(runId, 'agent_started', { agent: agentId, stage: phase.name, step: taskId });
+      },
       onTaskComplete: async (taskId, output) => {
+        await eventLog.emit(runId, 'agent_completed', {
+          agent: agentAssignments[taskId],
+          stage: phase.name,
+          step: taskId,
+          level: output.success ? 'info' : 'warn',
+          data: { success: output.success, ...(output.error ? { error: output.error } : {}) },
+        });
         if (!output.success || !output.output) {
           return;
         }
 
+        // Store in artifact DB (internal record-keeping).
         const materialized = await materializeTaskArtifacts(
           artifactStore,
           outputParser,
@@ -278,11 +308,30 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
             output: output.output,
           }
         );
-
         for (const error of materialized.errors) {
-          console.warn(
-            `[auto-exec] Failed to materialize artifact for task ${taskId}: ${error.message}`
+          console.warn(`[auto-exec] Artifact save error for ${taskId}: ${error.message}`);
+        }
+
+        // Also write extracted files to the live project directory so
+        // the Validator can run tsc/vitest against real files on disk.
+        const fileArtifacts = outputParser.parseTaskOutput(output.output);
+        if (fileArtifacts.length > 0) {
+          const writeResult = await projectWriter.write(fileArtifacts);
+          console.log(
+            `[auto-exec] Task ${taskId}: wrote ${writeResult.written.length} file(s) to project dir` +
+            (writeResult.errors.length ? `, ${writeResult.errors.length} error(s)` : '')
           );
+          for (const writtenPath of writeResult.written) {
+            await eventLog.emit(runId, 'artifact_created', {
+              agent: agentAssignments[taskId],
+              stage: phase.name,
+              step: taskId,
+              data: { path: writtenPath, produced_by: agentAssignments[taskId] },
+            });
+          }
+          for (const err of writeResult.errors) {
+            console.warn(`[auto-exec] Write error — ${err.path}: ${err.message}`);
+          }
         }
       },
     });
@@ -321,32 +370,147 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
     currentRun = afterPhaseRun;
 
     if (!phaseResult.success) {
-      const failedRun: Run = {
-        ...currentRun,
-        status: 'failed',
-        errorMessage: phaseResult.error || `Phase "${phase.name}" failed`,
-        completedAt: now,
-      };
-      await persistence.update<Run>('runs', runId, failedRun);
+      await transitionRunStatus(persistence, eventLog, runId, 'failed', {
+        reason: phaseResult.error || `Phase "${phase.name}" failed`,
+        validation: toValidationOutcome(lastValidationReport),
+      });
       return;
+    }
+
+    // Validate → Repair → Re-validate loop. Capped at MAX_REPAIR_ATTEMPTS per phase.
+    const MAX_REPAIR_ATTEMPTS = 3;
+    let report: ProjectValidationReport | null = null;
+
+    try {
+      if (npmGaveUp) {
+        // With a known-broken node_modules, tsc/vitest errors would be misleading.
+        // Skip the full validation block so the repair loop doesn't chase false errors.
+        console.log(`[validator] Phase "${phase.name}" — npm-install gave up in prior phase, skipping validation`);
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+
+      await eventLog.emit(runId, 'validation_started', { stage: phase.name });
+      report = await new ProjectValidator(projectWriter.root, runId).validate(['tsc', 'vitest']);
+      console.log(`[validator] Phase "${phase.name}": ${report.summary}`);
+
+      let attempt = 0;
+      while (!report.passed && attempt < MAX_REPAIR_ATTEMPTS) {
+        attempt++;
+        console.log(`[repair] Phase "${phase.name}" attempt ${attempt}/${MAX_REPAIR_ATTEMPTS}`);
+
+        const repairTasks = await buildRepairTasks(report.results, projectWriter.root);
+        if (!repairTasks.length) {
+          console.warn('[repair] No repair tasks derived — stopping loop');
+          break;
+        }
+
+        for (const repairTask of repairTasks) {
+          const agent = selectAgentForTask(repairTask, agents);
+          console.log(`[repair] "${repairTask.name}" → ${agent.name}`);
+
+          const result = await taskExecutor.executeTask({
+            task: {
+              id: repairTask.id,
+              name: repairTask.name,
+              description: repairTask.description,
+              status: 'pending',
+              dependencies: [],
+            },
+            agentId: agent.id,
+            runId,
+            phaseId: phase.id,
+          });
+
+          if (result.success && result.output) {
+            const repairedFiles = outputParser.parseTaskOutput(result.output);
+            if (repairedFiles.length) {
+              const wr = await projectWriter.write(repairedFiles);
+              console.log(`[repair] Wrote ${wr.written.length} repaired file(s): ${wr.written.join(', ')}`);
+            } else {
+              console.warn(`[repair] Agent responded for ${repairTask.id} but extracted no files`);
+            }
+          } else {
+            console.warn(`[repair] Task ${repairTask.id} failed: ${result.error}`);
+          }
+        }
+
+        report = await new ProjectValidator(projectWriter.root, runId).validate(['tsc', 'vitest']);
+        console.log(`[repair] After attempt ${attempt}: ${report.summary}`);
+      }
+
+      if (!report.passed) {
+        console.warn(
+          `[repair] Phase "${phase.name}" still has ${report.totalErrors} error(s) ` +
+          `after ${Math.min(attempt, MAX_REPAIR_ATTEMPTS)} repair attempt(s) — continuing run`
+        );
+      } else {
+        // If npm install is now passing, clear the gave-up flag.
+        const installResult = report.results.find(r => r.tool === 'npm-install');
+        if (installResult?.passed) npmGaveUp = false;
+      }
+
+      // If npm-install still failing after all repair attempts, set the flag so
+      // subsequent phases don't waste 3 more repair cycles on the same package.json.
+      if (!report.passed) {
+        const installFailed = report.results.find(r => r.tool === 'npm-install' && !r.passed);
+        if (installFailed && attempt >= MAX_REPAIR_ATTEMPTS) {
+          npmGaveUp = true;
+        }
+      }
+
+      if (report) {
+        lastValidationReport = report;
+        await eventLog.emit(runId, 'validation_completed', {
+          stage: phase.name,
+          level: report.passed ? 'info' : 'error',
+          data: {
+            validation_status: report.passed ? 'passed' : 'failed',
+            totalErrors: report.totalErrors,
+            summary: report.summary,
+          },
+        });
+      }
+
+      await (persistence.create as (c: string, d: unknown) => Promise<unknown>)(
+        'validation-reports', { ...report, phaseId: phase.id }
+      ).catch(() => { /* non-fatal */ });
+
+    } catch (validationErr) {
+      console.warn(
+        `[validator] Phase "${phase.name}" validation skipped:`,
+        validationErr instanceof Error ? validationErr.message : validationErr
+      );
     }
   }
 
-  // All phases done — mark completed and generate summary
+  // All phases done — apply the terminal-honesty guard (Phase 32) and generate summary.
   currentRun = (await persistence.read<Run>('runs', runId)) || currentRun;
   if (currentRun.status === 'running') {
-    const completedAt = new Date();
-    const completedRun: Run = {
-      ...currentRun,
-      status: 'completed',
-      completedAt: completedAt.toISOString(),
-    };
-    await persistence.update<Run>('runs', runId, completedRun);
+    const allArtifacts = outputParser.parseTaskOutput(
+      currentRun.phases.flatMap(p => p.tasks.map(t => t.output)).filter(Boolean)
+    );
+    const validation = toValidationOutcome(lastValidationReport);
+    const decision = decideTerminalStatus({ materializedCount: allArtifacts.length, validation });
+
+    // Write project manifest so the Validator knows what was produced.
+    await projectWriter.writeManifest(allArtifacts, runId).catch(e =>
+      console.warn('[auto-exec] Manifest write failed:', e)
+    );
+
+    const terminalRun = await transitionRunStatus(persistence, eventLog, runId, decision.status, {
+      reason: decision.reason,
+      validation,
+    });
 
     // Generate and persist run summary
     try {
-      await refreshRunSummary(persistence, artifactStore, runCompletion, completedRun, runStartTime);
-      console.log(`[auto-exec] Run ${runId} complete — summary saved`);
+      await refreshRunSummary(persistence, artifactStore, runCompletion, terminalRun || currentRun, runStartTime);
+      console.log(
+        `[auto-exec] Run ${runId} ${decision.status}` +
+          (decision.reason ? ` — ${decision.reason}` : '') +
+          ` (validation: ${validation.status}) — summary saved`
+      );
     } catch (summaryErr) {
       console.warn(`[auto-exec] Failed to generate summary for run ${runId}:`, summaryErr);
     }
@@ -359,6 +523,13 @@ export const createRunRoutes = (
 ) => {
   const router = Router();
   const runService = new RunService();
+  const eventLog = new RunEventLog(persistence.getDataDir());
+
+  // Canonical run event stream (Phase 32 evidence spine)
+  router.get('/:id/events', async (req: Request, res: Response) => {
+    const events = await eventLog.read(req.params.id);
+    res.json(createResponse(events));
+  });
 
   // Create run from approved roadmap
   router.post('/from-roadmap/:roadmapId', async (req: Request, res: Response) => {
@@ -378,6 +549,11 @@ export const createRunRoutes = (
       // Create run from roadmap
       const runData = runService.createRunFromRoadmap(roadmap, roadmap.applicationId);
       const run = await persistence.create<Run>('runs', runData);
+
+      await eventLog.emit(run.id, 'run_created', {
+        msg: run.title,
+        data: { job_type: 'build_app', requested_objective: roadmap.title, roadmapId },
+      });
 
       res.status(201).json(createResponse(run));
     } catch (error) {

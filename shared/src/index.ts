@@ -173,6 +173,51 @@ export interface Run extends BaseEntity {
   errorMessage?: string;
   totalCost?: CostMetrics;
   phaseCosts?: PhaseCost[];
+  // Quality outcome, kept SEPARATE from execution `status` (execution-state ≠ quality-outcome).
+  validation?: RunValidationOutcome;
+}
+
+// --- Orchestration evidence spine: canonical run lifecycle events + quality outcome ---
+// Ported from the mature UnifiedAIToolbox EVENT_TAXONOMY / RUN_LIFECYCLE contracts
+// (TS-idiomatic camelCase; same semantics). Persisted append-only per run.
+
+export type RunValidationStatus = 'passed' | 'failed' | 'not_run' | 'insufficient_evidence';
+
+export interface RunValidationOutcome {
+  status: RunValidationStatus;
+  totalErrors?: number;
+  summary?: string;
+  checkedAt?: string;
+}
+
+export type OrchestrationEventType =
+  | 'run_created'
+  | 'run_queued'
+  | 'run_started'
+  | 'agent_started'
+  | 'agent_progress'
+  | 'agent_blocked'
+  | 'agent_completed'
+  | 'artifact_created'
+  | 'validation_started'
+  | 'validation_completed'
+  | 'run_completed'
+  | 'run_failed'
+  | 'run_recovered';
+
+export type OrchestrationEventLevel = 'debug' | 'info' | 'warn' | 'error';
+
+export interface OrchestrationEvent {
+  ts: string;
+  level: OrchestrationEventLevel;
+  runId: string;
+  type: OrchestrationEventType;
+  msg?: string;
+  agent?: string;
+  stage?: string;
+  step?: string;
+  attemptId?: string;
+  data?: Record<string, unknown>;
 }
 
 export interface AgentIOContract {
