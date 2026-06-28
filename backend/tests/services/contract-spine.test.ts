@@ -83,4 +83,20 @@ describe('checkCoherence (anti-drift)', () => {
     expect(report.status).toBe('drift');
     expect(report.drift[0].symbol).toBe('Idea');
   });
+
+  it('does NOT flag a type re-referenced in a test file as drift', () => {
+    const report = checkCoherence('r1', [
+      { path: 'src/idea.ts', content: 'export interface Idea { title: string }' },
+      { path: 'src/idea.test.ts', content: 'interface Idea { title: string }\n// local mock' },
+    ]);
+    expect(report.status).toBe('coherent');
+  });
+
+  it('does NOT flag duplicate class names as drift (local impls, not shared types)', () => {
+    const report = checkCoherence('r1', [
+      { path: 'src/a.ts', content: 'export class Helper {}' },
+      { path: 'src/b.ts', content: 'export class Helper {}' },
+    ]);
+    expect(report.status).toBe('coherent');
+  });
 });

@@ -22,7 +22,7 @@ import { createGenericCrudRoutes } from './generic-crud.js';
 import { buildAgentAssignments, selectAgentForTask } from '../services/agent-selector.js';
 import { ProjectWriter, projectOutputDir } from '../services/project-writer.js';
 import { ProjectValidator, type ProjectValidationReport } from '../services/project-validator.js';
-import { buildRepairTasks } from '../services/repair-task-builder.js';
+import { buildRepairTasks, buildDriftRepairTask } from '../services/repair-task-builder.js';
 import { RunEventLog } from '../services/run-event-log.js';
 import { transitionRunStatus, decideTerminalStatus, toValidationOutcome } from '../services/run-status.js';
 import { captureBaseline } from '../services/baseline.js';
@@ -539,6 +539,69 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
         const installFailed = report.results.find(r => r.tool === 'npm-install' && !r.passed);
         if (installFailed && attempt >= repairPolicy.maxRepairGenerations) {
           npmGaveUp = true;
+        }
+      }
+
+      // Phase 34 follow-on: silent-drift repair. Consolidate duplicate type definitions that
+      // compiled CLEAN but are incoherent (tsc won't flag them). Strictly safe: only on a green
+      // build, bounded + no-progress guarded, fresh contract injected, and ROLLED BACK if the
+      // consolidation regresses the build — so it can never turn a passing phase red.
+      if (!baseline.transient && report.passed) {
+        let files = await readProjectFiles(projectWriter.root);
+        let coherence = checkCoherence(runId, files);
+        if (coherence.status === 'drift') {
+          const greenReport = report;
+          const snapshot = files.map(f => ({ filePath: f.path, content: f.content }));
+          let driftSig = coherence.drift.map(d => d.symbol).sort().join(',');
+          let driftGen = 0;
+
+          while (coherence.status === 'drift' && driftGen < 2) {
+            driftGen++;
+            console.log(
+              `[drift] Phase "${phase.name}" gen ${driftGen}: consolidating ${coherence.drift.length} drifted symbol(s): ` +
+              coherence.drift.map(d => d.symbol).join(', ')
+            );
+            const contractContent = coherence.contractModule
+              ? files.find(f => f.path === coherence.contractModule)?.content
+              : undefined;
+            const driftTask = buildDriftRepairTask(coherence.drift, coherence.contractModule);
+            const agent = selectAgentForTask(driftTask, agents);
+            const driftResult = await taskExecutor.executeTask({
+              task: { id: driftTask.id, name: driftTask.name, description: driftTask.description, status: 'pending', dependencies: [] },
+              agentId: agent.id,
+              runId,
+              phaseId: phase.id,
+              sharedContract: contractContent ?? sharedContract,
+            });
+            if (driftResult.success && driftResult.output) {
+              const fixed = outputParser.parseTaskOutput(driftResult.output);
+              if (fixed.length) {
+                const wr = await projectWriter.write(fixed);
+                console.log(`[drift] Wrote ${wr.written.length} consolidated file(s): ${wr.written.join(', ')}`);
+              }
+            }
+            files = await readProjectFiles(projectWriter.root);
+            const next = checkCoherence(runId, files);
+            const nextSig = next.drift.map(d => d.symbol).sort().join(',');
+            coherence = next;
+            if (nextSig === driftSig) {
+              console.warn(`[drift] Phase "${phase.name}": no progress on drift — stopping`);
+              break;
+            }
+            driftSig = nextSig;
+          }
+
+          // Accept the consolidation only if the build is STILL green; otherwise roll back and
+          // keep the (harmless, compiling) drift rather than regress a passing phase.
+          const postReport = await new ProjectValidator(projectWriter.root, runId).validate(['tsc', 'vitest']);
+          if (postReport.passed) {
+            report = postReport;
+            console.log(`[drift] Phase "${phase.name}": consolidation kept the build green`);
+          } else {
+            await projectWriter.write(snapshot);
+            report = greenReport;
+            console.warn(`[drift] Phase "${phase.name}": consolidation regressed the build — rolled back, drift left in place`);
+          }
         }
       }
 

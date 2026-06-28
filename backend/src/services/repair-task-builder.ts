@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import type { ValidationError, ValidationResult } from './project-validator.js';
+import type { DriftFinding } from './contract-spine.js';
 
 export type RepairCategory = 'package-version' | 'type-error' | 'missing-tests' | 'lint' | 'general';
 
@@ -228,6 +229,37 @@ async function buildLintRepairTasks(
     });
   }
   return tasks;
+}
+
+// Phase 34 follow-on: a targeted repair task for interface drift (a shared type defined in
+// more than one file). Consolidates each duplicated type into one canonical module and makes
+// the other files import it — fixing the "compiles-but-incoherent" silent-drift case that tsc
+// would not flag.
+export function buildDriftRepairTask(
+  drift: DriftFinding[],
+  contractModule: string | null
+): RepairTask {
+  const lines = drift
+    .map(d => `- \`${d.symbol}\` is defined in: ${d.files.join(', ')}`)
+    .join('\n');
+  const canonical = contractModule
+    ? `the shared contract module (\`${contractModule}\`)`
+    : 'a single canonical module';
+
+  return {
+    id: 'repair-drift',
+    category: 'general',
+    name: 'Consolidate duplicate type definitions (interface drift)',
+    description:
+      `The project defines the same type in more than one file (interface drift):\n\n` +
+      lines +
+      `\n\nConsolidate each duplicated type: keep ONE definition in ${canonical}, delete the ` +
+      `duplicate definitions in the other files, and make those files IMPORT the type instead. ` +
+      `Do not change behavior. Output every file you change:\n\n` +
+      `## File: path/to/file.ts\n\`\`\`typescript\n[complete corrected file]\n\`\`\`\n\n` +
+      `NO prose. NO explanation. ONLY ## File: blocks.`,
+    errors: [],
+  };
 }
 
 // npm install failures — read package.json so the agent has content to rewrite.

@@ -96,11 +96,17 @@ export function findContractModule(files: ProjectFile[]): ProjectFile | null {
  * is `duplicate_definition` drift — multiple workers reinvented the same interface.
  */
 export function checkCoherence(runId: string, files: ProjectFile[]): TraceabilityReport {
-  const tsFiles = files.filter(f => f.path.endsWith('.ts'));
+  // Drift is about SHARED type definitions across source files — exclude test files (which
+  // legitimately re-reference/mock types) and `class` declarations (local impls, not shared
+  // contract types). Mirrors findContractModule's exclusions.
+  const tsFiles = files.filter(
+    f => f.path.endsWith('.ts') && !f.path.endsWith('.test.ts') && !f.path.endsWith('.spec.ts')
+  );
 
   const declMap = new Map<string, Set<string>>();
   for (const f of tsFiles) {
     for (const d of extractDeclarations(f.content)) {
+      if (d.kind === 'class') continue;
       if (!declMap.has(d.name)) declMap.set(d.name, new Set());
       declMap.get(d.name)!.add(f.path);
     }

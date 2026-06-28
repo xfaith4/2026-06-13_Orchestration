@@ -1,6 +1,28 @@
 import { describe, it, expect } from 'vitest';
-import { buildRepairTasks } from '../../src/services/repair-task-builder.js';
+import { buildRepairTasks, buildDriftRepairTask } from '../../src/services/repair-task-builder.js';
 import type { ValidationResult } from '../../src/services/project-validator.js';
+
+describe('buildDriftRepairTask', () => {
+  it('names the drifted symbols, their files, and the canonical contract module', () => {
+    const task = buildDriftRepairTask(
+      [{ symbol: 'PhaseStatus', kind: 'duplicate_definition', files: ['src/a.ts', 'src/b.ts'] }],
+      'src/contracts.ts'
+    );
+    expect(task.id).toBe('repair-drift');
+    expect(task.description).toContain('PhaseStatus');
+    expect(task.description).toContain('src/a.ts');
+    expect(task.description).toContain('src/contracts.ts');
+    expect(task.description).toContain('## File:');
+  });
+
+  it('falls back gracefully when there is no contract module', () => {
+    const task = buildDriftRepairTask(
+      [{ symbol: 'Idea', kind: 'duplicate_definition', files: ['src/a.ts', 'src/b.ts'] }],
+      null
+    );
+    expect(task.description).toContain('a single canonical module');
+  });
+});
 
 // Minimal project root — tsc tasks read files but we control the errors directly,
 // so the file-read will simply fail and fileContent will be undefined (valid path).
