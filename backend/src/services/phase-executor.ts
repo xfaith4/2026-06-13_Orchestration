@@ -15,6 +15,7 @@ export interface PhaseExecutionInput {
   variables?: Record<string, string>;
   runId?: string;
   stackConstraints?: StackConstraints;
+  sharedContract?: string;
   onTaskStart?: (taskId: string, agentId: string) => Promise<void>;
   onTaskComplete?: (taskId: string, output: TaskExecutionOutput) => Promise<void>;
 }
@@ -75,6 +76,7 @@ export class PhaseExecutor {
           runId: input.runId,
           phaseId,
           stackConstraints: input.stackConstraints,
+          sharedContract: input.sharedContract,
         };
 
         const result = await this.taskExecutor.executeTask(executionInput);

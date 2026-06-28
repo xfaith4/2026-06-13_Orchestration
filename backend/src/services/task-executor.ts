@@ -1,12 +1,10 @@
 import { ExecutionTask, CostMetrics, StackConstraints } from '@unifiedaitoolbox/shared';
-import { AgentRegistry } from './agent-registry.js';
+import { AgentRegistry, CostCalculator, ErrorHandler, LLMClient } from '@fuhrhaus/orchestration-core';
 import { PromptRegistry } from './prompt-registry.js';
-import { CostCalculator } from './cost-calculator.js';
-import { ErrorHandler } from './error-handler.js';
 import { RecoveryService } from './recovery-service.js';
-import { LLMClient } from './llm-client.js';
 import { OutputParser } from './output-parser.js';
 import { StackConstraintBuilder } from './stack-constraint-builder.js';
+import { rankAgentsForTask } from './agent-selector.js';
 
 export interface TaskExecutionInput {
   task: ExecutionTask;
@@ -18,6 +16,9 @@ export interface TaskExecutionInput {
   runId?: string;
   phaseId?: string;
   stackConstraints?: StackConstraints;
+  // Phase 34: the shared contract module content to inject so the worker imports shared
+  // types instead of redefining them (anti-drift).
+  sharedContract?: string;
 }
 
 export interface TaskExecutionWarning {
@@ -183,7 +184,10 @@ export class TaskExecutor {
         promptContent = prompt.content;
         await this.promptRegistry.recordUsage(input.promptId);
       } else {
-        promptContent = agent.description || FALLBACK_SYSTEM_PROMPT;
+        // Prefer the agent's YAML prompt (compressed directive) over the role
+        // description one-liner.  Falls back to description, then the generic
+        // fallback, so any agent without a YAML prompt still works.
+        promptContent = agent.prompt || agent.description || FALLBACK_SYSTEM_PROMPT;
       }
 
       // Substitute variables in prompt
@@ -191,7 +195,7 @@ export class TaskExecutor {
 
       // Execute with retry logic
       const result = await this.recoveryService.executeWithCircuitBreaker(
-        () => this.runTaskExecution(taskId, agent.name, finalPrompt, input.task, input.stackConstraints),
+        () => this.runTaskExecution(taskId, agent.name, finalPrompt, input.task, input.stackConstraints, input.sharedContract),
         `task-${taskId}`
       );
 
@@ -259,10 +263,11 @@ export class TaskExecutor {
     agentName: string,
     systemPrompt: string,
     task: ExecutionTask,
-    stackConstraints?: StackConstraints
+    stackConstraints?: StackConstraints,
+    sharedContract?: string
   ): Promise<{ status: string; result?: unknown }> {
-    if (LLMClient.isAvailable()) {
-      return this.runWithLLM(taskId, agentName, systemPrompt, task, stackConstraints);
+    if (process.env.ANTHROPIC_API_KEY) {
+      return this.runWithLLM(taskId, agentName, systemPrompt, task, stackConstraints, sharedContract);
     }
     return this.runMock(taskId, agentName, task);
   }
@@ -272,21 +277,28 @@ export class TaskExecutor {
     agentName: string,
     systemPrompt: string,
     task: ExecutionTask,
-    stackConstraints?: StackConstraints
+    stackConstraints?: StackConstraints,
+    sharedContract?: string
   ): Promise<{ status: string; result?: unknown }> {
-    const client = new LLMClient();
+    const client = new LLMClient({ apiKey: process.env.ANTHROPIC_API_KEY! });
     const stackBlock = this.stackConstraintBuilder.build(stackConstraints);
 
+    // Phase 34: inject the shared contract so the worker imports shared types instead of
+    // redefining them (capped to bound token cost).
+    const contractBlock = sharedContract
+      ? `SHARED CONTRACT — import all shared types from the contracts module; DO NOT redefine any type below:\n\`\`\`ts\n${sharedContract.slice(0, 8000)}\n\`\`\`\n\n`
+      : '';
+
+    // Compressed dispatch message — no interpretation space.
+    // The task description is already a compact directive (enforced by the roadmap generator).
+    // The format example is one line; no rules list needed.
+    const stackLine = stackBlock ? stackBlock + '\n' : '';
     const userMessage =
-      `${stackBlock}\n\n` +
-      `Task: ${task.name}\n\n` +
-      `Description: ${task.description}\n\n` +
-      (task.estimatedHours
-        ? `Estimated effort: ${task.estimatedHours} hours\n\n`
-        : '') +
-      `Produce complete, detailed output for this task. If this is a code task, ` +
-      `write production-ready code with appropriate comments. If this is a design ` +
-      `or documentation task, write thorough, actionable content.`;
+      contractBlock +
+      stackLine +
+      `TASK: ${task.name}\n` +
+      task.description +
+      `\n\nFor each output file:\n## File: path/to/file.ext\n\`\`\`lang\ncontent\`\`\``;
 
     const result = await client.call({
       systemPrompt,
@@ -441,11 +453,7 @@ export class TaskExecutor {
     const agents = this.agentRegistry.getAllAgents();
     const prompts = this.promptRegistry.getAllPrompts();
 
-    const agentSuggestions = agents.slice(0, 3).map((a, i) => ({
-      id: a.id,
-      name: a.name,
-      score: 1 - i * 0.1,
-    }));
+    const agentSuggestions = rankAgentsForTask(task, agents);
 
     const promptSuggestions = prompts.slice(0, 3).map((p, i) => ({
       id: p.id,
@@ -453,11 +461,15 @@ export class TaskExecutor {
       relevance: 1 - i * 0.1,
     }));
 
+    const avgTokensPerTask = 2500;
+    const costPerToken = 0.000000625; // claude-haiku input estimate
+    const estimatedCost = avgTokensPerTask * costPerToken * 2; // input + output
+
     return {
       agentSuggestions,
       promptSuggestions,
-      estimatedDuration: 1000 + Math.random() * 5000,
-      estimatedCost: 0.01 + Math.random() * 0.05,
+      estimatedDuration: 8000 + (task.estimatedHours || 1) * 1000,
+      estimatedCost,
     };
   }
 }

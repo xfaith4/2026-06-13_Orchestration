@@ -16,7 +16,7 @@ import { RunCompletion } from '../services/run-completion.js';
 import { FailureClassifier } from '../services/failure-classifier.js';
 import { RepairStrategist } from '../services/repair-strategist.js';
 import { OutputParser } from '../services/output-parser.js';
-import { Roadmap, Run } from '@unifiedaitoolbox/shared';
+import { Roadmap, Run, RunValidationOutcome } from '@unifiedaitoolbox/shared';
 import { createResponse, ApiError } from '../types/responses.js';
 import { createGenericCrudRoutes } from './generic-crud.js';
 import { buildAgentAssignments, selectAgentForTask } from '../services/agent-selector.js';
@@ -25,6 +25,8 @@ import { ProjectValidator, type ProjectValidationReport } from '../services/proj
 import { buildRepairTasks } from '../services/repair-task-builder.js';
 import { RunEventLog } from '../services/run-event-log.js';
 import { transitionRunStatus, decideTerminalStatus, toValidationOutcome } from '../services/run-status.js';
+import { captureBaseline } from '../services/baseline.js';
+import { readProjectFiles, findContractModule, checkCoherence } from '../services/contract-spine.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -234,6 +236,7 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
   const eventLog = new RunEventLog(persistence.getDataDir());
   // Tracks the most recent phase validation so terminal status reflects quality, not just "ran".
   let lastValidationReport: ProjectValidationReport | null = null;
+  let lastValidation: RunValidationOutcome | null = null;
 
   // Set to true after exhausting repair attempts on npm-install without fixing it.
   // Reset to false if a repair agent writes a new package.json, allowing one more retry.
@@ -275,11 +278,21 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
     // Select the best-fit agent per task based on capabilities and task content
     const agentAssignments = buildAgentAssignments(phase, agents);
 
+    // Phase 34: inject the accumulating shared contract so this phase's workers import
+    // shared types instead of redefining them (anti-drift).
+    const priorFiles = await readProjectFiles(projectWriter.root);
+    const contractModule = findContractModule(priorFiles);
+    const sharedContract = contractModule ? contractModule.content : undefined;
+    if (contractModule) {
+      console.log(`[contract] Phase "${phase.name}": injecting shared contract from ${contractModule.path}`);
+    }
+
     const phaseResult = await phaseExecutor.executePhase({
       phase,
       agentAssignments,
       runId,
       stackConstraints: currentRun.stackConstraints,
+      sharedContract,
       onTaskStart: async (taskId, agentId) => {
         await eventLog.emit(runId, 'agent_started', { agent: agentId, stage: phase.name, step: taskId });
       },
@@ -372,7 +385,7 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
     if (!phaseResult.success) {
       await transitionRunStatus(persistence, eventLog, runId, 'failed', {
         reason: phaseResult.error || `Phase "${phase.name}" failed`,
-        validation: toValidationOutcome(lastValidationReport),
+        validation: lastValidation ?? toValidationOutcome(lastValidationReport),
       });
       return;
     }
@@ -394,8 +407,20 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
       report = await new ProjectValidator(projectWriter.root, runId).validate(['tsc', 'vitest']);
       console.log(`[validator] Phase "${phase.name}": ${report.summary}`);
 
+      // Phase 33: capture a typed baseline BEFORE any repair, and never repair the
+      // environment — a transient/IO failure (npm EPERM, file lock, network) is degraded
+      // to `insufficient_evidence`, not chased as a code defect.
+      const baseline = captureBaseline(runId, phase.id, report);
+      await (persistence.create as (c: string, d: unknown) => Promise<unknown>)(
+        'validation-baselines', baseline
+      ).catch(() => { /* non-fatal */ });
+      console.log(
+        `[baseline] Phase "${phase.name}": ${baseline.status}, ${baseline.totalErrors} error(s)` +
+        (baseline.transient ? ' — transient/environment, skipping repair' : '')
+      );
+
       let attempt = 0;
-      while (!report.passed && attempt < MAX_REPAIR_ATTEMPTS) {
+      while (!baseline.transient && !report.passed && attempt < MAX_REPAIR_ATTEMPTS) {
         attempt++;
         console.log(`[repair] Phase "${phase.name}" attempt ${attempt}/${MAX_REPAIR_ATTEMPTS}`);
 
@@ -461,11 +486,25 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
 
       if (report) {
         lastValidationReport = report;
+        lastValidation = baseline.transient
+          ? {
+              status: 'insufficient_evidence',
+              totalErrors: report.totalErrors,
+              summary: 'Validation could not run reliably (transient/environment failure)',
+              checkedAt: new Date().toISOString(),
+            }
+          : toValidationOutcome(report);
         await eventLog.emit(runId, 'validation_completed', {
           stage: phase.name,
-          level: report.passed ? 'info' : 'error',
+          level:
+            lastValidation.status === 'failed'
+              ? 'error'
+              : lastValidation.status === 'insufficient_evidence'
+                ? 'warn'
+                : 'info',
           data: {
-            validation_status: report.passed ? 'passed' : 'failed',
+            validation_status: lastValidation.status,
+            baseline_status: baseline.status,
             totalErrors: report.totalErrors,
             summary: report.summary,
           },
@@ -490,7 +529,7 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
     const allArtifacts = outputParser.parseTaskOutput(
       currentRun.phases.flatMap(p => p.tasks.map(t => t.output)).filter(Boolean)
     );
-    const validation = toValidationOutcome(lastValidationReport);
+    const validation = lastValidation ?? toValidationOutcome(lastValidationReport);
     const decision = decideTerminalStatus({ materializedCount: allArtifacts.length, validation });
 
     // Write project manifest so the Validator knows what was produced.
@@ -498,9 +537,22 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
       console.warn('[auto-exec] Manifest write failed:', e)
     );
 
+    // Phase 34: deterministic traceability gate — surface cross-worker interface drift by name.
+    const traceability = checkCoherence(runId, await readProjectFiles(projectWriter.root));
+    await (persistence.create as (c: string, d: unknown) => Promise<unknown>)(
+      'traceability-reports', traceability
+    ).catch(() => { /* non-fatal */ });
+    if (traceability.status === 'drift') {
+      console.warn(
+        `[traceability] Run ${runId}: ${traceability.drift.length} duplicate-definition drift finding(s) — ` +
+        traceability.drift.map(d => `${d.symbol} (${d.files.length} files)`).join(', ')
+      );
+    }
+
     const terminalRun = await transitionRunStatus(persistence, eventLog, runId, decision.status, {
       reason: decision.reason,
       validation,
+      data: { driftCount: traceability.drift.length, contractModule: traceability.contractModule },
     });
 
     // Generate and persist run summary

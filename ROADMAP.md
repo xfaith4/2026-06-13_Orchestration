@@ -108,14 +108,16 @@ into "succeeded, or failed at a named component" — the precondition for every 
 - **Acceptance:** every run emits a typed event stream; no run is `completed` without materialized, validated output; status is single-owner. Port invariants from UnifiedAIToolbox `CLAUDE.md`, `docs/contracts/RUN_LIFECYCLE.md`, `EVENT_TAXONOMY.md`.
 - **Touches:** `backend/src/routes/runs.ts`, `backend/src/services/persistence.ts`, `shared/src` (Run + event types).
 
-### Phase 33 — Green Baseline Before Repair
+### Phase 33 — Green Baseline Before Repair  ✅ COMPLETE (2026-06-28)
+- **Delivered:** `backend/src/services/baseline.ts` — `captureBaseline()` records a typed pre-repair `ValidationBaseline` (status green/red/insufficient_evidence, per-tool results, error signatures, env fingerprint) persisted to the `validation-baselines` collection; `classifyValidation()` + `isTransientMessage()` flag environment/IO failures (npm EPERM, file lock, network, ENOSPC…) so the repair loop is **skipped** for transient failures (`!baseline.transient` guard) and the run reports `validation: insufficient_evidence` instead of chasing a phantom code defect; `errorSignature()` provides the convergence key Phase 36 will consume. Wired into `runs.ts` (baseline captured before the repair loop; outcome threaded to terminal status). Tests: `baseline.test.ts` (8 passing); backend `tsc --noEmit` clean. **Next: Phase 34.**
 - **Goal:** Establish a known-good "before" state so repair can tell "I broke it" from "already broken."
 - **Why:** #1 cause of non-convergent repair; the loop currently repairs blind.
 - **Deliverables:** a discovery + baseline step (install/build/test) recorded as a typed artifact (model on the already-vendored `contracts/repo_context_schema.v1.json`); repair only proceeds against a captured baseline; transient-IO failures degrade to "insufficient evidence," not code failure.
 - **Acceptance:** no repair task runs without a recorded baseline; runs distinguish pre-existing vs introduced failures.
 - **Touches:** new baseline/repo-context service, `project-validator.ts`, `runs.ts` repair loop.
 
-### Phase 34 — Shared-Contract / Traceability Spine  (anti-drift)
+### Phase 34 — Shared-Contract / Traceability Spine  ✅ COMPLETE (2026-06-28)
+- **Delivered:** `backend/src/services/contract-spine.ts` — `checkCoherence()` deterministically detects `duplicate_definition` drift (a shared type declared in >1 file = the bake-off's #1 failure, e.g. `PhaseStatus`); `findContractModule()` locates the shared contract; `extractDeclarations()` + `readProjectFiles()` support it. Injection: `sharedContract` threaded through `phase-executor` → `task-executor` (prepended to every worker prompt: "import shared types; DO NOT redefine"), accumulating from the project as it builds. Traceability gate at completion persists a `traceability-reports` artifact, logs drift by name, and surfaces `driftCount` in the `run_completed` event. Tests: `contract-spine.test.ts` (9 passing); backend `tsc --noEmit` clean. **Note:** detection + injection landed; wiring drift INTO the repair signal is Phase 36. **Next: Phase 35.**
 - **Goal:** Stop agents redefining each other's interfaces (the bake-off's #1 failure).
 - **Why:** the YAML conversion *regressed* — it dropped the cross-agent IO wiring (`source_agent`/`consumed_by`/`io_reference`) the mature `agent-library.json` used to bind producers and consumers to one field vocabulary.
 - **Deliverables:** a shared contract/type artifact produced before fan-out (ConceptualModelContract + acceptance tests) consumed by all workers; restored cross-agent IO references; a deterministic traceability check (every required contract id → file/symbol/probe), reviewer-reconciled.
@@ -555,8 +557,8 @@ When complete, update to:
 | 30 | Agent Prompt Language Constraints | Enforce target language/stack in all task prompts | Not Started | |
 | 31 | Run Artifact Materialization | Write generated files to disk on run completion | Not Started | |
 | 32 | Evidence Spine & Lifecycle Invariants | Truthful events/status so failures name their cause | **Complete** | 2026-06-28 |
-| 33 | Green Baseline Before Repair | Known-good baseline so repair can converge | **Not Started — CRITICAL PATH** | |
-| 34 | Shared-Contract / Traceability Spine | Stop cross-worker interface drift | **Not Started — CRITICAL PATH** | |
+| 33 | Green Baseline Before Repair | Known-good baseline so repair can converge | **Complete** | 2026-06-28 |
+| 34 | Shared-Contract / Traceability Spine | Stop cross-worker interface drift | **Complete** | 2026-06-28 |
 | 35 | Wire the Vendored Contracts | Hardening compiler + job-type casting | **Not Started — CRITICAL PATH** | |
 | 36 | Signature-Aware Planner-First Repair | Bounded, converging, escalating repair | **Not Started — CRITICAL PATH** | |
 | 37 | Typed Gates + Sequencing + Isolation | Gates w/ retry, reviewer-after-producer, worker isolation | **Not Started — CRITICAL PATH** | |
