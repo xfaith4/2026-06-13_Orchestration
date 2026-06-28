@@ -132,7 +132,8 @@ into "succeeded, or failed at a named component" — the precondition for every 
 - **Acceptance:** a run cannot start without a complete, schema-valid contract (roster, stages, gates, budget); required phases present, forbidden phases rejected.
 - **Touches:** new `contract-compiler` service, a `job_types.json`, `roadmap-generator.ts`, `runs.ts` start path.
 
-### Phase 36 — Signature-Aware Planner-First Repair
+### Phase 36 — Signature-Aware Planner-First Repair  ✅ COMPLETE (2026-06-28)
+- **Delivered:** `backend/src/services/repair-policy.ts` — `failureSignature()` (deduped/sorted error-signature set), `classifyFailureClass()` (maps to the policy enum: environment_blocker / implementation_defect / unverifiable_acceptance / …), `repairGate()` (stops at `maxRepairGenerations` or `maxSameFailureSignature`), and `DEFAULT_REPAIR_POLICY` (concrete instance of `failure_treatment_policy.v1.json` retry controls). Rewrote the `runs.ts` repair loop: replaced the blind `MAX_REPAIR_ATTEMPTS=3` counter with a signature-aware loop that also stops on **no-progress** (identical signature after a repair = `no_plan_delta_detected`), carries attempt history into re-prompts, and on stop **escalates** (persists `repair-escalations` + emits `agent_blocked` with `code`/`failure_class`/`needed_from=Supervisor`). Tests: `repair-policy.test.ts` (9 passing; 42 across the reliability suite); backend `tsc --noEmit` clean. **Next: Phase 37 (last reliability phase).**
 - **Goal:** make repair converge or stop honestly.
 - **Why:** the loop is a blind `MAX_REPAIR_ATTEMPTS = 3` counter — no same-failure detection, no progress check (`runs.ts`); `failure_treatment_policy.v1.json` is vendored but unwired.
 - **Deliverables:** wire `failure_treatment_policy` — classify into its `failure_class`; cap by `max_same_failure_signature`; require a `plan_delta` each repair (no delta → stop); planner-first ownership + escalation (Supervisor→Commissioner→Human); carry attempt history into re-prompts.
@@ -561,7 +562,7 @@ When complete, update to:
 | 33 | Green Baseline Before Repair | Known-good baseline so repair can converge | **Complete** | 2026-06-28 |
 | 34 | Shared-Contract / Traceability Spine | Stop cross-worker interface drift | **Complete** | 2026-06-28 |
 | 35 | Wire the Vendored Contracts | Hardening compiler + job-type casting | **Complete** | 2026-06-28 |
-| 36 | Signature-Aware Planner-First Repair | Bounded, converging, escalating repair | **Not Started — CRITICAL PATH** | |
+| 36 | Signature-Aware Planner-First Repair | Bounded, converging, escalating repair | **Complete** | 2026-06-28 |
 | 37 | Typed Gates + Sequencing + Isolation | Gates w/ retry, reviewer-after-producer, worker isolation | **Not Started — CRITICAL PATH** | |
 
 ---

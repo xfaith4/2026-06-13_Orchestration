@@ -28,6 +28,7 @@ import { transitionRunStatus, decideTerminalStatus, toValidationOutcome } from '
 import { captureBaseline } from '../services/baseline.js';
 import { readProjectFiles, findContractModule, checkCoherence } from '../services/contract-spine.js';
 import { loadJobTypes, buildAndValidate } from '../services/contract-compiler.js';
+import { DEFAULT_REPAIR_POLICY, failureSignature, classifyFailureClass, repairGate, type EscalateAfter } from '../services/repair-policy.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -391,8 +392,7 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
       return;
     }
 
-    // Validate → Repair → Re-validate loop. Capped at MAX_REPAIR_ATTEMPTS per phase.
-    const MAX_REPAIR_ATTEMPTS = 3;
+    // Validate → Repair → Re-validate loop (Phase 36: signature-aware, planner-first escalation).
     let report: ProjectValidationReport | null = null;
 
     try {
@@ -420,10 +420,20 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
         (baseline.transient ? ' — transient/environment, skipping repair' : '')
       );
 
+      const repairPolicy = DEFAULT_REPAIR_POLICY;
       let attempt = 0;
-      while (!baseline.transient && !report.passed && attempt < MAX_REPAIR_ATTEMPTS) {
+      let escalateAfter: EscalateAfter | null = null;
+      let currentSig = failureSignature(report);
+      const sigCounts: Record<string, number> = currentSig ? { [currentSig]: 1 } : {};
+
+      while (!baseline.transient && !report.passed) {
+        const gate = repairGate({ attempt, currentSignature: currentSig, signatureCounts: sigCounts, policy: repairPolicy });
+        if (!gate.proceed) {
+          escalateAfter = gate.escalateAfter ?? null;
+          break;
+        }
         attempt++;
-        console.log(`[repair] Phase "${phase.name}" attempt ${attempt}/${MAX_REPAIR_ATTEMPTS}`);
+        console.log(`[repair] Phase "${phase.name}" generation ${attempt}/${repairPolicy.maxRepairGenerations}`);
 
         const repairTasks = await buildRepairTasks(report.results, projectWriter.root);
         if (!repairTasks.length) {
@@ -433,16 +443,14 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
 
         for (const repairTask of repairTasks) {
           const agent = selectAgentForTask(repairTask, agents);
+          // Carry attempt history into the re-prompt so each generation is smarter than the last.
+          const description = attempt > 1
+            ? `${repairTask.description}\n\nThis is repair generation ${attempt}. A previous fix did NOT resolve these errors — change your approach; do not repeat the same edit.`
+            : repairTask.description;
           console.log(`[repair] "${repairTask.name}" → ${agent.name}`);
 
           const result = await taskExecutor.executeTask({
-            task: {
-              id: repairTask.id,
-              name: repairTask.name,
-              description: repairTask.description,
-              status: 'pending',
-              dependencies: [],
-            },
+            task: { id: repairTask.id, name: repairTask.name, description, status: 'pending', dependencies: [] },
             agentId: agent.id,
             runId,
             phaseId: phase.id,
@@ -462,25 +470,59 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
         }
 
         report = await new ProjectValidator(projectWriter.root, runId).validate(['tsc', 'vitest']);
-        console.log(`[repair] After attempt ${attempt}: ${report.summary}`);
+        const newSig = failureSignature(report);
+        console.log(`[repair] After generation ${attempt}: ${report.summary}`);
+
+        if (report.passed) break;
+        if (newSig === currentSig) {
+          // Identical failure signature after a repair — no progress (no plan-delta). Stop.
+          escalateAfter = 'no_plan_delta_detected';
+          console.warn(`[repair] Phase "${phase.name}": identical failure signature after repair — no progress, stopping`);
+          break;
+        }
+        sigCounts[newSig] = (sigCounts[newSig] ?? 0) + 1;
+        currentSig = newSig;
       }
 
-      if (!report.passed) {
-        console.warn(
-          `[repair] Phase "${phase.name}" still has ${report.totalErrors} error(s) ` +
-          `after ${Math.min(attempt, MAX_REPAIR_ATTEMPTS)} repair attempt(s) — continuing run`
-        );
-      } else {
-        // If npm install is now passing, clear the gave-up flag.
+      // Planner-first escalation: when repair stops without passing, record + surface it by name.
+      if (escalateAfter && !report.passed) {
+        const failureClass = classifyFailureClass(report);
+        await (persistence.create as (c: string, d: unknown) => Promise<unknown>)('repair-escalations', {
+          runId,
+          phaseId: phase.id,
+          escalateAfter,
+          escalationTarget: repairPolicy.escalationTarget,
+          failureClass,
+          generations: attempt,
+          finalSignature: currentSig,
+          totalErrors: report.totalErrors,
+          createdAt: new Date().toISOString(),
+        }).catch(() => { /* non-fatal */ });
+        await eventLog.emit(runId, 'agent_blocked', {
+          agent: 'Repair',
+          stage: phase.name,
+          level: 'warn',
+          data: {
+            severity: 'soft_blocker',
+            code: escalateAfter,
+            summary: `Repair stopped (${escalateAfter}) after ${attempt} generation(s); routing to ${repairPolicy.escalationTarget}`,
+            needed_from: repairPolicy.escalationTarget,
+            failure_class: failureClass,
+          },
+        });
+        console.warn(`[repair] Phase "${phase.name}" escalated: ${escalateAfter} → ${repairPolicy.escalationTarget} (class: ${failureClass})`);
+      } else if (report.passed) {
         const installResult = report.results.find(r => r.tool === 'npm-install');
         if (installResult?.passed) npmGaveUp = false;
+      } else {
+        console.warn(`[repair] Phase "${phase.name}" still has ${report.totalErrors} error(s) — continuing run`);
       }
 
-      // If npm-install still failing after all repair attempts, set the flag so
-      // subsequent phases don't waste 3 more repair cycles on the same package.json.
+      // If npm-install still failing after repair, flag it so later phases don't waste
+      // generations on the same package.json.
       if (!report.passed) {
         const installFailed = report.results.find(r => r.tool === 'npm-install' && !r.passed);
-        if (installFailed && attempt >= MAX_REPAIR_ATTEMPTS) {
+        if (installFailed && attempt >= repairPolicy.maxRepairGenerations) {
           npmGaveUp = true;
         }
       }
