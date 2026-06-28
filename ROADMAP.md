@@ -124,7 +124,8 @@ into "succeeded, or failed at a named component" — the precondition for every 
 - **Acceptance:** workers import the shared contract instead of redefining types; a traceability gate verifies coverage deterministically (not via prompt).
 - **Touches:** `agents/*.yaml` + `agent-loader`, new contract/traceability service, `task-executor.ts`.
 
-### Phase 35 — Wire the Vendored Contracts (compiler + casting)
+### Phase 35 — Wire the Vendored Contracts (compiler + casting)  ✅ COMPLETE (2026-06-28)
+- **Delivered:** `job_types.json` (per-job-type roster + required/optional/forbidden stage policy + budget/gate/artifact policy, for `build_new_app` and `maintain_existing_app`); `backend/src/services/contract-compiler.ts` — `compileContract()` hardens a loose request (job_type + goal) into a complete `RunContract` by merging job-type defaults; `validateContract()` refuses incomplete contracts (missing required field, empty roster) and enforces stage policy (required stages present, forbidden absent); `buildAndValidate()` combines them. New `RunContract` shared type (snake_case to match the vendored schemas) + `run.contract`. Wired into `PATCH /api/runs/:id/start`: a run **cannot start** without a complete, policy-valid contract (422 otherwise); the contract is attached to the run. Tests: `contract-compiler.test.ts` (7 passing); backend `tsc --noEmit` clean. **Next: Phase 36.**
 - **Goal:** make the vendored governance contracts *enforce* a complete spec before a run starts.
 - **Why:** `contracts/build_app_*.json` + `maintenance_*.json` are currently inert (only listed by `/api/governance-contracts`). Planning failures dominate when runs start from a vague goal.
 - **Deliverables:** request→contract hardening compiler (merge job-type defaults, re-validate against the strict schema, refuse to start if incomplete); job-type → roster + required/forbidden-stage casting. Port `contract_compiler.ps1`, `job_types.json`, `job_router.ps1`.
@@ -559,7 +560,7 @@ When complete, update to:
 | 32 | Evidence Spine & Lifecycle Invariants | Truthful events/status so failures name their cause | **Complete** | 2026-06-28 |
 | 33 | Green Baseline Before Repair | Known-good baseline so repair can converge | **Complete** | 2026-06-28 |
 | 34 | Shared-Contract / Traceability Spine | Stop cross-worker interface drift | **Complete** | 2026-06-28 |
-| 35 | Wire the Vendored Contracts | Hardening compiler + job-type casting | **Not Started — CRITICAL PATH** | |
+| 35 | Wire the Vendored Contracts | Hardening compiler + job-type casting | **Complete** | 2026-06-28 |
 | 36 | Signature-Aware Planner-First Repair | Bounded, converging, escalating repair | **Not Started — CRITICAL PATH** | |
 | 37 | Typed Gates + Sequencing + Isolation | Gates w/ retry, reviewer-after-producer, worker isolation | **Not Started — CRITICAL PATH** | |
 

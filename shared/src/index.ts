@@ -175,6 +175,28 @@ export interface Run extends BaseEntity {
   phaseCosts?: PhaseCost[];
   // Quality outcome, kept SEPARATE from execution `status` (execution-state ≠ quality-outcome).
   validation?: RunValidationOutcome;
+  // The hardened, schema-complete contract a run is bound to (Phase 35).
+  contract?: RunContract;
+}
+
+// --- Hardened run contract (Phase 35) ---
+// Snake_case keys to match the vendored contracts/*.json governance schemas, so a compiled
+// contract can be validated directly against them.
+export interface RunContract {
+  schema_version: string;
+  job_type: string;
+  contract_universe: string;
+  contract_version: string;
+  pipeline_id: string;
+  run_id: string;
+  goal: string;
+  agent_roster: string[];
+  budget: Record<string, unknown>;
+  logging: Record<string, unknown>;
+  artifact_policy: Record<string, unknown>;
+  gate_policy: Record<string, unknown>;
+  stages: string[];
+  metadata?: Record<string, unknown>;
 }
 
 // --- Orchestration evidence spine: canonical run lifecycle events + quality outcome ---

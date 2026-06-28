@@ -27,6 +27,7 @@ import { RunEventLog } from '../services/run-event-log.js';
 import { transitionRunStatus, decideTerminalStatus, toValidationOutcome } from '../services/run-status.js';
 import { captureBaseline } from '../services/baseline.js';
 import { readProjectFiles, findContractModule, checkCoherence } from '../services/contract-spine.js';
+import { loadJobTypes, buildAndValidate } from '../services/contract-compiler.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -633,7 +634,37 @@ export const createRunRoutes = (
         throw new ApiError(404, 'Run not found');
       }
 
-      const updated = runService.startRun(run);
+      // Phase 35: harden the run into a complete, schema-valid contract before starting.
+      // Refuse to start if the contract is incomplete or violates the job's stage policy.
+      const jobType = run.contract?.job_type || 'build_new_app';
+      let jobTypes;
+      try {
+        jobTypes = await loadJobTypes();
+      } catch {
+        throw new ApiError(500, 'job_types.json could not be loaded — cannot compile run contract');
+      }
+      const jobConfig = jobTypes[jobType];
+      if (!jobConfig) {
+        throw new ApiError(400, `Unknown job_type "${jobType}" — cannot compile run contract`);
+      }
+      const { contract, validation: contractCheck } = buildAndValidate(
+        {
+          jobType,
+          goal: run.title || run.description || '',
+          runId: run.id,
+          metadata: { roadmapId: run.roadmapId },
+        },
+        jobConfig
+      );
+      if (!contractCheck.valid) {
+        throw new ApiError(422, `Run cannot start — incomplete contract: ${contractCheck.errors.join('; ')}`);
+      }
+      console.log(
+        `[contract] Run ${id}: compiled ${jobType} contract ` +
+        `(roster ${contract.agent_roster.length}, stages ${contract.stages.join('/')})`
+      );
+
+      const updated = runService.startRun({ ...run, contract });
       const result = await persistence.update<Run>('runs', id, updated);
 
       res.json(createResponse(result));

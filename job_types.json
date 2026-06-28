@@ -1,0 +1,34 @@
+{
+  "build_new_app": {
+    "contract_universe": "app_factory",
+    "contract_version": "1.0",
+    "contract_schema": "build_app_contract.v1.json",
+    "default_agents": ["Researcher", "Engineer", "Critic", "Synthesizer", "Commissioner", "Supervisor"],
+    "default_stages": ["plan", "generate", "validate", "repair", "review"],
+    "stage_policy": {
+      "required": ["plan", "generate", "validate"],
+      "optional": ["repair", "review"],
+      "forbidden": ["maintain", "repo_context"]
+    },
+    "budget": { "max_time_minutes": 30 },
+    "gate_policy": { "mode": "advisory" },
+    "artifact_policy": { "mode": "required", "required": ["generated_app"] },
+    "logging": { "level": "info" }
+  },
+  "maintain_existing_app": {
+    "contract_universe": "app_factory",
+    "contract_version": "1.0",
+    "contract_schema": "maintenance_contract.v1.json",
+    "default_agents": ["RepoContextBuilder", "Researcher", "Engineer", "Critic", "ReviewGate", "Supervisor"],
+    "default_stages": ["repo_context", "plan", "generate", "validate", "repair", "review"],
+    "stage_policy": {
+      "required": ["repo_context", "plan", "validate"],
+      "optional": ["generate", "repair", "review"],
+      "forbidden": ["AppFactoryBootstrap"]
+    },
+    "budget": { "max_time_minutes": 30 },
+    "gate_policy": { "mode": "strict" },
+    "artifact_policy": { "mode": "required", "required": ["changeset", "pr_description"] },
+    "logging": { "level": "info" }
+  }
+}
