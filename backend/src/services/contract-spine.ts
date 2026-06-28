@@ -46,10 +46,22 @@ const CONTRACT_BASENAMES = new Set([
 const DECL_RE =
   /(?:^|\n)\s*(?:export\s+)?(?:declare\s+)?(?:default\s+)?(?:abstract\s+)?(interface|type|enum|class)\s+([A-Za-z_$][\w$]*)/g;
 
+// Remove comments and string/template literals so a declaration keyword inside a block comment
+// or a code-generating template string is not mistaken for a real declaration (false drift).
+function stripCommentsAndStrings(src: string): string {
+  return src
+    .replace(/\/\*[\s\S]*?\*\//g, ' ') // block comments
+    .replace(/\/\/[^\n]*/g, ' ') // line comments
+    .replace(/`(?:\\.|[^`\\])*`/g, '``') // template literals
+    .replace(/'(?:\\.|[^'\\])*'/g, "''") // single-quoted strings
+    .replace(/"(?:\\.|[^"\\])*"/g, '""'); // double-quoted strings
+}
+
 /** Extract the type-level declarations (interface/type/enum/class) declared in a TS file. */
 export function extractDeclarations(content: string): { name: string; kind: string }[] {
+  const cleaned = stripCommentsAndStrings(content);
   const out: { name: string; kind: string }[] = [];
-  for (const m of content.matchAll(DECL_RE)) {
+  for (const m of cleaned.matchAll(DECL_RE)) {
     out.push({ kind: m[1], name: m[2] });
   }
   return out;

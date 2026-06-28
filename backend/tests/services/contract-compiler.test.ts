@@ -39,6 +39,12 @@ describe('compileContract', () => {
     expect(c.agent_roster).toEqual(['OnlyOne']);
     expect(c.stages).toEqual(['plan', 'generate', 'validate']);
   });
+
+  it('falls back to the job default when budget is an empty object', () => {
+    const c = compileContract({ jobType: 'build_new_app', goal: 'g', runId: 'r3', budget: {} }, jobConfig);
+    expect(c.budget).toEqual(jobConfig.budget);
+    expect(validateContract(c, jobConfig).valid).toBe(true);
+  });
 });
 
 describe('validateContract', () => {

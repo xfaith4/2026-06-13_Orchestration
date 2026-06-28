@@ -392,9 +392,11 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
     currentRun = afterPhaseRun;
 
     if (!phaseResult.success) {
+      // The phase failed during task execution (before its own validation ran), so report
+      // `not_run` rather than attaching a stale earlier-phase validation outcome.
       await transitionRunStatus(persistence, eventLog, runId, 'failed', {
         reason: phaseResult.error || `Phase "${phase.name}" failed`,
-        validation: lastValidation ?? toValidationOutcome(lastValidationReport),
+        validation: { status: 'not_run', summary: 'phase failed during task execution' },
       });
       return;
     }
@@ -405,8 +407,14 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
     try {
       if (npmGaveUp) {
         // With a known-broken node_modules, tsc/vitest errors would be misleading.
-        // Skip the full validation block so the repair loop doesn't chase false errors.
+        // Skip validation, but record `insufficient_evidence` so the terminal status reflects
+        // "could not validate" rather than reusing a stale earlier-phase outcome.
         console.log(`[validator] Phase "${phase.name}" — npm-install gave up in prior phase, skipping validation`);
+        lastValidation = {
+          status: 'insufficient_evidence',
+          summary: 'validation skipped — npm install was unrecoverable in a prior phase',
+          checkedAt: new Date().toISOString(),
+        };
         // eslint-disable-next-line no-continue
         continue;
       }

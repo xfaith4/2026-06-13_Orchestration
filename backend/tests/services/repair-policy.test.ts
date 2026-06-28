@@ -44,6 +44,19 @@ describe('failureSignature', () => {
     const b = report({ results: [result({ tool: 'tsc', passed: false, errors: [{ type: 'type', file: 'a.ts', message: 'TS2304: y', raw: '' }] })] });
     expect(failureSignature(a)).not.toBe(failureSignature(b));
   });
+
+  it('changes when one of several vitest failures is fixed (no false no-progress)', () => {
+    const three = report({ results: [result({ tool: 'vitest', passed: false, errors: [
+      { type: 'test', message: 'creates a user', raw: '' },
+      { type: 'test', message: 'deletes a user', raw: '' },
+      { type: 'test', message: 'updates a user', raw: '' },
+    ] })] });
+    const two = report({ results: [result({ tool: 'vitest', passed: false, errors: [
+      { type: 'test', message: 'deletes a user', raw: '' },
+      { type: 'test', message: 'updates a user', raw: '' },
+    ] })] });
+    expect(failureSignature(three)).not.toBe(failureSignature(two));
+  });
 });
 
 describe('classifyFailureClass', () => {

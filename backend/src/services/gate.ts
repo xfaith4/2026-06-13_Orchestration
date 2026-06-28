@@ -42,7 +42,11 @@ export function checkPlanIntegrity(phases: ExecutionPhase[]): PlanIntegrity {
   const errors: string[] = [];
   const deps = new Map<string, string[]>();
   for (const p of phases) {
-    for (const t of p.tasks) deps.set(t.id, (t.dependencies || []).slice());
+    for (const t of p.tasks) {
+      // Duplicate ids would silently clobber each other in the map and hide a broken DAG.
+      if (deps.has(t.id)) errors.push(`Duplicate task id "${t.id}"`);
+      deps.set(t.id, (t.dependencies || []).slice());
+    }
   }
   const known = new Set(deps.keys());
 

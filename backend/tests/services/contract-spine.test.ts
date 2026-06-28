@@ -18,6 +18,15 @@ describe('extractDeclarations', () => {
     const names = decls.map(d => d.name).sort();
     expect(names).toEqual(['Foo', 'Local', 'PhaseStatus', 'Run', 'Status']);
   });
+
+  it('ignores declarations inside block comments and template/string literals', () => {
+    const decls = extractDeclarations([
+      '/* export interface CommentedOut {} */',
+      'const codegen = `export interface GeneratedDTO {}`;',
+      'export interface Real { id: string }',
+    ].join('\n'));
+    expect(decls.map(d => d.name)).toEqual(['Real']);
+  });
 });
 
 describe('findContractModule', () => {

@@ -50,9 +50,13 @@ export function errorSignature(
   err: { file?: string; message?: string; raw?: string }
 ): string {
   const text = err.message || err.raw || '';
-  const code = text.match(/TS\d+|[A-Z]{3,}\d*/)?.[0] ?? '';
+  const code = text.match(/TS\d+|[A-Z]{3,}\d*/)?.[0];
   const file = err.file ?? '';
-  return `${tool}:${file}:${code}`.toLowerCase();
+  // Fall back to a normalized message slice when there is no error code, so failures without a
+  // code or file (e.g. vitest test names) get DISTINCT signatures instead of all collapsing to
+  // `${tool}::` — which would make the repair loop's no-progress check fire on real progress.
+  const key = code ?? text.toLowerCase().replace(/\d+/g, '#').replace(/\s+/g, ' ').trim().slice(0, 48);
+  return `${tool}:${file}:${key}`.toLowerCase();
 }
 
 /**
@@ -66,14 +70,22 @@ export function classifyValidation(report: ProjectValidationReport): {
 } {
   if (report.passed) return { status: 'green', transient: false };
 
-  const failing = report.results.filter(r => !r.passed);
-  const allTransient =
-    failing.length > 0 &&
-    failing.every(r =>
-      r.errors.length > 0
+  // A failing tool counts as "transient" only for genuine environment/IO failures: an
+  // npm-install whose messages/output match transient patterns, or any tool that CRASHED
+  // (raw output, no parsed errors). We deliberately do NOT match transient patterns against
+  // parsed tsc/vitest messages — a test named "network error handling" is a real defect, not
+  // a transient failure, and must not be skipped.
+  const isToolTransient = (r: ProjectValidationReport['results'][number]): boolean => {
+    if (r.tool === 'npm-install') {
+      return r.errors.length > 0
         ? r.errors.every(e => isTransientMessage(e.message || e.raw || ''))
-        : isTransientMessage(r.output || '')
-    );
+        : isTransientMessage(r.output || '');
+    }
+    return r.errors.length === 0 && isTransientMessage(r.output || '');
+  };
+
+  const failing = report.results.filter(r => !r.passed);
+  const allTransient = failing.length > 0 && failing.every(isToolTransient);
 
   return allTransient
     ? { status: 'insufficient_evidence', transient: true }

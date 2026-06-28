@@ -83,11 +83,30 @@ describe('classifyValidation', () => {
     );
     expect(c.status).toBe('red');
   });
+
+  it('does NOT treat a vitest test named "network error" as transient', () => {
+    const c = classifyValidation(
+      report({
+        results: [
+          result({ tool: 'vitest', passed: false, errors: [{ type: 'test', message: 'network error handling returns 500', raw: '' }] }),
+        ],
+      })
+    );
+    expect(c.status).toBe('red');
+    expect(c.transient).toBe(false);
+  });
 });
 
 describe('errorSignature', () => {
   it('combines tool, file, and error code', () => {
     expect(errorSignature('tsc', { file: 'src/a.ts', message: "TS2322: Type 'x'..." })).toBe('tsc:src/a.ts:ts2322');
+  });
+
+  it('gives codeless failures (e.g. vitest test names) DISTINCT signatures', () => {
+    const a = errorSignature('vitest', { message: 'creates a user' });
+    const b = errorSignature('vitest', { message: 'deletes a user' });
+    expect(a).not.toBe(b);
+    expect(a).not.toBe('vitest::'); // the old collapsing bug
   });
 });
 

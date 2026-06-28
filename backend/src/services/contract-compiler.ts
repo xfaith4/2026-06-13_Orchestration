@@ -80,7 +80,7 @@ export function compileContract(req: CompileRequest, job: JobTypeConfig): RunCon
     run_id: req.runId,
     goal: req.goal,
     agent_roster: req.agentRoster && req.agentRoster.length ? req.agentRoster : job.default_agents,
-    budget: req.budget ?? job.budget,
+    budget: req.budget && Object.keys(req.budget).length ? req.budget : job.budget,
     logging: job.logging ?? { level: 'info' },
     artifact_policy: job.artifact_policy,
     gate_policy: job.gate_policy,

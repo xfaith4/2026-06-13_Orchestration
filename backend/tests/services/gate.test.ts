@@ -74,4 +74,13 @@ describe('checkPlanIntegrity', () => {
     ]);
     expect(r.ok).toBe(true);
   });
+
+  it('flags duplicate task ids (which would otherwise hide a broken DAG)', () => {
+    const r = checkPlanIntegrity([
+      phase([{ id: 'a', dependencies: ['b'] }, { id: 'b' }]),
+      { ...phase([{ id: 'a' }]), id: 'p1', number: 1 } as ExecutionPhase,
+    ]);
+    expect(r.ok).toBe(false);
+    expect(r.errors.some(e => /Duplicate task id "a"/.test(e))).toBe(true);
+  });
 });
