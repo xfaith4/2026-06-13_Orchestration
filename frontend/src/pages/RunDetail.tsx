@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { apiClient } from '../services/api';
 import { Run, ExecutionTask } from '../types';
 import { CostBreakdown } from '../components/CostBreakdown';
+import { OutputDirectory } from '../components/OutputDirectory';
 import { ErrorDisplay } from '../components/ErrorDisplay';
 import { ErrorHistory } from '../components/ErrorHistory';
 
@@ -320,6 +321,11 @@ export function RunDetail() {
         {/* Cost Breakdown */}
         <div className="mb-8">
           <CostBreakdown run={run} />
+        </div>
+
+        {/* Produced application output directory */}
+        <div className="mb-8">
+          <OutputDirectory runId={run.id} />
         </div>
 
         {/* Error History */}

@@ -70,3 +70,48 @@ export class ProjectWriter {
 export function projectOutputDir(repoRoot: string, runId: string): string {
   return path.join(repoRoot, 'output', 'projects', runId);
 }
+
+// Walk a produced-app directory, returning relative file paths. Caps the count and skips
+// heavy/derived directories (node_modules, .git, build output) so the listing stays useful.
+const PRODUCED_FILES_CAP = 300;
+const PRODUCED_SKIP_DIRS = new Set(['node_modules', '.git', 'dist', '.next', 'coverage', '.turbo']);
+
+export interface ProducedFiles {
+  files: string[];
+  count: number;
+  truncated: boolean;
+  hasNodeModules: boolean;
+}
+
+export async function collectProducedFiles(dir: string): Promise<ProducedFiles> {
+  const files: string[] = [];
+  let truncated = false;
+  let hasNodeModules = false;
+
+  async function walk(current: string, rel: string): Promise<void> {
+    let entries;
+    try {
+      entries = await fs.readdir(current, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const e of entries) {
+      const childRel = rel ? `${rel}/${e.name}` : e.name;
+      if (e.isDirectory()) {
+        if (e.name === 'node_modules') hasNodeModules = true;
+        if (PRODUCED_SKIP_DIRS.has(e.name)) continue;
+        await walk(path.join(current, e.name), childRel);
+      } else if (e.isFile()) {
+        if (files.length >= PRODUCED_FILES_CAP) {
+          truncated = true;
+          continue;
+        }
+        files.push(childRel);
+      }
+    }
+  }
+
+  await walk(dir, '');
+  files.sort();
+  return { files, count: files.length, truncated, hasNodeModules };
+}

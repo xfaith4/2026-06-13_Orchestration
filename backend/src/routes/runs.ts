@@ -1,6 +1,8 @@
 import { Router, Request, Response } from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { promises as fs } from 'fs';
+import { spawn } from 'child_process';
 import { PersistenceService } from '../services/persistence.js';
 import { ValidationService } from '../services/validation.js';
 import { RunService } from '../services/run-service.js';
@@ -21,7 +23,7 @@ import { Roadmap, Run, RunValidationOutcome } from '@unifiedaitoolbox/shared';
 import { createResponse, ApiError } from '../types/responses.js';
 import { createGenericCrudRoutes } from './generic-crud.js';
 import { buildAgentAssignments, selectAgentForTask } from '../services/agent-selector.js';
-import { ProjectWriter, projectOutputDir } from '../services/project-writer.js';
+import { ProjectWriter, projectOutputDir, collectProducedFiles } from '../services/project-writer.js';
 import { ProjectValidator, type ProjectValidationReport } from '../services/project-validator.js';
 import { buildRepairTasks, buildDriftRepairTask } from '../services/repair-task-builder.js';
 import { RunEventLog } from '../services/run-event-log.js';
@@ -212,6 +214,17 @@ async function refreshRunSummary(
   } else {
     await persistence.create('run-summaries', summary);
   }
+}
+
+// Resolve a run's produced-app directory, guarding against path escape.
+function resolveOutputDir(runId: string): { repoRoot: string; dir: string } {
+  const repoRoot = path.join(__dirname, '..', '..', '..');
+  const dir = projectOutputDir(repoRoot, runId);
+  const base = path.join(repoRoot, 'output', 'projects');
+  if (dir !== base && !dir.startsWith(base + path.sep)) {
+    throw new ApiError(400, 'Invalid run id');
+  }
+  return { repoRoot, dir };
 }
 
 async function executeRunAsync(runId: string, persistence: PersistenceService): Promise<void> {
@@ -1187,6 +1200,94 @@ export const createRunRoutes = (
       } else {
         res.status(500).json({
           error: error instanceof Error ? error.message : 'Failed to materialize run artifacts',
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
+  });
+
+  // Produced-app output directory: the local folder where this run's files were written.
+  router.get('/:id/output', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const run = await persistence.read<Run>('runs', id);
+      if (!run) {
+        throw new ApiError(404, 'Run not found');
+      }
+
+      const { repoRoot, dir } = resolveOutputDir(id);
+      let exists = false;
+      try {
+        exists = (await fs.stat(dir)).isDirectory();
+      } catch {
+        exists = false;
+      }
+      const listing = exists
+        ? await collectProducedFiles(dir)
+        : { files: [], count: 0, truncated: false, hasNodeModules: false };
+
+      res.json(
+        createResponse({
+          runId: id,
+          path: dir,
+          relativePath: path.relative(repoRoot, dir).split(path.sep).join('/'),
+          exists,
+          fileCount: listing.count,
+          truncated: listing.truncated,
+          hasNodeModules: listing.hasNodeModules,
+          files: listing.files,
+        })
+      );
+    } catch (error) {
+      if (error instanceof ApiError) {
+        res.status(error.statusCode).json({ error: error.message, timestamp: new Date().toISOString() });
+      } else {
+        res.status(500).json({
+          error: error instanceof Error ? error.message : 'Failed to read output directory',
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
+  });
+
+  // Reveal the produced-app directory in the OS file manager (local-dev convenience).
+  router.post('/:id/reveal-output', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const run = await persistence.read<Run>('runs', id);
+      if (!run) {
+        throw new ApiError(404, 'Run not found');
+      }
+
+      const { dir } = resolveOutputDir(id);
+      let exists = false;
+      try {
+        exists = (await fs.stat(dir)).isDirectory();
+      } catch {
+        exists = false;
+      }
+      if (!exists) {
+        throw new ApiError(404, 'No output directory has been produced for this run yet');
+      }
+
+      const opener =
+        process.platform === 'win32'
+          ? { cmd: 'explorer.exe', args: [dir] }
+          : process.platform === 'darwin'
+            ? { cmd: 'open', args: [dir] }
+            : { cmd: 'xdg-open', args: [dir] };
+      // Fire-and-forget: explorer.exe exits non-zero even on success, so don't await/inspect exit.
+      const child = spawn(opener.cmd, opener.args, { detached: true, stdio: 'ignore' });
+      child.on('error', err => console.warn(`[reveal-output] failed to open ${dir}:`, err));
+      child.unref();
+
+      res.json(createResponse({ opened: true, path: dir }));
+    } catch (error) {
+      if (error instanceof ApiError) {
+        res.status(error.statusCode).json({ error: error.message, timestamp: new Date().toISOString() });
+      } else {
+        res.status(500).json({
+          error: error instanceof Error ? error.message : 'Failed to reveal output directory',
           timestamp: new Date().toISOString(),
         });
       }
