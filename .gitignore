@@ -89,9 +89,10 @@ htmlcov/
 .prettierignore
 tsbuildinfo
 
-# Orchestration runtime output (generated per run — not source)
+# Orchestration runtime state & output — LOCAL ONLY, never tracked (regenerated per run).
+# data/ = persistence store + produced-app artifacts; output/ = materialized projects.
 output/
-data/run-events/
+data/
 backend/.bakeoff/
 backend/.bakeoff-roadmap/
 
