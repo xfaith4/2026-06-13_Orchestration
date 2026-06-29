@@ -24,6 +24,10 @@ export interface LLMCallResult {
   text: string;
   inputTokens: number;
   outputTokens: number;
+  /** Prompt-cache creation (write) tokens. 0 when caching is not used. */
+  cacheWriteTokens: number;
+  /** Prompt-cache hit (read) tokens. 0 when caching is not used. */
+  cacheReadTokens: number;
   model: string;
   stopReason: string;
 }
@@ -59,6 +63,8 @@ export class LLMClient {
       text,
       inputTokens: response.usage.input_tokens,
       outputTokens: response.usage.output_tokens,
+      cacheWriteTokens: response.usage.cache_creation_input_tokens ?? 0,
+      cacheReadTokens: response.usage.cache_read_input_tokens ?? 0,
       model: response.model,
       stopReason: response.stop_reason || 'end_turn',
     };

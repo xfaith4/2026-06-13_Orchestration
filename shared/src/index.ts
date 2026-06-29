@@ -123,6 +123,12 @@ export interface ExecutionPhase {
 export interface CostMetrics {
   tokenInputs: number;
   tokenOutputs: number;
+  /** Cache-write (prompt-cache creation) tokens. Optional for backward compat. */
+  cacheWriteTokens?: number;
+  /** Cache-read (prompt-cache hit) tokens. Optional for backward compat. */
+  cacheReadTokens?: number;
+  /** Model that produced this cost, when known (drives model-aware pricing). */
+  model?: string;
   estimatedCost: number;
   currency: string;
 }
@@ -142,6 +148,77 @@ export interface PhaseCost extends CostMetrics {
 export interface RunCost extends CostMetrics {
   runId: string;
   phaseCosts: PhaseCost[];
+}
+
+// ─── Definitive per-run cost report (surfaced on the run report card) ──────────
+// Produced by the CostMeter from real captured usage. Because orchestration runs
+// are metered-API, these dollars are actual spend, not subscription-buffered value.
+
+/** Normalized per-call cost record the CostMeter aggregates over. */
+export interface TaskCostRecord {
+  taskId: string;
+  taskName?: string;
+  phaseId?: string;
+  phaseName?: string;
+  /** Agent/role that ran the call (for by-role attribution). */
+  role?: string;
+  model: string;
+  tokenInputs: number;
+  tokenOutputs: number;
+  cacheWriteTokens: number;
+  cacheReadTokens: number;
+  cost: number;
+}
+
+export interface TokenTypeBreakdown {
+  input: number;
+  output: number;
+  cacheWrite: number;
+  cacheRead: number;
+}
+
+export interface CostGroup {
+  key: string;
+  cost: number;
+  tokenInputs: number;
+  tokenOutputs: number;
+  cacheWriteTokens: number;
+  cacheReadTokens: number;
+  calls: number;
+}
+
+export interface RunCostReport {
+  runId: string;
+  /** Authoritative API-dollar total for the run (= real cash; metered API). */
+  totalCost: number;
+  currency: string;
+  /** Pricing table date used, for reproducibility. */
+  pricingAsOf: string;
+  calls: number;
+  tokenInputs: number;
+  tokenOutputs: number;
+  cacheWriteTokens: number;
+  cacheReadTokens: number;
+  /** Cache reads / (cache reads + uncached input). 0..1. Higher is cheaper. */
+  cacheHitRatio: number;
+  /** Per-token-type dollar split. */
+  costByTokenType: TokenTypeBreakdown;
+  byModel: CostGroup[];
+  byPhase: CostGroup[];
+  byRole: CostGroup[];
+  efficiency: {
+    costPerCall: number;
+    costPerSuccessfulTask?: number;
+    costPerArtifact?: number;
+  };
+  budget?: {
+    limit: number;
+    used: number;
+    remaining: number;
+    status: 'ok' | 'warning' | 'critical' | 'exceeded';
+  };
+  /** Models seen that couldn't be priced precisely (priced at fallback rate). */
+  unknownModels: string[];
 }
 
 export type RunStatus = 'draft' | 'pending' | 'running' | 'completed' | 'failed' | 'paused';
@@ -223,6 +300,7 @@ export type OrchestrationEventType =
   | 'artifact_created'
   | 'validation_started'
   | 'validation_completed'
+  | 'cost_report'
   | 'run_completed'
   | 'run_failed'
   | 'run_recovered';
@@ -508,6 +586,8 @@ export interface RunSummary extends BaseEntity {
   totalCost: number;
   costByPhase: Record<string, number>;
   estimatedSavings?: number;
+  /** Definitive per-run cost breakdown (model/token-type/phase/role + efficiency). */
+  costReport?: RunCostReport;
 
   // Artifacts
   artifacts: {

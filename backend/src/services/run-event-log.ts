@@ -18,6 +18,7 @@ const DEFAULT_LEVEL: Record<OrchestrationEventType, OrchestrationEventLevel> = {
   artifact_created: 'info',
   validation_started: 'info',
   validation_completed: 'info',
+  cost_report: 'info',
   run_completed: 'info',
   run_failed: 'error',
   run_recovered: 'warn',

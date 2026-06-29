@@ -5,6 +5,7 @@ import { PersistenceService } from '../services/persistence.js';
 import { ValidationService } from '../services/validation.js';
 import { RunService } from '../services/run-service.js';
 import { CostTracker } from '../services/cost-tracker.js';
+import { CostMeter } from '../services/cost-meter.js';
 import { ErrorLogger } from '../services/error-logger.js';
 import { AgentRegistry } from '@fuhrhaus/orchestration-core';
 import { PersistenceAgentStore } from '../services/persistence-agent-store.js';
@@ -224,6 +225,7 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
   await promptRegistry.initialize();
 
   const costTracker = new CostTracker();
+  const costMeter = new CostMeter();
   const errorLogger = new ErrorLogger(persistence);
   const taskExecutor = new TaskExecutor(agentRegistry, promptRegistry);
   const phaseExecutor = new PhaseExecutor(taskExecutor, costTracker, errorLogger);
@@ -675,6 +677,21 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
       validation,
       data: { driftCount: traceability.drift.length, contractModule: traceability.contractModule },
     });
+
+    // Definitive cost report → evidence spine (reuses the spine; no parallel ledger).
+    try {
+      const summarySource = terminalRun || currentRun;
+      const costReport = costMeter.report(summarySource, {
+        successfulTasks: summarySource.phases.reduce(
+          (n, p) => n + p.tasks.filter(t => t.status === 'completed').length,
+          0
+        ),
+      });
+      const ev = costMeter.toEvent(costReport);
+      await eventLog.emit(runId, 'cost_report', { level: ev.level, msg: ev.msg, data: ev.data });
+    } catch (costErr) {
+      console.warn(`[auto-exec] Failed to emit cost report for run ${runId}:`, costErr);
+    }
 
     // Generate and persist run summary
     try {

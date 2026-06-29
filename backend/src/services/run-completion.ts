@@ -8,8 +8,11 @@ import {
   ExecutionTask,
   CostMetrics,
 } from '@unifiedaitoolbox/shared';
+import { CostMeter } from './cost-meter.js';
 
 export class RunCompletion {
+  private readonly costMeter = new CostMeter();
+
   // Generate summary for completed run
   generateSummary(
     run: Run,
@@ -30,6 +33,15 @@ export class RunCompletion {
 
     // Calculate costs
     const { totalCost, costByPhase } = this.calculateFinalCosts(run);
+
+    // Definitive per-run cost report: real captured usage, model/cache-aware pricing.
+    const costReport = this.costMeter.report(run, {
+      successfulTasks: tasksCompleted,
+      artifactCount: artifacts?.totalCount,
+      budgetLimit:
+        (run as { budgetLimit?: number; budget?: number }).budgetLimit ??
+        (run as { budget?: number }).budget,
+    });
 
     // Generate lessons
     const lessons = this.generateLessonsLearned(run, taskResults, failures, duration, totalCost);
@@ -55,6 +67,7 @@ export class RunCompletion {
       failures,
       totalCost,
       costByPhase,
+      costReport,
       artifacts: artifacts || {
         totalCount: 0,
         totalSize: 0,
@@ -309,8 +322,11 @@ export class RunCompletion {
       `Failed: ${summary.tasksFailed}`,
       `Skipped: ${summary.tasksSkipped}`,
       '',
-      '--- Cost Summary ---',
-      `Total Cost: $${summary.totalCost.toFixed(2)}`,
+      // Rich section only when real per-call usage was captured; otherwise fall back to
+      // the legacy total (avoids displaying a fabricated $0.00 breakdown for usage-less runs).
+      summary.costReport && summary.costReport.calls > 0
+        ? this.costMeter.renderSection(summary.costReport)
+        : `--- Cost Summary ---\nTotal Cost: $${summary.totalCost.toFixed(2)}`,
       '',
       '--- Artifacts ---',
       `Total Count: ${summary.artifacts.totalCount}`,

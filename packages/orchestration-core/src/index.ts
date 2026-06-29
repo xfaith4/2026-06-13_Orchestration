@@ -14,7 +14,8 @@ export { LLMClient } from './execution/llm-client.js';
 export type { LLMClientOptions, LLMCallOptions, LLMCallResult, LLMMessage } from './execution/llm-client.js';
 export { ErrorHandler } from './execution/error-handler.js';
 export type { ErrorContext } from './execution/error-handler.js';
-export { CostCalculator } from './execution/cost-calculator.js';
+export { CostCalculator, PRICING, PRICING_AS_OF, resolveModelTier } from './execution/cost-calculator.js';
+export type { ModelTier, TierRates, UsageTokens, PricedUsage } from './execution/cost-calculator.js';
 
 // State
 export { RunStateMachine } from './state/run-state-machine.js';

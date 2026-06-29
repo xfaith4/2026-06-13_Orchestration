@@ -218,17 +218,33 @@ export class TaskExecutor {
           output: string;
           tokensIn?: number;
           tokensOut?: number;
+          tokensCacheWrite?: number;
+          tokensCacheRead?: number;
+          model?: string;
         };
       };
 
       const tokensIn = taskResult?.result?.tokensIn ?? Math.floor(finalPrompt.length / 4);
       const tokensOut = taskResult?.result?.tokensOut ?? 0;
+      const cacheWrite = taskResult?.result?.tokensCacheWrite ?? 0;
+      const cacheRead = taskResult?.result?.tokensCacheRead ?? 0;
+      const model = taskResult?.result?.model;
 
       const tokensUsed = { input: tokensIn, output: tokensOut };
+      // Definitive, model-aware, all-four-token-type pricing (not the legacy model-blind shim).
+      const priced = this.costCalculator.priceUsage(model, {
+        input: tokensIn,
+        output: tokensOut,
+        cacheWrite,
+        cacheRead,
+      });
       const cost: CostMetrics = {
-        tokenInputs: tokensUsed.input,
-        tokenOutputs: tokensUsed.output,
-        estimatedCost: this.costCalculator.calculateTokenCost(tokensUsed.input, tokensUsed.output),
+        tokenInputs: tokensIn,
+        tokenOutputs: tokensOut,
+        cacheWriteTokens: cacheWrite,
+        cacheReadTokens: cacheRead,
+        model,
+        estimatedCost: priced.cost,
         currency: 'USD',
       };
       const warnings = this.getConstraintWarnings(
@@ -308,7 +324,9 @@ export class TaskExecutor {
 
     console.log(
       `[TaskExecutor] Task ${taskId} (${agentName}): ` +
-        `${result.inputTokens}→${result.outputTokens} tokens, stop=${result.stopReason}`
+        `${result.inputTokens}→${result.outputTokens} tokens ` +
+        `(cacheW ${result.cacheWriteTokens}, cacheR ${result.cacheReadTokens}), ` +
+        `model=${result.model}, stop=${result.stopReason}`
     );
 
     return {
@@ -320,6 +338,8 @@ export class TaskExecutor {
         output: result.text,
         tokensIn: result.inputTokens,
         tokensOut: result.outputTokens,
+        tokensCacheWrite: result.cacheWriteTokens,
+        tokensCacheRead: result.cacheReadTokens,
         model: result.model,
         timestamp: new Date().toISOString(),
       },
@@ -343,6 +363,8 @@ export class TaskExecutor {
         output: `[MOCK — set ANTHROPIC_API_KEY for real output]\n\nExecuted by ${agentName}: ${task.description}`,
         tokensIn: Math.floor(task.description.length / 4),
         tokensOut: 50,
+        tokensCacheWrite: 0,
+        tokensCacheRead: 0,
         model: 'mock',
         timestamp: new Date().toISOString(),
       },
