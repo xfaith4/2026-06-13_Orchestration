@@ -49,7 +49,8 @@ describe('PhaseExecutor', () => {
         taskId: 'task-1',
         success: true,
         duration: 25,
-        output: { ok: true },
+        // Include proper output with file artifacts so acceptance passes
+        output: `## File: src/route.ts\n\`\`\`typescript\nexport const route = () => ({ok: true});\n\`\`\``,
         cost: {
           tokenInputs: 10,
           tokenOutputs: 5,

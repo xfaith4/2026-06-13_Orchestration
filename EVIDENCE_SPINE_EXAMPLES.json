@@ -1,0 +1,574 @@
+{
+  "_comment": "Evidence Spine Concrete Examples — actual JSON payloads from a real run",
+
+  "run_event_log": {
+    "_description": "Append-only per-run JSONL stream at data/run-events/{runId}.jsonl",
+    "filename": "data/run-events/run-abc123.jsonl",
+    "line_by_line": [
+      {
+        "ts": "2026-06-29T10:00:00.000Z",
+        "runId": "run-abc123",
+        "type": "run_created",
+        "level": "info",
+        "msg": "Build a React dashboard",
+        "data": {
+          "job_type": "build_new_app",
+          "requested_objective": "Build a React dashboard",
+          "roadmapId": "roadmap-xyz",
+          "phases": 3
+        }
+      },
+      {
+        "ts": "2026-06-29T10:00:05.000Z",
+        "runId": "run-abc123",
+        "type": "run_started",
+        "level": "info",
+        "msg": "Build a React dashboard",
+        "data": {
+          "phases": 3,
+          "attempt_number": 1,
+          "estimated_duration_mins": 45
+        }
+      },
+      {
+        "ts": "2026-06-29T10:00:10.000Z",
+        "runId": "run-abc123",
+        "type": "agent_started",
+        "level": "info",
+        "agent": "Architect",
+        "stage": "Phase 1: Architecture & Setup",
+        "step": "design-component-hierarchy",
+        "data": {
+          "agentId": "agent-001",
+          "taskId": "task-001",
+          "role": "Architect",
+          "model": "claude-3-5-sonnet-20241022",
+          "inputTokens": 8192
+        }
+      },
+      {
+        "ts": "2026-06-29T10:00:45.000Z",
+        "runId": "run-abc123",
+        "type": "agent_completed",
+        "level": "info",
+        "agent": "Architect",
+        "stage": "Phase 1: Architecture & Setup",
+        "step": "design-component-hierarchy",
+        "data": {
+          "success": true,
+          "outputTokens": 4096,
+          "durationMs": 35000,
+          "model": "claude-3-5-sonnet-20241022"
+        }
+      },
+      {
+        "ts": "2026-06-29T10:01:00.000Z",
+        "runId": "run-abc123",
+        "type": "artifact_created",
+        "level": "info",
+        "agent": "Architect",
+        "stage": "Phase 1: Architecture & Setup",
+        "step": "design-component-hierarchy",
+        "data": {
+          "path": "src/components/Dashboard.tsx",
+          "size": 2048,
+          "checksum": "sha256:a1b2c3d4e5f6",
+          "produced_by": "Architect",
+          "language": "typescript"
+        }
+      },
+      {
+        "ts": "2026-06-29T10:02:00.000Z",
+        "runId": "run-abc123",
+        "type": "artifact_created",
+        "level": "info",
+        "agent": "Architect",
+        "stage": "Phase 1: Architecture & Setup",
+        "step": "design-component-hierarchy",
+        "data": {
+          "path": "src/App.tsx",
+          "size": 1024,
+          "checksum": "sha256:f6e5d4c3b2a1",
+          "produced_by": "Architect",
+          "language": "typescript"
+        }
+      },
+      {
+        "ts": "2026-06-29T10:03:00.000Z",
+        "runId": "run-abc123",
+        "type": "validation_started",
+        "level": "info",
+        "stage": "Phase 1: Architecture & Setup",
+        "data": {
+          "tools": ["npm-install", "tsc", "vitest"],
+          "baseline_captured": true
+        }
+      },
+      {
+        "ts": "2026-06-29T10:04:00.000Z",
+        "runId": "run-abc123",
+        "type": "validation_completed",
+        "level": "error",
+        "stage": "Phase 1: Architecture & Setup",
+        "data": {
+          "validation_status": "failed",
+          "baseline_status": "red",
+          "totalErrors": 2,
+          "summary": "2 tsc errors in Dashboard.tsx",
+          "tools": [
+            {
+              "tool": "npm-install",
+              "passed": true,
+              "errorCount": 0
+            },
+            {
+              "tool": "tsc",
+              "passed": false,
+              "errorCount": 2
+            },
+            {
+              "tool": "vitest",
+              "passed": true,
+              "errorCount": 0
+            }
+          ]
+        }
+      },
+      {
+        "ts": "2026-06-29T10:05:00.000Z",
+        "runId": "run-abc123",
+        "type": "agent_started",
+        "level": "info",
+        "agent": "TypeScript Fixer",
+        "stage": "Phase 1: Architecture & Setup [Repair Gen 1]",
+        "step": "fix-tsc-errors",
+        "attemptId": "repair-gen-1",
+        "data": {
+          "agentId": "agent-repair-001",
+          "taskId": "repair-task-001",
+          "role": "TypeScript Fixer",
+          "model": "claude-3-5-sonnet-20241022",
+          "inputTokens": 12288
+        }
+      },
+      {
+        "ts": "2026-06-29T10:05:30.000Z",
+        "runId": "run-abc123",
+        "type": "agent_completed",
+        "level": "info",
+        "agent": "TypeScript Fixer",
+        "stage": "Phase 1: Architecture & Setup [Repair Gen 1]",
+        "step": "fix-tsc-errors",
+        "attemptId": "repair-gen-1",
+        "data": {
+          "success": true,
+          "outputTokens": 2048,
+          "durationMs": 30000,
+          "model": "claude-3-5-sonnet-20241022"
+        }
+      },
+      {
+        "ts": "2026-06-29T10:06:00.000Z",
+        "runId": "run-abc123",
+        "type": "artifact_created",
+        "level": "info",
+        "agent": "TypeScript Fixer",
+        "stage": "Phase 1: Architecture & Setup [Repair Gen 1]",
+        "step": "fix-tsc-errors",
+        "data": {
+          "path": "src/components/Dashboard.tsx",
+          "size": 2100,
+          "checksum": "sha256:b2c3d4e5f6a7",
+          "produced_by": "TypeScript Fixer",
+          "language": "typescript"
+        }
+      },
+      {
+        "ts": "2026-06-29T10:07:00.000Z",
+        "runId": "run-abc123",
+        "type": "validation_completed",
+        "level": "info",
+        "stage": "Phase 1: Architecture & Setup [After Repair Gen 1]",
+        "data": {
+          "validation_status": "passed",
+          "baseline_status": "red",
+          "totalErrors": 0,
+          "summary": "All checks passed",
+          "tools": [
+            {
+              "tool": "npm-install",
+              "passed": true,
+              "errorCount": 0
+            },
+            {
+              "tool": "tsc",
+              "passed": true,
+              "errorCount": 0
+            },
+            {
+              "tool": "vitest",
+              "passed": true,
+              "errorCount": 0
+            }
+          ]
+        }
+      },
+      {
+        "ts": "2026-06-29T10:10:00.000Z",
+        "runId": "run-abc123",
+        "type": "run_completed",
+        "level": "info",
+        "msg": "Build a React dashboard",
+        "data": {
+          "status": "completed",
+          "validation_status": "passed",
+          "driftCount": 0,
+          "totalErrors": 0,
+          "durationMs": 600000
+        }
+      },
+      {
+        "ts": "2026-06-29T10:10:05.000Z",
+        "runId": "run-abc123",
+        "type": "cost_report",
+        "level": "info",
+        "msg": "Run cost: $0.45 (2 calls, 28K input tokens, 6K output tokens)",
+        "data": {
+          "totalCost": 0.45,
+          "currency": "USD",
+          "calls": 2,
+          "tokenInputs": 28000,
+          "tokenOutputs": 6000,
+          "cacheWriteTokens": 0,
+          "cacheReadTokens": 0,
+          "cacheHitRatio": 0.0,
+          "byModel": {
+            "claude-3-5-sonnet-20241022": {
+              "cost": 0.45,
+              "calls": 2,
+              "tokens": 34000
+            }
+          }
+        }
+      }
+    ]
+  },
+
+  "validation_baseline": {
+    "_description": "Captured BEFORE repair, in collection 'validation-baselines'",
+    "id": "baseline-run-abc123-phase-1",
+    "runId": "run-abc123",
+    "phaseId": "phase-001",
+    "capturedAt": "2026-06-29T10:03:00.000Z",
+    "status": "red",
+    "transient": false,
+    "totalErrors": 2,
+    "tools": [
+      {
+        "tool": "npm-install",
+        "passed": true,
+        "errorCount": 0
+      },
+      {
+        "tool": "tsc",
+        "passed": false,
+        "errorCount": 2
+      },
+      {
+        "tool": "vitest",
+        "passed": true,
+        "errorCount": 0
+      }
+    ],
+    "errorSignatures": [
+      "tsc:src/components/Dashboard.tsx:ts2322",
+      "tsc:src/components/Dashboard.tsx:ts2345"
+    ],
+    "environment": {
+      "node": "v20.10.0",
+      "platform": "linux"
+    }
+  },
+
+  "validation_report": {
+    "_description": "Full validation output, in collection 'validation-reports'",
+    "id": "report-run-abc123-phase-1",
+    "runId": "run-abc123",
+    "phaseId": "phase-001",
+    "passed": false,
+    "totalErrors": 2,
+    "summary": "2 tsc errors in Dashboard.tsx",
+    "results": [
+      {
+        "tool": "npm-install",
+        "passed": true,
+        "errorCount": 0,
+        "errors": [],
+        "output": "added 156 packages"
+      },
+      {
+        "tool": "tsc",
+        "passed": false,
+        "errorCount": 2,
+        "errors": [
+          {
+            "file": "src/components/Dashboard.tsx",
+            "message": "Type 'string' is not assignable to type 'number'",
+            "raw": "TS2322"
+          },
+          {
+            "file": "src/components/Dashboard.tsx",
+            "message": "Expected 2 arguments, but got 1",
+            "raw": "TS2345"
+          }
+        ],
+        "output": "Found 2 errors.\n\n"
+      },
+      {
+        "tool": "vitest",
+        "passed": true,
+        "errorCount": 0,
+        "errors": [],
+        "output": "✓ All tests passed (5)"
+      }
+    ]
+  },
+
+  "traceability_report": {
+    "_description": "Drift detection at run end, in collection 'traceability-reports'",
+    "id": "traceability-run-abc123",
+    "runId": "run-abc123",
+    "checkedAt": "2026-06-29T10:10:00.000Z",
+    "status": "coherent",
+    "contractModule": "src/types.ts",
+    "contractSymbols": [
+      "DashboardProps",
+      "ChartData",
+      "UITheme"
+    ],
+    "drift": [],
+    "fileCount": 12
+  },
+
+  "traceability_report_with_drift": {
+    "_description": "Example with drift detected",
+    "id": "traceability-run-def456",
+    "runId": "run-def456",
+    "checkedAt": "2026-06-29T11:00:00.000Z",
+    "status": "drift",
+    "contractModule": "src/types.ts",
+    "contractSymbols": [
+      "DashboardProps",
+      "ChartData"
+    ],
+    "drift": [
+      {
+        "symbol": "UITheme",
+        "kind": "duplicate_definition",
+        "files": [
+          "src/types.ts",
+          "src/components/ThemeProvider.tsx"
+        ]
+      }
+    ],
+    "fileCount": 14
+  },
+
+  "repair_escalation": {
+    "_description": "When repair stops without converging, in collection 'repair-escalations'",
+    "id": "escalation-run-ghi789-phase-2",
+    "runId": "run-ghi789",
+    "phaseId": "phase-002",
+    "escalateAfter": "same_signature_repeated",
+    "escalationTarget": "Supervisor",
+    "failureClass": "implementation_defect",
+    "generations": 3,
+    "finalSignature": "tsc:src/api/handler.ts:ts2355|tsc:src/api/middleware.ts:ts7006",
+    "totalErrors": 2,
+    "createdAt": "2026-06-29T12:00:00.000Z"
+  },
+
+  "artifact": {
+    "_description": "Materialized file, in collection 'artifacts'",
+    "id": "artifact-run-abc123-dashboard",
+    "runId": "run-abc123",
+    "phaseId": "phase-001",
+    "taskId": "task-001",
+    "name": "src/components/Dashboard.tsx",
+    "type": "code",
+    "mimeType": "text/typescript",
+    "size": 2100,
+    "checksum": "sha256:b2c3d4e5f6a7",
+    "contentPath": "data/artifacts/run-abc123/src_components_Dashboard.tsx",
+    "downloadUrl": "/api/artifacts/artifact-run-abc123-dashboard/download",
+    "metadata": {
+      "language": "typescript",
+      "materializedFrom": "task-output"
+    },
+    "tags": ["materialized-output", "Phase 1"],
+    "uploadedBy": "TaskExecutor",
+    "uploadedAt": "2026-06-29T10:01:00.000Z"
+  },
+
+  "run_cost_report": {
+    "_description": "Definitive per-run cost, emitted as 'cost_report' event",
+    "runId": "run-abc123",
+    "totalCost": 0.45,
+    "currency": "USD",
+    "calls": 2,
+    "tokenInputs": 28000,
+    "tokenOutputs": 6000,
+    "cacheWriteTokens": 0,
+    "cacheReadTokens": 0,
+    "cacheHitRatio": 0.0,
+    "costByTokenType": {
+      "input": 0.30,
+      "output": 0.15,
+      "cacheWrite": 0.0,
+      "cacheRead": 0.0
+    },
+    "byModel": [
+      {
+        "key": "claude-3-5-sonnet-20241022",
+        "cost": 0.45,
+        "tokenInputs": 28000,
+        "tokenOutputs": 6000,
+        "cacheWriteTokens": 0,
+        "cacheReadTokens": 0,
+        "calls": 2
+      }
+    ],
+    "byPhase": [
+      {
+        "key": "Phase 1: Architecture & Setup",
+        "cost": 0.45,
+        "tokenInputs": 28000,
+        "tokenOutputs": 6000,
+        "cacheWriteTokens": 0,
+        "cacheReadTokens": 0,
+        "calls": 2
+      }
+    ],
+    "byRole": [
+      {
+        "key": "Architect",
+        "cost": 0.35,
+        "tokenInputs": 20480,
+        "tokenOutputs": 4096,
+        "cacheWriteTokens": 0,
+        "cacheReadTokens": 0,
+        "calls": 1
+      },
+      {
+        "key": "TypeScript Fixer",
+        "cost": 0.10,
+        "tokenInputs": 7520,
+        "tokenOutputs": 1904,
+        "cacheWriteTokens": 0,
+        "cacheReadTokens": 0,
+        "calls": 1
+      }
+    ],
+    "efficiency": {
+      "costPerCall": 0.225,
+      "costPerSuccessfulTask": 0.225,
+      "costPerArtifact": 0.0225
+    },
+    "budget": {
+      "limit": 5.0,
+      "used": 0.45,
+      "remaining": 4.55,
+      "status": "ok"
+    },
+    "unknownModels": []
+  },
+
+  "run_with_all_evidence_fields": {
+    "_description": "Complete Run object with evidence spine fields populated",
+    "id": "run-abc123",
+    "createdAt": "2026-06-29T10:00:00.000Z",
+    "updatedAt": "2026-06-29T10:10:05.000Z",
+    "roadmapId": "roadmap-xyz",
+    "applicationId": "app-001",
+    "title": "Build a React dashboard",
+    "description": "...",
+    "status": "completed",
+    "validation": {
+      "status": "passed",
+      "totalErrors": 0,
+      "summary": "All validations passed after 1 repair generation",
+      "checkedAt": "2026-06-29T10:07:00.000Z"
+    },
+    "contract": {
+      "schema_version": "1.0.0",
+      "job_type": "build_new_app",
+      "contract_universe": "default",
+      "contract_version": "1.0",
+      "pipeline_id": "pipeline-001",
+      "run_id": "run-abc123",
+      "goal": "Build a React dashboard",
+      "agent_roster": ["Architect", "TypeScript Fixer", "Test Writer"],
+      "budget": {
+        "totalTokens": 100000,
+        "totalCost": 5.0
+      },
+      "logging": {
+        "verbosity": "info",
+        "captureCalls": true
+      },
+      "artifact_policy": {
+        "allowedTypes": ["code", "test", "doc"],
+        "maxCount": 50
+      },
+      "gate_policy": {
+        "preRunGates": ["plan_integrity", "contract_completeness"],
+        "perPhaseGates": ["validation", "drift_check"]
+      },
+      "stages": ["Phase 1: Architecture & Setup", "Phase 2: Implementation", "Phase 3: Testing"]
+    },
+    "phases": [
+      {
+        "id": "phase-001",
+        "number": 1,
+        "name": "Phase 1: Architecture & Setup",
+        "goal": "Design components and set up project structure",
+        "status": "completed",
+        "startedAt": "2026-06-29T10:00:10.000Z",
+        "completedAt": "2026-06-29T10:07:00.000Z",
+        "tasks": [
+          {
+            "id": "task-001",
+            "name": "Design Component Hierarchy",
+            "description": "...",
+            "status": "completed",
+            "output": {
+              "code": "src/components/Dashboard.tsx\nsrc/App.tsx\n..."
+            },
+            "completedAt": "2026-06-29T10:00:45.000Z"
+          },
+          {
+            "id": "repair-task-001",
+            "name": "Fix TypeScript Errors",
+            "description": "Repair Generation 1: ...",
+            "status": "completed",
+            "output": {
+              "code": "src/components/Dashboard.tsx\n..."
+            },
+            "completedAt": "2026-06-29T10:06:00.000Z"
+          }
+        ]
+      }
+    ],
+    "startedAt": "2026-06-29T10:00:05.000Z",
+    "completedAt": "2026-06-29T10:10:05.000Z",
+    "summary": "Run completed successfully with 1 repair generation; all validations passed",
+    "totalCost": {
+      "estimatedCost": 0.45,
+      "currency": "USD",
+      "tokenInputs": 28000,
+      "tokenOutputs": 6000,
+      "cacheWriteTokens": 0,
+      "cacheReadTokens": 0
+    }
+  }
+}

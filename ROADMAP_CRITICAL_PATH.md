@@ -106,18 +106,22 @@ These 4 phases must be done sequentially and completely. They form the foundatio
 **What:** Ability to create a "run" that tracks the execution of a roadmap.
 
 **Inputs:**
+
 - Roadmap (approved)
 
 **Outputs:**
+
 - Run entity with status tracking
 - Task execution states (pending → assigned → in-progress → completed/failed)
 
 **Why Critical:**
+
 - Without this, you can't execute anything
 - It's the core data model for execution
 - Everything else depends on it
 
 **Key Features:**
+
 - POST /api/runs (create run from roadmap)
 - GET /api/runs (list all runs)
 - PATCH /api/runs/:id (update run status)
@@ -128,6 +132,7 @@ These 4 phases must be done sequentially and completely. They form the foundatio
 **Files to Create:** `backend/src/services/run-service.ts`, `backend/src/routes/runs.ts`, `frontend/src/pages/RunList.tsx`, `frontend/src/pages/RunDetail.tsx`
 
 **Success Criteria:**
+
 - ✓ Create run from approved roadmap
 - ✓ View run list
 - ✓ View run detail with all phases/tasks
@@ -141,20 +146,24 @@ These 4 phases must be done sequentially and completely. They form the foundatio
 **What:** Complete audit trail of every change in the system.
 
 **Inputs:**
+
 - All create/update/delete operations (from Phases 1-9)
 
 **Outputs:**
+
 - Audit log for every change
 - Search/filter capability
 - User attribution for all changes
 
 **Why Critical:**
+
 - Without audit logs, you can't debug failures
 - With complex execution, failures will happen
 - Audit logs are the only way to understand what happened
 - Required for compliance (who changed what when)
 
 **Key Features:**
+
 - POST /api/audit-logs (log every change)
 - GET /api/audit-logs (view audit trail)
 - Query by date, user, resource type, action
@@ -164,6 +173,7 @@ These 4 phases must be done sequentially and completely. They form the foundatio
 **Files to Create:** `backend/src/services/audit-logger.ts`, `backend/src/middleware/audit-middleware.ts`, `frontend/src/pages/AuditLog.tsx`
 
 **Success Criteria:**
+
 - ✓ Every create/update/delete is logged
 - ✓ Audit log includes: timestamp, user, action, resource, old/new values
 - ✓ Can search audit logs by date, user, resource
@@ -176,21 +186,25 @@ These 4 phases must be done sequentially and completely. They form the foundatio
 **What:** Track the cost of operations (LLM API calls, agent execution).
 
 **Inputs:**
+
 - Execution runs and their tasks
 - Agent API calls
 
 **Outputs:**
+
 - Cost breakdown by run/phase/task
 - Total cost summary
 - Cost dashboard
 
 **Why Critical:**
+
 - Multi-agent orchestration is expensive
 - Without cost tracking from the start, you'll accumulate hidden costs
 - Must know which agents/tasks are expensive
 - Essential for cost control and optimization
 
 **Key Features:**
+
 - Cost calculation service
 - Track costs per run, per phase, per task
 - Dashboard widget showing total costs
@@ -200,6 +214,7 @@ These 4 phases must be done sequentially and completely. They form the foundatio
 **Files to Create:** `backend/src/services/cost-calculator.ts`, update `frontend/src/pages/Dashboard.tsx`
 
 **Success Criteria:**
+
 - ✓ Cost tracked for every run
 - ✓ Cost breakdown visible in Run detail
 - ✓ Cost summary on Dashboard
@@ -213,21 +228,25 @@ These 4 phases must be done sequentially and completely. They form the foundatio
 **What:** Don't let single errors crash the system. Handle, log, and recover.
 
 **Inputs:**
+
 - All services and endpoints
 - Execution engine (from Phase 15)
 
 **Outputs:**
+
 - Error service (classify, log, retry)
 - Recovery mechanism (exponential backoff, circuit breaker)
 - Clear error messages for users
 
 **Why Critical:**
+
 - Without error handling, any unexpected condition crashes the system
 - In multi-agent execution, unexpected conditions are common
 - Error cascades are the #1 cause of system failure
 - Must recover automatically where possible, fail gracefully otherwise
 
 **Key Features:**
+
 - Error classification (transient vs. permanent)
 - Retry logic with exponential backoff
 - Circuit breakers for external APIs
@@ -238,6 +257,7 @@ These 4 phases must be done sequentially and completely. They form the foundatio
 **Files to Create:** `backend/src/services/error-handler.ts`, `backend/src/services/recovery-service.ts`, update `frontend/src/pages/RunDetail.tsx`
 
 **Success Criteria:**
+
 - ✓ Transient errors auto-retry (up to 3 times, exponential backoff)
 - ✓ Permanent errors are captured and reported
 - ✓ Circuit breaker prevents thundering herd
@@ -258,6 +278,7 @@ These 4 phases must be done sequentially and completely. They form the foundatio
 **This is a stable, production-grade foundation.**
 
 At this point, you can optionally proceed to:
+
 - **Phase 13-14:** Load agents and prompts (prerequisites for execution)
 - **Phase 15:** Build execution engine (the actual work happens here)
 

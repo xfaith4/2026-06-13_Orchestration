@@ -7,6 +7,7 @@ import {
 } from './task-executor.js';
 import { CostTracker } from './cost-tracker.js';
 import { ErrorLogger } from './error-logger.js';
+import { TaskAcceptanceService } from './task-acceptance.js';
 
 export interface PhaseExecutionInput {
   phase: ExecutionPhase;
@@ -33,11 +34,16 @@ export interface PhaseExecutionOutput {
 }
 
 export class PhaseExecutor {
+  private acceptanceService: TaskAcceptanceService;
+
   constructor(
     private taskExecutor: TaskExecutor,
     private costTracker: CostTracker,
-    private errorLogger: ErrorLogger
-  ) {}
+    private errorLogger: ErrorLogger,
+    acceptanceService?: TaskAcceptanceService
+  ) {
+    this.acceptanceService = acceptanceService || new TaskAcceptanceService();
+  }
 
   // Execute all tasks in a phase sequentially
   async executePhase(input: PhaseExecutionInput): Promise<PhaseExecutionOutput> {
@@ -80,23 +86,39 @@ export class PhaseExecutor {
         };
 
         const result = await this.taskExecutor.executeTask(executionInput);
-        taskResults.push(result);
 
+        // NEW: Apply acceptance gate. Implementation-like tasks must produce artifacts.
+        let finalResult = result;
         if (result.success) {
+          const acceptance = this.acceptanceService.accept(task, result.output);
+          if (!acceptance.accepted) {
+            // Task execution succeeded, but output validation failed
+            finalResult = {
+              ...result,
+              success: false,
+              error: acceptance.message,
+              errorType: 'permanent' as const,
+            };
+          }
+        }
+
+        taskResults.push(finalResult);
+
+        if (finalResult.success) {
           tasksExecuted++;
-          if (result.cost) {
-            totalCost += result.cost.estimatedCost;
+          if (finalResult.cost) {
+            totalCost += finalResult.cost.estimatedCost;
           }
 
-          if (result.warnings?.length) {
-            await this.logTaskWarnings(input.runId, phaseId, task.id, result.warnings);
+          if (finalResult.warnings?.length) {
+            await this.logTaskWarnings(input.runId, phaseId, task.id, finalResult.warnings);
           }
         } else {
           tasksFailed++;
 
           // Log error
           await this.errorLogger.logError(
-            new Error(result.error || 'Task execution failed'),
+            new Error(finalResult.error || 'Task execution failed'),
             {
               runId: input.runId,
               phaseId,
@@ -104,7 +126,7 @@ export class PhaseExecutor {
               service: 'phase-executor',
               operation: 'executeTask',
             },
-            result.retries || 0,
+            finalResult.retries || 0,
             3
           );
         }
