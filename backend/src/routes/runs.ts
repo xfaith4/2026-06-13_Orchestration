@@ -22,7 +22,7 @@ import { OutputParser } from '../services/output-parser.js';
 import { Roadmap, Run, RunValidationOutcome } from '@unifiedaitoolbox/shared';
 import { createResponse, ApiError } from '../types/responses.js';
 import { createGenericCrudRoutes } from './generic-crud.js';
-import { buildAgentAssignments, selectAgentForTask } from '../services/agent-selector.js';
+import { buildAgentAssignments, selectAgentForTask, filterAgentsByRoster } from '../services/agent-selector.js';
 import { ProjectWriter, projectOutputDir, collectProducedFiles } from '../services/project-writer.js';
 import { ProjectValidator, type ProjectValidationReport } from '../services/project-validator.js';
 import { buildRepairTasks, buildDriftRepairTask } from '../services/repair-task-builder.js';
@@ -294,7 +294,8 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
     currentRun = inProgressRun;
 
     // Select the best-fit agent per task based on capabilities and task content
-    const agentAssignments = buildAgentAssignments(phase, agents);
+    // Phase 35: respect the contract-defined agent roster
+    const agentAssignments = buildAgentAssignments(phase, agents, currentRun.contract?.agent_roster);
 
     // Phase 37: producer-then-reviewer ordering — a reviewer (Critic/Validator) never runs
     // before the producer output it reviews exists.
@@ -472,7 +473,9 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
         }
 
         for (const repairTask of repairTasks) {
-          const agent = selectAgentForTask(repairTask, agents);
+          // Phase 35: respect contract roster during repair too
+          const rosterAgents = filterAgentsByRoster(agents, currentRun.contract?.agent_roster ?? []);
+          const agent = selectAgentForTask(repairTask, rosterAgents);
           // Carry attempt history into the re-prompt so each generation is smarter than the last.
           const description = attempt > 1
             ? `${repairTask.description}\n\nThis is repair generation ${attempt}. A previous fix did NOT resolve these errors — change your approach; do not repeat the same edit.`
@@ -580,7 +583,9 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
               ? files.find(f => f.path === coherence.contractModule)?.content
               : undefined;
             const driftTask = buildDriftRepairTask(coherence.drift, coherence.contractModule);
-            const agent = selectAgentForTask(driftTask, agents);
+            // Phase 35: respect contract roster during drift repair too
+            const driftRosterAgents = filterAgentsByRoster(agents, currentRun.contract?.agent_roster ?? []);
+            const agent = selectAgentForTask(driftTask, driftRosterAgents);
             const driftResult = await taskExecutor.executeTask({
               task: { id: driftTask.id, name: driftTask.name, description: driftTask.description, status: 'pending', dependencies: [] },
               agentId: agent.id,
@@ -665,8 +670,12 @@ async function executeRunAsync(runId: string, persistence: PersistenceService): 
     const allArtifacts = outputParser.parseTaskOutput(
       currentRun.phases.flatMap(p => p.tasks.map(t => t.output)).filter(Boolean)
     );
+
+    // BUG FIX: Count ACTUAL files in output directory, not re-parsed task output.
+    // The artifacts are written to disk via projectWriter; collect the real file count.
+    const producedFiles = await collectProducedFiles(projectWriter.root);
     const validation = lastValidation ?? toValidationOutcome(lastValidationReport);
-    const decision = decideTerminalStatus({ materializedCount: allArtifacts.length, validation });
+    const decision = decideTerminalStatus({ materializedCount: producedFiles.count, validation });
 
     // Write project manifest so the Validator knows what was produced.
     await projectWriter.writeManifest(allArtifacts, runId).catch(e =>
