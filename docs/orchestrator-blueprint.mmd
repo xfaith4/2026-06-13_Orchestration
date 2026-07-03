@@ -1,0 +1,116 @@
+flowchart TD
+    subgraph UI["Frontend — React + Vite :5176"]
+        A["ApplicationIntakeForm.tsx\nfields: name / description / goal\nrequirements[] / targetAudience / constraints[]"] -->|"usePost  POST /api/applications"| B
+    end
+
+    subgraph INTAKE["Intake API  backend/src/routes/applications.ts"]
+        B["ValidationService.loadSchema\nvalidation.validate(body, schema)\n→ 400 on error"] -->|"Application{id,status:draft}"| C["data/applications/{id}.json"]
+    end
+
+    subgraph PRERUN["Pre-Run Pipeline  (human-gated, sequential)"]
+        C --> D["POST /api/design-plans/generate/{appId}\nDesignPlanGenerator → LLM\nSYSTEM_PROMPT: JSON schema\n→ DesignPlan{overview,architecture,\ncomponents[],tradeoffs[]}"]
+        D --> E["PATCH /api/design-plans/:id/approve\n→ status=approved"]
+        E --> F["POST /api/roadmaps/generate/{designPlanId}\nRoadmapGenerator → LLM\nSYSTEM_PROMPT: phases+tasks JSON schema\n→ Roadmap{phases[],estimatedDuration}"]
+        F --> G["PATCH /api/roadmaps/:id/approve\n→ status=approved"]
+        G --> H["POST /api/runs/from-roadmap/{roadmapId}\nRunService.createRunFromRoadmap\n→ Run{phases[],status:draft}\n→ data/runs/{runId}.json"]
+    end
+
+    subgraph START["Run Start  PATCH /api/runs/:id/start  runs.ts:778"]
+        H --> S1{"checkPlanIntegrity\ngate.ts\nDAG cycles?"}
+        S1 -->|"cycles / unknown deps"| S1F["422 Abort"]
+        S1 -->|"OK"| S2["buildAndValidate\ncontract-compiler.ts\njob_types.json → RunContract\n{agent_roster[], stages[], budget}"]
+        S2 -->|"schema invalid"| S2F["422 Abort"]
+        S2 -->|"valid"| S3["runService.startRun\nstatus=running\nstartedAt=now"]
+        S3 --> S4["persistence.update Run\ndata/runs/{id}.json"]
+        S4 -->|"HTTP 200"| CLIENT["Client"]
+        S4 -->|"fire-and-forget"| EXEC
+    end
+
+    subgraph EXEC["executeRunAsync  runs.ts:230"]
+        EXEC --> EI["Initialize services:\nAgentRegistry ← agents/*.yaml\nPromptRegistry ← Prompts/*.json\nProjectWriter → output/projects/{runId}/\nRunEventLog → data/run-events/{runId}.jsonl"]
+        EI --> PHLOOP
+
+        subgraph PHLOOP["Phase Loop  sequential  runs.ts:278"]
+            PHLOOP --> PL1{"phase.status\n== pending?"}
+            PL1 -->|"skip"| PL_NEXT["next phase"]
+            PL1 -->|"yes"| PL2["buildAgentAssignments\nagent-selector.ts\nscoring: cap-keywords(+2)\n+ domain-heuristics(+4..+8)\n+ engineer-broad-bonus(+4..+7)"]
+            PL2 --> PL3["orderProducersFirst\ngate.ts\nreviewer/critic tasks → end"]
+            PL3 --> PL4["findContractModule\ncontract-spine.ts\nfind canonical types.ts/contracts.ts"]
+            PL4 --> PH_EXEC
+
+            subgraph PH_EXEC["PhaseExecutor.executePhase  phase-executor.ts"]
+                PH_EXEC --> TL
+
+                subgraph TL["Task Loop  sequential"]
+                    TL --> T1["resolve prompt:\npromptId → PromptRegistry\n|| agent.prompt\n|| FALLBACK_SYSTEM_PROMPT"]
+                    T1 --> T2["substituteVariables\n{{key}} → value\nunresolved → [UNKNOWN: key]"]
+                    T2 --> T3["build userMessage:\n[contractBlock 8000 char cap]\n[stackConstraintBlock]\nTASK: {name}\n{description}\n\nFor each output file:\n## File: path\n```lang\ncontent```"]
+                    T3 --> T4{"ANTHROPIC_API_KEY\npresent?"}
+                    T4 -->|"no"| MOCK["runMock\n200-600ms simulated\n[MOCK] string"]
+                    T4 -->|"yes"| LLM["LLMClient.call\nsystemPrompt + userMessage\nmaxTokens:4096\n→ {text, inputTokens, outputTokens,\ncacheWriteTokens, cacheReadTokens, model}"]
+                    LLM --> T5["TaskAcceptanceService.accept\ntask-acceptance.ts\nimplementation keywords check\n→ requires ## File: blocks\n→ else permanent failure"]
+                    T5 -->|"rejected"| TFAIL["phase fails → run_failed"]
+                    T5 -->|"accepted"| T6["OutputParser.parseTaskOutput\noutput-parser.ts\nregex: ## File: path\\n```lang\\ncontent```\nnormalize paths / dedup"]
+                    T6 --> T7["ProjectWriter.write\nproject-writer.ts\npath-escape guard\nfs.writeFile OVERWRITE\noutput/projects/{runId}/{path}"]
+                    T7 --> T8["ArtifactStore.save\ndata/artifacts/{uuid}.json"]
+                    T8 --> T9["emit artifact_created\nrun-event-log"]
+                end
+            end
+
+            PH_EXEC --> VAL
+
+            subgraph VAL["Validate → Repair Loop  runs.ts:419"]
+                VAL --> V1["ProjectValidator.validate\nproject-validator.ts\nnpm install (120s)\ntsc --noEmit (30s)\nvitest run (60s)"]
+                V1 --> V2["captureBaseline\nbaseline.ts\ntransient IO detection"]
+                V2 -->|"transient"| VSKIP["validation=insufficient_evidence\nskip repair\ncontinue"]
+                V2 -->|"code failure"| RL
+
+                subgraph RL["Repair Loop  max 3 generations  runs.ts:459"]
+                    RL --> R1{"report.passed?"}
+                    R1 -->|"yes"| DRIFT
+                    R1 -->|"no"| RG["repairGate\nrepair-policy.ts\nattempt >= 3 → escalate\nsame-sig × 2 → escalate"]
+                    RG -->|"gate closed"| ESC
+                    RG -->|"gate open"| R2["buildRepairTasks\nrepair-task-builder.ts\ngroup tsc errors by file\nread targetFileContent"]
+                    R2 --> R3["selectAgentForTask\nagent-selector.ts"]
+                    R3 --> R4["TaskExecutor.executeTask\nrepair prompt + raw errors\n(attempt>1: 'change your approach')"]
+                    R4 --> R5["OutputParser + ProjectWriter\nwrite repaired files"]
+                    R5 --> R6["ProjectValidator.validate again"]
+                    R6 --> R7{"newSig ==\noldSig?"}
+                    R7 -->|"no progress"| ESC
+                    R7 -->|"changed"| R1
+                    ESC["persist repair-escalation\nemit agent_blocked warn\nrun CONTINUES to next phase"]
+                end
+
+                subgraph DRIFT["Drift Repair  runs.ts:564"]
+                    DRIFT --> D1{"coherence\ncheck"}
+                    D1 -->|"coherent"| PL_NEXT
+                    D1 -->|"drift found"| D2["buildDriftRepairTask\nup to 2 gens\nROLLBACK if build regresses"]
+                    D2 --> PL_NEXT
+                end
+            end
+        end
+
+        PHLOOP --> FIN
+
+        subgraph FIN["Finalization  runs.ts:662"]
+            FIN --> F1["decideTerminalStatus\nmaterializedCount > 0 AND passed\n→ completed\n0 files → failed"]
+            F1 --> F2["ProjectWriter.writeManifest\n.run-manifest.json"]
+            F2 --> F3["checkCoherence\npersist traceability-report"]
+            F3 --> F4["transitionRunStatus\nemit run_completed or run_failed"]
+            F4 --> F5["costMeter.report\npersist cost records"]
+            F5 --> F6["RunCompletion.generateSummary\nRunSummary + lessons\npersist run-summaries"]
+        end
+    end
+
+    style UI fill:#e3f2fd,stroke:#1565C0,color:#000
+    style INTAKE fill:#f3e5f5,stroke:#6A1B9A,color:#000
+    style PRERUN fill:#e8eaf6,stroke:#283593,color:#000
+    style START fill:#fff3e0,stroke:#E65100,color:#000
+    style EXEC fill:#e8f5e9,stroke:#1B5E20,color:#000
+    style PHLOOP fill:#f1f8e9,stroke:#33691E,color:#000
+    style PH_EXEC fill:#e0f2f1,stroke:#004D40,color:#000
+    style TL fill:#e0f7fa,stroke:#006064,color:#000
+    style VAL fill:#fffde7,stroke:#F57F17,color:#000
+    style RL fill:#fce4ec,stroke:#880E4F,color:#000
+    style DRIFT fill:#f3e5f5,stroke:#4A148C,color:#000
+    style FIN fill:#e8eaf6,stroke:#1A237E,color:#000

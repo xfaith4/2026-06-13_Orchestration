@@ -179,16 +179,38 @@ export function selectAgentForTask(
   return best;
 }
 
+// Filter agents by contract roster — only return agents that are in the allowed list
+export function filterAgentsByRoster(
+  agents: AgentDefinition[],
+  rosterNames: string[]
+): AgentDefinition[] {
+  if (!rosterNames.length) {
+    console.warn('[agent-selector] Empty agent roster — returning all agents');
+    return agents;
+  }
+  const rosterSet = new Set(rosterNames.map(n => n.toLowerCase()));
+  const filtered = agents.filter(a => rosterSet.has(a.name.toLowerCase()));
+  if (filtered.length === 0) {
+    console.error(`[agent-selector] No agents matched roster ${rosterNames.join(', ')}. Available: ${agents.map(a => a.name).join(', ')}`);
+    return agents; // fallback to all agents rather than zero agents
+  }
+  return filtered;
+}
+
 // Build the full taskId → agentId map for a phase, logging each assignment.
+// If rosterNames is provided, only agents in the roster will be considered.
 export function buildAgentAssignments(
   phase: ExecutionPhase,
-  agents: AgentDefinition[]
+  agents: AgentDefinition[],
+  rosterNames?: string[]
 ): Record<string, string> {
+  const availableAgents = rosterNames ? filterAgentsByRoster(agents, rosterNames) : agents;
   const assignments: Record<string, string> = {};
   for (const task of phase.tasks) {
-    const agent = selectAgentForTask(task, agents);
+    const agent = selectAgentForTask(task, availableAgents);
     assignments[task.id] = agent.id;
-    console.log(`[agent-selector] Phase "${phase.name}" / "${task.name}" → ${agent.name}`);
+    const rosterNote = rosterNames ? ` [roster-constrained to ${rosterNames.length} agents]` : '';
+    console.log(`[agent-selector] Phase "${phase.name}" / "${task.name}" → ${agent.name}${rosterNote}`);
   }
   return assignments;
 }

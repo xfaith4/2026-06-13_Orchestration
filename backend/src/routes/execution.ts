@@ -15,6 +15,19 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+/**
+ * Assert that direct execution is allowed.
+ * In production, direct task/phase execution should be disabled to prevent bypassing governance.
+ */
+const assertDirectExecutionAllowed = (): void => {
+  const isDev = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
+  const allowDirect = process.env.ALLOW_DIRECT_EXECUTION === 'true';
+
+  if (!isDev && !allowDirect) {
+    throw new ApiError(403, 'Direct task/phase execution is disabled in production. Use canonical run flow.');
+  }
+};
+
 const logTaskWarnings = async (
   errorLogger: ErrorLogger,
   runId: string,
@@ -81,6 +94,7 @@ export const createExecutionRoutes = (persistence: PersistenceService) => {
   // Execute a single task
   router.post('/:runId/phase/:phaseId/task/:taskId/execute', async (req: Request, res: Response) => {
     try {
+      assertDirectExecutionAllowed();
       await ensureInitialized();
 
       const { runId, phaseId, taskId } = req.params;
@@ -123,9 +137,21 @@ export const createExecutionRoutes = (persistence: PersistenceService) => {
       // Update task status using state machine
       const newTaskStatus = result.success ? ('completed' as const) : ('failed' as const);
       const currentTaskStatus = task.status as TaskStatus;
-      if (stateMachine.canTransitionTask(currentTaskStatus, newTaskStatus)) {
-        stateMachine.transitionTask(runId, phaseId, taskId, currentTaskStatus, newTaskStatus, 'Task execution completed');
+      if (!stateMachine.canTransitionTask(currentTaskStatus, newTaskStatus)) {
+        throw new ApiError(
+          409,
+          `Cannot transition task from ${currentTaskStatus} to ${newTaskStatus}`
+        );
       }
+
+      stateMachine.transitionTask(
+        runId,
+        phaseId,
+        taskId,
+        currentTaskStatus,
+        newTaskStatus,
+        'Task execution completed'
+      );
 
       const updatedTask = {
         ...task,
@@ -135,13 +161,21 @@ export const createExecutionRoutes = (persistence: PersistenceService) => {
         error: result.error,
       };
 
-      // Update phase status
-      const newPhaseStatus = result.success ? ('completed' as const) : ('failed' as const);
+      // Determine phase status from all tasks (not just this one)
+      const allTasksUpdated = phase.tasks.map(t => t.id === taskId ? updatedTask : t);
+      const allTasksCompleted = allTasksUpdated.every(t => t.status === 'completed');
+      const anyTaskFailed = allTasksUpdated.some(t => t.status === 'failed');
+
+      const phaseStatus: typeof phase.status =
+        anyTaskFailed ? 'failed' :
+        allTasksCompleted ? 'completed' :
+        'in-progress';
+
       const updatedPhase = {
         ...phase,
-        status: newPhaseStatus,
-        tasks: phase.tasks.map(t => t.id === taskId ? updatedTask : t),
-        completedAt: new Date().toISOString(),
+        status: phaseStatus,
+        tasks: allTasksUpdated,
+        completedAt: phaseStatus === 'completed' || phaseStatus === 'failed' ? new Date().toISOString() : phase.completedAt,
       };
 
       const updatedRun: Run = {
@@ -170,6 +204,7 @@ export const createExecutionRoutes = (persistence: PersistenceService) => {
   // Execute entire phase
   router.post('/:runId/phase/:phaseId/execute', async (req: Request, res: Response) => {
     try {
+      assertDirectExecutionAllowed();
       await ensureInitialized();
 
       const { runId, phaseId } = req.params;
@@ -203,13 +238,34 @@ export const createExecutionRoutes = (persistence: PersistenceService) => {
 
       // Update phase status using state machine
       const newPhaseStatus = result.success ? ('completed' as const) : ('failed' as const);
-      if (stateMachine.canTransitionPhase(phase.status, newPhaseStatus)) {
-        stateMachine.transitionPhase(runId, phaseId, phase.status, newPhaseStatus, 'Phase execution completed');
+      if (!stateMachine.canTransitionPhase(phase.status, newPhaseStatus)) {
+        throw new ApiError(
+          409,
+          `Cannot transition phase from ${phase.status} to ${newPhaseStatus}`
+        );
       }
+
+      stateMachine.transitionPhase(
+        runId,
+        phaseId,
+        phase.status,
+        newPhaseStatus,
+        'Phase execution completed'
+      );
 
       const updatedPhase: ExecutionPhase = {
         ...phase,
         status: newPhaseStatus,
+        tasks: result.taskResults.map(tr => {
+          const origTask = phase.tasks.find(t => t.id === tr.taskId);
+          return {
+            ...origTask!,
+            status: tr.success ? ('completed' as const) : ('failed' as const),
+            completedAt: new Date().toISOString(),
+            output: tr.output,
+            error: tr.error,
+          };
+        }),
         completedAt: new Date().toISOString(),
       };
 

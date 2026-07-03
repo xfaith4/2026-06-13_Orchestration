@@ -23,6 +23,17 @@ interface GovernanceContract {
   schema: Record<string, unknown>;
 }
 
+interface ContractLoadError {
+  file: string;
+  message: string;
+}
+
+interface ContractLoadResult {
+  contracts: GovernanceContract[];
+  errors: ContractLoadError[];
+  directoryExists: boolean;
+}
+
 function parseMeta(file: string): Omit<GovernanceContract, 'requiredCount' | 'propertyCount' | 'schema'> {
   const noExt = file.replace(/\.json$/i, '');
   const parts = noExt.split('.');
@@ -39,12 +50,18 @@ function parseMeta(file: string): Omit<GovernanceContract, 'requiredCount' | 'pr
   return { id: `${name}.${version}`, name, group, kind, version, file };
 }
 
-async function loadContracts(): Promise<GovernanceContract[]> {
+async function loadContracts(): Promise<ContractLoadResult> {
   let files: string[];
+  let directoryExists = true;
+  const errors: ContractLoadError[] = [];
+
   try {
     files = (await fs.readdir(contractsDir)).filter((f) => f.toLowerCase().endsWith('.json'));
-  } catch {
-    return []; // no contracts dir — return empty rather than erroring
+  } catch (err) {
+    directoryExists = false;
+    const message = err instanceof Error ? err.message : 'Directory not found';
+    errors.push({ file: contractsDir, message });
+    return { contracts: [], errors, directoryExists };
   }
 
   const out: GovernanceContract[] = [];
@@ -60,11 +77,12 @@ async function loadContracts(): Promise<GovernanceContract[]> {
         propertyCount: Object.keys(props).length,
         schema,
       });
-    } catch {
-      // skip unparseable file but keep serving the rest
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to parse contract';
+      errors.push({ file, message });
     }
   }
-  return out;
+  return { contracts: out, errors, directoryExists };
 }
 
 export const createGovernanceContractRoutes = () => {
@@ -72,7 +90,8 @@ export const createGovernanceContractRoutes = () => {
 
   router.get('/', async (_req: Request, res: Response) => {
     try {
-      res.json(createResponse(await loadContracts()));
+      const result = await loadContracts();
+      res.json(createResponse(result.contracts));
     } catch (error) {
       res.status(500).json({
         error: error instanceof Error ? error.message : 'Failed to load governance contracts',
@@ -81,10 +100,34 @@ export const createGovernanceContractRoutes = () => {
     }
   });
 
+  // NEW: Health endpoint (before :id route so it's matched first)
+  router.get('/health', async (_req: Request, res: Response) => {
+    try {
+      const result = await loadContracts();
+      const ok = result.directoryExists && result.errors.length === 0;
+
+      res.status(ok ? 200 : 500).json({
+        ok,
+        loadedCount: result.contracts.length,
+        errorCount: result.errors.length,
+        directoryExists: result.directoryExists,
+        errors: result.errors.length > 0 ? result.errors : undefined,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      res.status(500).json({
+        ok: false,
+        error: error instanceof Error ? error.message : 'Failed to check governance contract health',
+        timestamp: new Date().toISOString(),
+      });
+    }
+  });
+
+  // Get specific contract by ID
   router.get('/:id', async (req: Request, res: Response) => {
     try {
-      const all = await loadContracts();
-      const found = all.find((c) => c.id === req.params.id || c.file === req.params.id);
+      const result = await loadContracts();
+      const found = result.contracts.find((c) => c.id === req.params.id || c.file === req.params.id);
       if (!found) {
         return res.status(404).json({ error: 'Contract not found', timestamp: new Date().toISOString() });
       }

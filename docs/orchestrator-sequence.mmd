@@ -1,0 +1,182 @@
+sequenceDiagram
+    actor User
+    participant Form as ApplicationIntakeForm.tsx
+    participant AppAPI as POST /api/applications
+    participant DPG as DesignPlanGenerator
+    participant RG as RoadmapGenerator
+    participant RunAPI as PATCH /api/runs/:id/start
+    participant Gate as gate.ts checkPlanIntegrity
+    participant CC as contract-compiler.ts
+    participant Async as executeRunAsync
+    participant AgentReg as AgentRegistry
+    participant PromptReg as PromptRegistry
+    participant Selector as agent-selector.ts
+    participant Phase as PhaseExecutor
+    participant Task as TaskExecutor
+    participant LLM as LLMClient (Anthropic API)
+    participant Accept as TaskAcceptanceService
+    participant Parser as OutputParser
+    participant Writer as ProjectWriter
+    participant Validator as ProjectValidator
+    participant Repair as RepairLoop
+    participant EventLog as RunEventLog
+    participant Persist as PersistenceService
+
+    User->>Form: Fill name/desc/goal/requirements
+    Form->>AppAPI: POST /api/applications {name,desc,goal,reqs,audience,constraints}
+    AppAPI->>AppAPI: ValidationService.validate(body, schema)
+    AppAPI->>Persist: create('applications', payload)
+    Persist-->>AppAPI: Application {id, status:'draft'}
+    AppAPI-->>Form: 201 Application
+
+    Note over User,DPG: User clicks "Generate Design Plan"
+    User->>DPG: POST /api/design-plans/generate/{appId}
+    DPG->>LLM: call(SYSTEM_PROMPT[design], userMessage[app fields])
+    LLM-->>DPG: JSON {overview, architecture, components[], tradeoffs[]}
+    DPG->>Persist: create('design-plans', designPlan)
+    DPG-->>User: DesignPlan {id, status:'draft'}
+
+    User->>AppAPI: PATCH /api/design-plans/:id/approve
+    AppAPI->>Persist: update('design-plans', id, {status:'approved'})
+
+    Note over User,RG: User clicks "Generate Roadmap"
+    User->>RG: POST /api/roadmaps/generate/{designPlanId}
+    RG->>LLM: call(SYSTEM_PROMPT[roadmap], userMessage[design fields])
+    LLM-->>RG: JSON {phases[{tasks[{id,name,description,outputSpec}]}]}
+    RG->>Persist: create('roadmaps', roadmap)
+    RG-->>User: Roadmap {id, status:'draft'}
+
+    User->>AppAPI: PATCH /api/roadmaps/:id/approve
+    AppAPI->>Persist: update('roadmaps', id, {status:'approved'})
+
+    User->>AppAPI: POST /api/runs/from-roadmap/{roadmapId}
+    AppAPI->>Persist: create('runs', run{phases,status:'draft'})
+    AppAPI-->>User: Run {id, status:'draft'}
+
+    User->>RunAPI: PATCH /api/runs/:id/start
+    RunAPI->>Gate: checkPlanIntegrity(run.phases)
+    alt DAG invalid
+        Gate-->>RunAPI: {ok:false, errors:[...]}
+        RunAPI-->>User: 422 Abort
+    else DAG valid
+        Gate-->>RunAPI: {ok:true}
+        RunAPI->>CC: buildAndValidate(jobType, goal, runId)
+        CC->>CC: loadJobTypes() → job_types.json
+        CC->>CC: compileContract() → RunContract
+        CC->>CC: validateContract() vs contracts/build_app_contract.v1.json
+        alt Contract invalid
+            CC-->>RunAPI: {valid:false, errors:[...]}
+            RunAPI-->>User: 422 Abort
+        else Contract valid
+            CC-->>RunAPI: {valid:true, contract}
+            RunAPI->>Persist: update run {status:'running', contract, startedAt}
+            RunAPI-->>User: 200 Run {status:'running'}
+
+            RunAPI-)Async: executeRunAsync(runId) [fire-and-forget]
+
+            Async->>AgentReg: initialize() — load agents/*.yaml + *.json
+            Async->>PromptReg: initialize() — load Prompts/*.json + data/prompts/
+            Async->>EventLog: emit(run_started)
+
+            loop For each pending phase
+                Async->>Selector: buildAgentAssignments(phase, allAgents)
+                Note over Selector: Score each agent per task via<br/>capability keywords + domain heuristics<br/>+ engineer broad bonus
+                Selector-->>Async: {taskId: agentId} map
+
+                Async->>Async: orderProducersFirst(tasks, roleOf) [gate.ts]
+                Async->>Async: findContractModule(priorFiles) [contract-spine.ts]
+                Async->>Persist: update phase {status:'in-progress'}
+
+                loop For each task in phase
+                    Async->>EventLog: emit(agent_started, {agent, stage, step})
+                    Async->>Phase: executePhase(phase, assignments, sharedContract)
+                    Phase->>Task: executeTask({task, agentId, sharedContract, stackConstraints})
+                    Task->>PromptReg: getPrompt(promptId) || agent.prompt || FALLBACK
+                    Task->>Task: substituteVariables(prompt, vars)
+                    Task->>Task: build userMessage [contractBlock + stackBlock + TASK + ## File: instruction]
+                    Task->>LLM: call({systemPrompt, messages:[{role:'user',content}], maxTokens:4096})
+                    LLM-->>Task: {text, inputTokens, outputTokens, cacheTokens, model}
+                    Task-->>Phase: {status:'completed', result:{output:text, tokens, model}}
+                    Phase->>Accept: accept(task, output)
+                    alt implementation task with no ## File: blocks
+                        Accept-->>Phase: rejected_no_artifacts → permanent failure
+                        Phase->>EventLog: emit(agent_completed, {success:false})
+                        Phase-->>Async: phaseResult{success:false}
+                        Async->>Persist: transitionRunStatus('failed')
+                        Async->>EventLog: emit(run_failed)
+                    else accepted
+                        Accept-->>Phase: {accepted:true, artifacts:[...]}
+                        Phase->>EventLog: emit(agent_completed, {success:true})
+                        Phase-->>Async: taskResult{success:true, output}
+                        Async->>Parser: parseTaskOutput(output)
+                        Note over Parser: extract ## File: blocks via regex<br/>normalize paths / dedup
+                        Parser-->>Async: FileArtifact[]
+                        Async->>Writer: write(artifacts)
+                        Note over Writer: path escape guard<br/>fs.writeFile OVERWRITE<br/>output/projects/{runId}/{path}
+                        Writer-->>Async: WriteResult{written[], errors[]}
+                        Async->>EventLog: emit(artifact_created, {path, agent}) per file
+                    end
+                end
+
+                Note over Async,Validator: Post-phase validation + repair
+                Async->>EventLog: emit(validation_started)
+                Async->>Validator: validate(['tsc','vitest'])
+                Note over Validator: npm install (120s)<br/>tsc --noEmit (30s)<br/>vitest run (60s)
+                Validator-->>Async: ProjectValidationReport{passed, results, totalErrors}
+                Async->>Async: captureBaseline(report) [baseline.ts]
+
+                alt Transient IO failure
+                    Async->>Async: lastValidation = insufficient_evidence
+                    Async->>EventLog: emit(validation_completed, warn)
+                else Code failures
+                    loop Repair generations (max 3)
+                        Async->>Repair: repairGate(attempt, sigCounts, policy)
+                        alt Gate closed (limit or same-sig)
+                            Repair-->>Async: {proceed:false, escalateAfter}
+                            Async->>Persist: create('repair-escalations', record)
+                            Async->>EventLog: emit(agent_blocked, {severity:'soft_blocker'})
+                        else Gate open
+                            Repair-->>Async: {proceed:true}
+                            Async->>Repair: buildRepairTasks(report.results, root)
+                            Repair-->>Async: RepairTask[] (grouped by failing file)
+                            loop For each RepairTask
+                                Async->>Selector: selectAgentForTask(repairTask, agents)
+                                Selector-->>Async: best-fit Agent
+                                Async->>Task: executeTask(repairTask + rawErrors, agentId)
+                                Task->>LLM: call(systemPrompt, repairMessage)
+                                LLM-->>Task: {text with repaired ## File: blocks}
+                                Task-->>Async: repaired output
+                                Async->>Parser: parseTaskOutput(repairedOutput)
+                                Async->>Writer: write(repairedFiles)
+                            end
+                            Async->>Validator: validate(['tsc','vitest'])
+                            Validator-->>Async: new report
+                            alt newSig == oldSig
+                                Async->>EventLog: emit(agent_blocked, no_plan_delta_detected)
+                            end
+                        end
+                    end
+                    Async->>EventLog: emit(validation_completed)
+                    Async->>Persist: create('validation-reports', report)
+                end
+
+                Async->>Persist: update phase {status:phaseStatus}
+            end
+
+            Note over Async,Persist: All phases done — finalize run
+            Async->>Async: decideTerminalStatus(materializedCount, lastValidation)
+            Async->>Writer: writeManifest(artifacts, runId)
+            Async->>Async: checkCoherence(projectFiles) [contract-spine.ts]
+            Async->>Persist: create('traceability-reports', report)
+            Async->>Persist: transitionRunStatus(decision.status)
+            Async->>EventLog: emit(run_completed or run_failed)
+            Async->>Async: costMeter.report(run)
+            Async->>Async: RunCompletion.generateSummary(run)
+            Async->>Persist: create('run-summaries', summary)
+
+            User->>AppAPI: GET /api/runs/:id (poll or SSE)
+            AppAPI->>Persist: read('runs', id)
+            Persist-->>AppAPI: Run{status:'completed'|'failed', validation, costs}
+            AppAPI-->>User: Final run state
+        end
+    end
