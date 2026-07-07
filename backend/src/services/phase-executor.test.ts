@@ -1,12 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { PhaseExecutor } from './phase-executor.js';
+import { TaskExecutor } from './task-executor.js';
+import { CostTracker } from './cost-tracker.js';
+import { ErrorLogger } from './error-logger.js';
 import { TaskAcceptanceService } from './task-acceptance.js';
 import { ExecutionPhase } from '@unifiedaitoolbox/shared';
 
 describe('PhaseExecutor with TaskAcceptanceService', () => {
-  let mockTaskExecutor: any;
-  let mockCostTracker: any;
-  let mockErrorLogger: any;
+  let mockTaskExecutor: { executeTask: ReturnType<typeof vi.fn> };
+  let mockCostTracker: { trackCost: ReturnType<typeof vi.fn> };
+  let mockErrorLogger: { logError: ReturnType<typeof vi.fn> };
   let acceptanceService: TaskAcceptanceService;
   let phaseExecutor: PhaseExecutor;
 
@@ -27,9 +30,9 @@ describe('PhaseExecutor with TaskAcceptanceService', () => {
     acceptanceService = new TaskAcceptanceService();
 
     phaseExecutor = new PhaseExecutor(
-      mockTaskExecutor as any,
-      mockCostTracker as any,
-      mockErrorLogger as any,
+      mockTaskExecutor as unknown as TaskExecutor,
+      mockCostTracker as unknown as CostTracker,
+      mockErrorLogger as unknown as ErrorLogger,
       acceptanceService
     );
   });
