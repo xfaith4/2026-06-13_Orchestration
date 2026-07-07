@@ -27,6 +27,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Build shared workspace dependencies for typecheck
+        run: npm run build -w shared && npm run build -w packages/orchestration-core
+
       - name: TypeScript type checking
         run: npm run typecheck
 
